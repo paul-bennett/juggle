@@ -104,11 +104,14 @@ public class Juggler {
     }
 
     public Method[] findMethods(List<Class> queryParamTypes, Class queryReturnType) {
-        System.err.println("Searching for: "
-                + queryParamTypes.stream().map(Class::getCanonicalName).collect(Collectors.joining(" -> "))
-                + " -> " + queryReturnType.getCanonicalName());
+        // We search the types involved in the query as well as the JARs.  This gets us a better hit rate on some
+        // JDK classes (which aren't listed in classesToSearch).  However, it won't get all methods.  Notable it'll
+        // fail to find static methods whose signatures don't include the declaring class, e.g. Math.sin().
 
-        return classesToSearch.stream()
+        Stream<Class> queryTypeStream = Stream.concat(queryParamTypes.stream(), Stream.of(queryReturnType));
+
+        return Stream.concat(queryTypeStream, classesToSearch.stream())
+                .sorted().distinct()
                 .flatMap((var c) -> {
                     try {
                         return Arrays.stream(c.getDeclaredMethods());
@@ -137,12 +140,9 @@ public class Juggler {
 
         Class methodReturnType = m.getReturnType();
 
-//        System.out.println("Checking: "
-//                + m.getDeclaringClass() + "." + m.getName() + " :: "
-//                + methodParamTypes.stream().map(Class::getCanonicalName).collect(Collectors.joining(" -> "))
-//                + " -> " + methodReturnType.getCanonicalName());
-
         // Now for the big questions: do the parameter types match? Does the return match?
+
+        // TODO: auto-boxing/unboxing
 
         Iterator<Class> queryTypeIter = queryParamTypes.iterator();
 

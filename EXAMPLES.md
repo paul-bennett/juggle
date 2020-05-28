@@ -1,0 +1,28 @@
+# Juggle Invocation Examples
+
+A list of questions that I wanted to ask the tool while writing it.
+Interactions are intended outputs, not actual!  Potentially the basis
+of a few tests.
+
+1. How can I get a `Class` given a `String` naming it?
+    ````
+    $ juggle -p String -r Class
+    public static java.lang.Class forName(java.lang.String)
+    ````
+
+2. How do I get a list of all classes within a package
+    ````
+    $ juggle -p java.lang.Package -r java.lang.Class[]
+    ````
+   [No answer -- I don't believe this is possible]
+
+3. What are the constructors for `URLClassLoader`?
+
+   Maybe this is out-of-scope; JavaDoc does it directly.
+
+4. How do I convert a `String` to a `URL`?
+   ````
+    $ juggle -p java.lang.String -r java.net.URL
+   ````
+   I'm not convinced there's a direct method; ended up going via URI:
+   `Paths.get(string).toUri().toURL()`
