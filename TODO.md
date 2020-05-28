@@ -12,8 +12,6 @@
  
 * Consider generics -- is it even possible due to type erasure?
  
-* Consider arrays
- 
 * Are member variables really fns?
   - get :: ClassType -> MemberType
   - set :: ClassType -> MemberType -> void
@@ -32,9 +30,7 @@
     a potentially different type, but return a Foo: 
      `-p _a -p _a -p _b -r Foo`
      
-* Is `void` really a type?
-  - Check that `-r void` works
-  - `-p void` should be disallowed
+* Should a warning be emitted for `-p void` or `void[]`?
      
 * Matches should work with any permutation of parameters
  

@@ -70,9 +70,17 @@ public class Juggler {
     }
 
     public Class classForTypename(String typename) {
-        // TODO: handle arrays
+        final String ARRAY_SUFFIX = "[]";
+
+        // If this is an array, work out how many dimensions are involved.
+        int arrayDimension;
+        for (arrayDimension = 0; typename.endsWith(ARRAY_SUFFIX); ++arrayDimension)
+            typename = typename.substring(0, typename.length() - ARRAY_SUFFIX.length()).stripTrailing();
+
         // TODO: think about Generics
-        return switch (typename) {
+
+        // Start with the base type
+        Class ret = switch (typename) {
             case "void"    -> Void.TYPE;
             case "boolean" -> Boolean.TYPE;
             case "char"    -> Character.TYPE;
@@ -94,11 +102,17 @@ public class Juggler {
                 }
             }
         };
+
+        // Now add the array dimension
+        for ( ; arrayDimension > 0; --arrayDimension)
+            ret = ret.arrayType();
+
+        return ret;
     }
 
     public Method[] findMethods(String[] paramTypenames, String returnTypename) {
         Class[] paramTypes = Arrays.stream(paramTypenames).map(this::classForTypename).toArray(Class[]::new);
-        Class returnType = returnTypename == null ? Void.class : classForTypename(returnTypename);
+        Class returnType = returnTypename == null ? Void.TYPE : classForTypename(returnTypename);
 
         return findMethods(List.of(paramTypes), returnType);
     }
@@ -111,7 +125,7 @@ public class Juggler {
         Stream<Class> queryTypeStream = Stream.concat(queryParamTypes.stream(), Stream.of(queryReturnType));
 
         return Stream.concat(queryTypeStream, classesToSearch.stream())
-//                .sorted().distinct()
+                .distinct()
                 .flatMap((var c) -> {
                     try {
                         return Arrays.stream(c.getDeclaredMethods());
@@ -136,7 +150,6 @@ public class Juggler {
             methodParamTypes.add(m.getDeclaringClass());
 
         methodParamTypes.addAll(Arrays.asList(m.getParameterTypes()));
-        Class[] methodParamTypeArr = methodParamTypes.stream().toArray(Class[]::new);
 
         Class methodReturnType = m.getReturnType();
 

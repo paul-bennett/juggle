@@ -1,0 +1,40 @@
+Interesting things...
+
+
+Playing with streams. Seems a bit mucky; is this really the best?
+
+        URL[] urls = Arrays.stream(jars)
+                .flatMap((String path) -> {
+                    try {
+                        return Stream.of(Paths.get(path).toUri().toURL());
+                    } catch (MalformedURLException ex) {
+                        return Stream.empty();
+                    }
+                })
+                .toArray(URL::new);
+
+
+Java 14 switch expressions, woohoo!
+
+        return switch (typename) {
+            case "void"    -> Void.class;
+            case "boolean" -> Boolean.class;
+            case "char"    -> Character.class;
+            case "byte"    -> Byte.class;
+            case "short"   -> Short.class;
+            case "int"     -> Integer.class;
+            case "long"    -> Long.class;
+            case "float"   -> Float.class;
+            case "double"  -> Double.class;
+            default        -> {
+                try {
+                    yield Class.forName(typename);
+                } catch (ClassNotFoundException e) {
+                    Class defaultType = Object.class;
+
+                    System.err.println("Warning: couldn't find class: " + typename
+                                        + "; using " + defaultType + " instead");
+                    yield defaultType;
+                }
+            }
+
