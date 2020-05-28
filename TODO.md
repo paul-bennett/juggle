@@ -49,8 +49,8 @@
   - Haskell-like?
     `foo -> bar -> baz`
           
-* Java automatically converts between boxed/unboxed types. Should Juggle?
-  - e.g. `long` is compatible with `Long`
+* Check type compatibility matches Java Language Spec chapter 5
+  - See methods isTypeCompatibleForInvocation/isTypeCompatibleForAssignment
 
 * Add an option for package 'import's
   - e.g. `-i java.net`
