@@ -111,7 +111,7 @@ public class Juggler {
         Stream<Class> queryTypeStream = Stream.concat(queryParamTypes.stream(), Stream.of(queryReturnType));
 
         return Stream.concat(queryTypeStream, classesToSearch.stream())
-                .sorted().distinct()
+//                .sorted().distinct()
                 .flatMap((var c) -> {
                     try {
                         return Arrays.stream(c.getDeclaredMethods());
