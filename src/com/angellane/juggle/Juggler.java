@@ -1,6 +1,7 @@
 package com.angellane.juggle;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
@@ -26,7 +27,7 @@ public class Juggler {
         // TODO: add modules here too?
 
         URL[] urls = Arrays.stream(jars)
-                .flatMap((String path) -> {
+                .flatMap(path -> {
                     try {
                         return Stream.of(Paths.get(path).toUri().toURL());
                     } catch (MalformedURLException ex) {
@@ -38,8 +39,8 @@ public class Juggler {
         loader = new JuggleClassLoader(urls);
 
         classesToSearch = Arrays.stream(jars)
-          .flatMap((var jarName) -> classesInJar(jarName).stream())
-          .flatMap((var className) -> {
+          .flatMap(jarName -> classesInJar(jarName).stream())
+          .flatMap(className -> {
               try {
                   return Stream.of(loader.loadClassWithoutResolving(className));
               }
@@ -59,9 +60,9 @@ public class Juggler {
             return file.stream()
                     .filter(Predicate.not(JarEntry::isDirectory))
                     .map(JarEntry::getName)
-                    .filter((var s) -> s.endsWith(CLASS_SUFFIX))
-                    .map((var s) -> s.substring(0, s.length() - CLASS_SUFFIX.length()))
-                    .map((var s) -> s.replace('/', '.'))
+                    .filter(s -> s.endsWith(CLASS_SUFFIX))
+                    .map(s -> s.substring(0, s.length() - CLASS_SUFFIX.length()))
+                    .map(s -> s.replace('/', '.'))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             System.err.println("Couldn't read JAR file: " + filename + "; ignoring.");
@@ -69,7 +70,7 @@ public class Juggler {
         }
     }
 
-    public Class classForTypename(String typename) {
+    public Class classForTypename(String[] imports, String typename) {
         final String ARRAY_SUFFIX = "[]";
 
         // If this is an array, work out how many dimensions are involved.
@@ -91,15 +92,20 @@ public class Juggler {
             case "float"   -> Float.TYPE;
             case "double"  -> Double.TYPE;
             default        -> {
-                try {
-                    yield loader.loadClassWithoutResolving(typename);
-                } catch (ClassNotFoundException e) {
-                    Class defaultType = Object.class;
+                // Actually now want to try typename plainly, then prefixed by each import in turn
+                // Default to Object if we can't find any match
+                for (var prefix : Stream.concat(Stream.of(""),
+                        Arrays.stream(imports).map(i -> i + ".")).collect(Collectors.toList()))
+                    try {
+                        yield loader.loadClassWithoutResolving(prefix + typename);
+                    } catch (ClassNotFoundException e) {}
 
-                    System.err.println("Warning: couldn't find class: " + typename
-                                        + "; using " + defaultType + " instead");
-                    yield defaultType;
-                }
+                // If we get here, the class wasn't found, either naked or with any imported package prefix
+                Class defaultType = Object.class;
+
+                System.err.println("Warning: couldn't find class: " + typename
+                                    + "; using " + defaultType + " instead");
+                yield defaultType;
             }
         };
 
@@ -110,9 +116,11 @@ public class Juggler {
         return ret;
     }
 
-    public Method[] findMethods(String[] paramTypenames, String returnTypename) {
-        Class[] paramTypes = Arrays.stream(paramTypenames).map(this::classForTypename).toArray(Class[]::new);
-        Class returnType = returnTypename == null ? Void.TYPE : classForTypename(returnTypename);
+    public Method[] findMethods(String[] imports, String[] paramTypenames, String returnTypename) {
+        Class[] paramTypes = Arrays.stream(paramTypenames == null ? new String[0] : paramTypenames)
+                .map(typename -> classForTypename(imports, typename))
+                .toArray(Class[]::new);
+        Class returnType = returnTypename == null ? Void.TYPE : classForTypename(imports, returnTypename);
 
         return findMethods(List.of(paramTypes), returnType);
     }
@@ -126,7 +134,7 @@ public class Juggler {
 
         return Stream.concat(queryTypeStream, classesToSearch.stream())
                 .distinct()
-                .flatMap((var c) -> {
+                .flatMap(c -> {
                     try {
                         return Arrays.stream(c.getDeclaredMethods());
                     } catch (NoClassDefFoundError e) {
@@ -136,7 +144,7 @@ public class Juggler {
                         return Stream.empty();
                     }
                 })
-                .filter((var m) -> doesMethodMatch(queryParamTypes, queryReturnType, m))
+                .filter(m -> doesMethodMatch(queryParamTypes, queryReturnType, m))
                 .toArray(Method[]::new);
     }
 
@@ -161,7 +169,7 @@ public class Juggler {
 
         return queryParamTypes.size() == methodParamTypes.size()
                 && methodParamTypes.stream().allMatch(
-                        (Class mpt) -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next())
+                        mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next())
                     )
                 && isTypeCompatibleForAssignment(queryReturnType, methodReturnType)
                 ;

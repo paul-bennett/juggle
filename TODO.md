@@ -52,12 +52,7 @@
 * Check type compatibility matches Java Language Spec chapter 5
   - See methods isTypeCompatibleForInvocation/isTypeCompatibleForAssignment
 
-* Add an option for package 'import's
-  - e.g. `-i java.net`
-  - If classname not found 'naked', try in the specified package
-  - When emitting decls, omit the default package name (maybe last `-i`)
-  - Could specify multiple imports
-  - Perhaps always implicitly import `java.lang`
+* When emitting decls, omit the default package name (maybe last -or first?- `-i`)
      
 * Should sort results naturally
      - Exact matches first
