@@ -9,6 +9,11 @@
   2. "How do I get a `Bar`?"
      
 * Add support for Java 9 Modules
+
+* Figure out how to get a list of classes in the JDK
+
+  - presently only searches classes named with `-p` and `-r` or in `-j` files
+  - perhaps this will come with `-m` module support
  
 * Consider generics -- is it even possible due to type erasure?
  
@@ -16,10 +21,14 @@
   - get :: ClassType -> MemberType
   - set :: ClassType -> MemberType -> void
      
-* How to handle constructors?  As funcs that return an object of that type?
- 
+* Add support for constructors
+  - `Class.getConstructors()` provides a list
+  - Treat them as funcs from c'tor args to declaring object type.
+  - Be careful of inner classes (implicit args?)
+   
 * Access; private, protected, package
   - maybe this should be a command-line flag, default = only public
+  - then again, `grep`ing the results is effective
      
 * Allow type placeholders & "don't care" types
   - In `-p` and `-r`, `_` means "I don't care about the type"
@@ -55,16 +64,18 @@
 * When emitting decls, omit the default package name (maybe last -or first?- `-i`)
      
 * Should sort results naturally
-     - Exact matches first
-     - Permutations of parameters and partial matches later
-     - What about supertype params and subtype returns?
-     - Box/unbox cost?
-     - Prefer member funs over statics?
+  - Exact matches first
+  - Permutations of parameters and partial matches later
+  - What about supertype params and subtype returns?
+  - Box/unbox cost?
+  - Prefer member funs over statics?
+  - Sort in order of specificity e.g. in calling semantics
      
-* How should inner classes be searched?
-     - Are there additional implicit args (one per containing class?)
+* Check behaviour for non-static inner classes
+  - I expect an additional constructor argument for containing class
+  - This is probably a compiler transformation, explicit in class file
+    (i.e. nothing for us to do in Juggle.)
  
 * Optional matching algorithm?
-     - exact match vs assignment-compatible
-     - configurable as to whether to ignore optional args
-     
+  - exact match vs assignment-compatible
+  - configurable as to whether to ignore optional args

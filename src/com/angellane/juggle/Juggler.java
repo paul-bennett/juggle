@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Juggler {
-    private JuggleClassLoader loader;
+    private ClassLoader loader;
 
     private Collection<Class> classesToSearch;
 
@@ -36,13 +36,13 @@ public class Juggler {
                 })
                 .toArray(URL[]::new);
 
-        loader = new JuggleClassLoader(urls);
+        loader = new URLClassLoader(urls);
 
         classesToSearch = Arrays.stream(jars)
           .flatMap(jarName -> classesInJar(jarName).stream())
           .flatMap(className -> {
               try {
-                  return Stream.of(loader.loadClassWithoutResolving(className));
+                  return Stream.of(loader.loadClass(className));
               }
               catch (ClassNotFoundException ex) {
                   System.err.println("Warning: class " + className + " not found");
@@ -97,7 +97,7 @@ public class Juggler {
                 for (var prefix : Stream.concat(Stream.of(""),
                         Arrays.stream(imports).map(i -> i + ".")).collect(Collectors.toList()))
                     try {
-                        yield loader.loadClassWithoutResolving(prefix + typename);
+                        yield loader.loadClass(prefix + typename);
                     } catch (ClassNotFoundException e) {}
 
                 // If we get here, the class wasn't found, either naked or with any imported package prefix
@@ -242,14 +242,4 @@ public class Juggler {
             Map.entry(Float.TYPE,     Float.class),
             Map.entry(Double.TYPE,    Double.class)
     );
-
-    private static class JuggleClassLoader extends URLClassLoader {
-        public JuggleClassLoader(URL[] urls) {
-            super(urls);
-        }
-
-        public Class loadClassWithoutResolving(String className) throws ClassNotFoundException {
-            return super.loadClass(className, false);
-        }
-    }
 }
