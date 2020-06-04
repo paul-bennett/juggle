@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public class Juggler {
     private ClassLoader loader;
 
-    private Collection<Class> classesToSearch;
+    private Collection<Class<?>> classesToSearch;
 
     public Juggler(String[] jars, String[] mods) {
         if (jars == null) jars = new String[] {};
@@ -70,7 +70,7 @@ public class Juggler {
         }
     }
 
-    public Class classForTypename(String[] imports, String typename) {
+    public Class<?> classForTypename(String[] imports, String typename) {
         final String ARRAY_SUFFIX = "[]";
 
         // If this is an array, work out how many dimensions are involved.
@@ -81,33 +81,36 @@ public class Juggler {
         // TODO: think about Generics
 
         // Start with the base type
-        Class ret = switch (typename) {
-            case "void"    -> Void.TYPE;
-            case "boolean" -> Boolean.TYPE;
-            case "char"    -> Character.TYPE;
-            case "byte"    -> Byte.TYPE;
-            case "short"   -> Short.TYPE;
-            case "int"     -> Integer.TYPE;
-            case "long"    -> Long.TYPE;
-            case "float"   -> Float.TYPE;
-            case "double"  -> Double.TYPE;
-            default        -> {
+        Class<?> ret = null;
+        switch (typename) {
+            case "void":        ret = Void.TYPE;        break;
+            case "boolean":     ret = Boolean.TYPE;     break;
+            case "char":        ret = Character.TYPE;   break;
+            case "byte":        ret = Byte.TYPE;        break;
+            case "short":       ret = Short.TYPE;       break;
+            case "int":         ret = Integer.TYPE;     break;
+            case "long":        ret = Long.TYPE;        break;
+            case "float":       ret = Float.TYPE;       break;
+            case "double":      ret = Double.TYPE;      break;
+            default:
                 // Actually now want to try typename plainly, then prefixed by each import in turn
                 // Default to Object if we can't find any match
                 for (var prefix : Stream.concat(Stream.of(""),
                         Arrays.stream(imports).map(i -> i + ".")).collect(Collectors.toList()))
                     try {
-                        yield loader.loadClass(prefix + typename);
-                    } catch (ClassNotFoundException e) {}
+                        ret = loader.loadClass(prefix + typename);
+                        break;
+                    } catch (ClassNotFoundException e) { /* try next iter */ }
 
-                // If we get here, the class wasn't found, either naked or with any imported package prefix
-                Class defaultType = Object.class;
+                if (ret == null) {
+                    // If we get here, the class wasn't found, either naked or with any imported package prefix
+                    Class<?> defaultType = Object.class;
 
-                System.err.println("Warning: couldn't find class: " + typename
-                                    + "; using " + defaultType + " instead");
-                yield defaultType;
-            }
-        };
+                    System.err.println("Warning: couldn't find class: " + typename
+                            + "; using " + defaultType + " instead");
+                    ret = defaultType;
+                }
+        }
 
         // Now add the array dimension
         for ( ; arrayDimension > 0; --arrayDimension)
@@ -117,20 +120,20 @@ public class Juggler {
     }
 
     public Method[] findMethods(String[] imports, String[] paramTypenames, String returnTypename) {
-        Class[] paramTypes = Arrays.stream(paramTypenames == null ? new String[0] : paramTypenames)
+        Class<?>[] paramTypes = Arrays.stream(paramTypenames == null ? new String[0] : paramTypenames)
                 .map(typename -> classForTypename(imports, typename))
-                .toArray(Class[]::new);
-        Class returnType = returnTypename == null ? Void.TYPE : classForTypename(imports, returnTypename);
+                .toArray(Class<?>[]::new);
+        Class<?> returnType = returnTypename == null ? Void.TYPE : classForTypename(imports, returnTypename);
 
         return findMethods(List.of(paramTypes), returnType);
     }
 
-    public Method[] findMethods(List<Class> queryParamTypes, Class queryReturnType) {
+    public Method[] findMethods(List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
         // We search the types involved in the query as well as the JARs.  This gets us a better hit rate on some
         // JDK classes (which aren't listed in classesToSearch).  However, it won't get all methods.  Notable it'll
         // fail to find static methods whose signatures don't include the declaring class, e.g. Math.sin().
 
-        Stream<Class> queryTypeStream = Stream.concat(queryParamTypes.stream(), Stream.of(queryReturnType));
+        Stream<Class<?>> queryTypeStream = Stream.concat(queryParamTypes.stream(), Stream.of(queryReturnType));
 
         return Stream.concat(queryTypeStream, classesToSearch.stream())
                 .distinct()
@@ -148,8 +151,8 @@ public class Juggler {
                 .toArray(Method[]::new);
     }
 
-    public boolean doesMethodMatch(List<Class> queryParamTypes, Class queryReturnType, Method m) {
-        List<Class> methodParamTypes = new LinkedList<>();
+    public boolean doesMethodMatch(List<Class<?>> queryParamTypes, Class<?> queryReturnType, Method m) {
+        List<Class<?>> methodParamTypes = new LinkedList<>();
 
         // TODO: what about constructors?
 
@@ -159,13 +162,13 @@ public class Juggler {
 
         methodParamTypes.addAll(Arrays.asList(m.getParameterTypes()));
 
-        Class methodReturnType = m.getReturnType();
+        Class<?> methodReturnType = m.getReturnType();
 
         // Now for the big questions: do the parameter types match? Does the return match?
 
         // TODO: auto-boxing/unboxing
 
-        Iterator<Class> queryTypeIter = queryParamTypes.iterator();
+        Iterator<Class<?>> queryTypeIter = queryParamTypes.iterator();
 
         return queryParamTypes.size() == methodParamTypes.size()
                 && methodParamTypes.stream().allMatch(
@@ -183,7 +186,7 @@ public class Juggler {
     // or
     //    ReadType r() {}
     //    WrittenType w = r();
-    boolean isTypeInstinctivelyCompatible(Class writtenType, Class readType) {
+    boolean isTypeInstinctivelyCompatible(Class<?> writtenType, Class<?> readType) {
         // Three cases:
         // 1. Primitive widening conversions
         // 2. Boxing/unboxing conversions
@@ -200,18 +203,18 @@ public class Juggler {
 
     // Invocation Context: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.3
     // TODO: check against JLS
-    boolean isTypeCompatibleForInvocation(Class parameterType, Class argumentType) {
+    boolean isTypeCompatibleForInvocation(Class<?> parameterType, Class<?> argumentType) {
         return isTypeInstinctivelyCompatible(parameterType, argumentType);
     }
 
     // Assignment Context: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.2
-    boolean isTypeCompatibleForAssignment(Class variableType, Class returnType) {
+    boolean isTypeCompatibleForAssignment(Class<?> variableType, Class<?> returnType) {
         return isTypeInstinctivelyCompatible(variableType, returnType);
     }
 
     // The 19 Widening Primitive Conversions, documented in Java Language Specification (Java SE 14 edn) sect 5.1.2
     // https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.2
-    Map<Class, Set<Class>> wideningConversions = Map.ofEntries(
+    Map<Class<?>, Set<Class<?>>> wideningConversions = Map.ofEntries(
             Map.entry(Byte.TYPE,      Set.of(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
             Map.entry(Short.TYPE,     Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
             Map.entry(Character.TYPE, Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
@@ -221,7 +224,7 @@ public class Juggler {
     );
 
     // The boxing/unboxing conversions
-    Map<Class, Class> boxingConversions = Map.ofEntries(
+    Map<Class<?>, Class<?>> boxingConversions = Map.ofEntries(
             // Boxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.7
             Map.entry(Boolean.class,   Boolean.TYPE),
             Map.entry(Byte.class,      Byte.TYPE),

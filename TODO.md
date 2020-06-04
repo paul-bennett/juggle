@@ -2,7 +2,6 @@
 
 * Adopt a decent project structure
   - Add tests
-  - Remove dependency on IntelliJ
   
 * Does Juggle solve my original two questions?
   1. "I have a `Foo`. What can I do with it?"
