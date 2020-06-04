@@ -6,15 +6,10 @@
 * Does Juggle solve my original two questions?
   1. "I have a `Foo`. What can I do with it?"
   2. "How do I get a `Bar`?"
-     
-* Add support for Java 9 Modules
-
-* Figure out how to get a list of classes in the JDK
-
-  - presently only searches classes named with `-p` and `-r` or in `-j` files
-  - perhaps this will come with `-m` module support
- 
+      
 * Consider generics -- is it even possible due to type erasure?
+
+* Add support for module path (``-M``?)
  
 * Are member variables really fns?
   - get :: ClassType -> MemberType

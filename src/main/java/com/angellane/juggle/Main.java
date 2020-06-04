@@ -3,7 +3,10 @@ package com.angellane.juggle;
 import org.apache.commons.cli.*;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class Main {
@@ -38,7 +41,10 @@ public class Main {
             String[] paramTypes = cmd.getOptionValues(OPT_PRM);
             String   returnType = cmd.getOptionValue(OPT_RET);
 
-            Juggler j = new Juggler(jarsToSearch, modsToSearch);
+            Juggler j = new Juggler(
+                    jarsToSearch == null ? List.of() : List.of(jarsToSearch),
+                    modsToSearch == null ? List.of() : List.of(modsToSearch)
+            );
 
             for (Method m : j.findMethods(imports, paramTypes, returnType)) {
                 System.out.println(m.toString());
