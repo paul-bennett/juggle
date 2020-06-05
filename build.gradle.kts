@@ -16,7 +16,8 @@ dependencies {
 }
 
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_10
+     sourceCompatibility = JavaVersion.VERSION_12
+     targetCompatibility = JavaVersion.VERSION_12
 }
 
 application {
