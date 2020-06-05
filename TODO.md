@@ -1,6 +1,6 @@
 # TODO for Juggle
 
-* Add tests
+* Add more tests
   
 * Does Juggle solve my original two questions?
   1. "I have a `Foo`. What can I do with it?"
@@ -10,9 +10,7 @@
 
 * Add support for module path (``-M``?)
  
-* Access; private, protected, package
-  - maybe this should be a command-line flag, default = only public
-  - then again, `grep`ing the results is effective
+* Add support for directories of class files
      
 * Allow type placeholders & "don't care" types
   - In `-p` and `-r`, `_` means "I don't care about the type"

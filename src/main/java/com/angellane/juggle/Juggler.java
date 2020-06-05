@@ -7,7 +7,6 @@ import java.lang.module.ResolvedModule;
 import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
 import static java.util.List.of;
 
 public class Juggler {
-    private ClassLoader loader;
+    private ResolvingURLClassLoader loader;
     private ModuleLayer layer;
 
     private Collection<Class<?>> classesToSearch;
@@ -36,7 +35,7 @@ public class Juggler {
                 })
                 .toArray(URL[]::new);
 
-        loader = new URLClassLoader(urls);
+        loader = new ResolvingURLClassLoader(urls);
 
         var boot = ModuleLayer.boot();
         ModuleFinder finder = ModuleFinder.ofSystem();
@@ -56,19 +55,22 @@ public class Juggler {
           .flatMap(jarName -> classesInJar(jarName).stream())
           .flatMap(className -> {
               try {
-                  return Stream.of(loader.loadClass(className));
-              }
-              catch (ClassNotFoundException ex) {
+                  Class<?> cls = loader.loadClass(className);
+                  loader.linkClass(cls);
+                  return Stream.of(cls);
+              } catch (ClassNotFoundException ex) {
                   System.err.println("Warning: class " + className + " not found");
                   return Stream.empty();
+              } catch (NoClassDefFoundError e) {
+                  // This might be thrown if the class file references other classes that can't be loaded.
+                  // Maybe it depends on another JAR that hasn't been specified on the command-line with -j.
+                  System.err.println("*** Ignoring class " + className + ": " + e);
+                  return Stream.empty();
               }
-          });
+    });
 
-        classesToSearch =
-                Stream.concat(baseClassesStream,
-                        Stream.concat(moduleClassesStream,
-                                jarClassesStream))
-          .collect(Collectors.toList());
+        classesToSearch = Stream.concat(baseClassesStream, Stream.concat(moduleClassesStream, jarClassesStream))
+                .collect(Collectors.toList());
     }
 
     private static final String CLASS_SUFFIX = ".class";
@@ -171,16 +173,17 @@ public class Juggler {
         return ret;
     }
 
-    public Member[] findMembers(String[] imports, String[] paramTypenames, String returnTypename) {
+    public Member[] findMembers(String[] imports, Accessibility minAccess,
+                                String[] paramTypenames, String returnTypename) {
         Class<?>[] paramTypes = Arrays.stream(paramTypenames == null ? new String[0] : paramTypenames)
                 .map(typename -> classForTypename(imports, typename))
                 .toArray(Class<?>[]::new);
         Class<?> returnType = returnTypename == null ? Void.TYPE : classForTypename(imports, returnTypename);
 
-        return findMembers(of(paramTypes), returnType);
+        return findMembers(minAccess, of(paramTypes), returnType);
     }
 
-    public Member[] findMembers(List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
+    public Member[] findMembers(Accessibility minAccess, List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
         // Fields
         Stream<CandidateMember> fieldStream = classesToSearch.stream()
                 .flatMap(c -> Arrays.stream(c.getDeclaredFields())
@@ -194,24 +197,14 @@ public class Juggler {
 
         // Methods
         Stream<CandidateMember> methodStream = classesToSearch.stream()
-                .flatMap(c -> {
-                    try {
-                        return Arrays.stream(c.getDeclaredMethods())
-                                .map(CandidateMember::memberFromMethod);
-                    } catch (NoClassDefFoundError e) {
-                        // TODO: consider whether this is still necessary.  If it is, how can it be factored out?
-                        // This might be thrown if the class file references other classes that can't be loaded.
-                        // Maybe it depends on another JAR that hasn't been specified on the command-line with -j.
-                        System.err.println("*** Ignoring class " + c + ": " + e);
-                        return Stream.empty();
-                    }
-                });
+                .flatMap(c -> Arrays.stream(c.getDeclaredMethods())
+                        .map(CandidateMember::memberFromMethod));
 
         return Stream.concat(fieldStream, Stream.concat(ctorStream, methodStream))  // TODO: more elegant concat
                 .filter(m -> m.matches(queryParamTypes, queryReturnType))
                 .map(CandidateMember::getMember)
                 .distinct()
-                // TODO: access filtering here
+                .filter(m -> Accessibility.fromModifiers(m.getModifiers()).isAtLastAsAccessibleAsOther(minAccess))
                 .toArray(Member[]::new);
     }
 }

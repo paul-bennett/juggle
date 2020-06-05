@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 public class Main {
     public static void main(String[] args) {
+        final String OPT_ACC = "access";
         final String OPT_IMP = "import";
         final String OPT_JAR = "jar";
         final String OPT_MOD = "module";
@@ -19,6 +20,7 @@ public class Main {
 
         Options opts = new Options();
 
+        opts.addOption("a", OPT_ACC, true, "Minimum accessibility of members to return");
         opts.addOption("i", OPT_IMP, true, "Imported packages");
         opts.addOption("j", OPT_JAR, true, "JAR file to include in search");
         opts.addOption("m", OPT_MOD, true, "Module to include in search");
@@ -35,6 +37,14 @@ public class Main {
                             Stream.ofNullable(cmd.getOptionValues(OPT_IMP)).flatMap(Arrays::stream)
                     ).toArray(String[]::new);
 
+            Accessibility minAccess = Accessibility.PUBLIC;
+            try {
+                minAccess = Accessibility.fromString(cmd.getOptionValue(OPT_ACC, minAccess.name().toLowerCase()));
+            }
+            catch (IllegalArgumentException ex) {
+                System.err.println("Unknown accessibility level; defaulting to " + minAccess.name().toLowerCase());
+            }
+
             String[] jarsToSearch = cmd.getOptionValues(OPT_JAR);
             String[] modsToSearch = cmd.getOptionValues(OPT_MOD);
 
@@ -46,7 +56,7 @@ public class Main {
                     modsToSearch == null ? List.of() : List.of(modsToSearch)
             );
 
-            for (var m : j.findMembers(imports, paramTypes, returnType)) {
+            for (var m : j.findMembers(imports, minAccess, paramTypes, returnType)) {
                 System.out.println(m.toString());
             }
         } catch (ParseException e) {
