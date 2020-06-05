@@ -1,7 +1,6 @@
 # TODO for Juggle
 
-* Adopt a decent project structure
-  - Add tests
+* Add tests
   
 * Does Juggle solve my original two questions?
   1. "I have a `Foo`. What can I do with it?"
@@ -11,15 +10,6 @@
 
 * Add support for module path (``-M``?)
  
-* Are member variables really fns?
-  - get :: ClassType -> MemberType
-  - set :: ClassType -> MemberType -> void
-     
-* Add support for constructors
-  - `Class.getConstructors()` provides a list
-  - Treat them as funcs from c'tor args to declaring object type.
-  - Be careful of inner classes (implicit args?)
-   
 * Access; private, protected, package
   - maybe this should be a command-line flag, default = only public
   - then again, `grep`ing the results is effective
@@ -65,11 +55,11 @@
   - Prefer member funs over statics?
   - Sort in order of specificity e.g. in calling semantics
      
-* Check behaviour for non-static inner classes
-  - I expect an additional constructor argument for containing class
-  - This is probably a compiler transformation, explicit in class file
-    (i.e. nothing for us to do in Juggle.)
- 
 * Optional matching algorithm?
   - exact match vs assignment-compatible
   - configurable as to whether to ignore optional args
+
+* Review code for more TODOs
+
+* Consider back-porting to JDK9
+  - biggest problem is Class.arrayType(), from JDK12

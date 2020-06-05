@@ -43,5 +43,40 @@ $ juggle                                                                \
     -i java.net                                                         \
 ...
 ````
-This example also demonstrates that a return type of `void` is inferred if no `-r` option is specified.
+
+Juggle treats constructors as if they were methods returning an instance of the
+declaring class.  In the following example you'll see a couple of constructors
+and three static methods, all with broadly similar signatures:
+````
+$ juggle -p int -p String -r java.io.InputStream
+public java.io.FileInputStream(java.lang.String) throws java.io.FileNotFoundException
+public java.io.StringBufferInputStream(java.lang.String)
+private static java.io.InputStream java.time.chrono.HijrahChronology.lambda$readConfigProperties$0(java.lang.String)
+public static java.io.InputStream java.lang.ClassLoader.getSystemResourceAsStream(java.lang.String)
+private static java.io.InputStream com.sun.java.util.jar.pack.PropMap.lambda$static$0(java.lang.String)
+$
+````
+
+Finally, Juggle treats data fields as a pair of methods: a setter and a getter.
+Non-static fields have an additional implicit `this` parameter:
+
+````
+$ juggle -r java.io.OutputStream
+private static java.io.PrintStream sun.launcher.LauncherHelper.ostream
+static final java.lang.ProcessBuilder$NullOutputStream java.lang.ProcessBuilder$NullOutputStream.INSTANCE
+public static final java.io.PrintStream java.lang.System.out
+public static final java.io.PrintStream java.lang.System.err
+public sun.security.util.DerOutputStream()
+public sun.net.www.http.PosterOutputStream()
+private java.lang.ProcessBuilder$NullOutputStream()
+public java.io.ByteArrayOutputStream()
+protected java.io.ObjectOutputStream() throws java.io.IOException,java.lang.SecurityException
+java.io.OutputStream$1()
+public java.io.OutputStream()
+public java.io.PipedOutputStream()
+com.sun.java.util.jar.pack.CodingChooser$Sizer()
+static java.io.PrintStream jdk.internal.logger.SimpleConsoleLogger.outputStream()
+public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
+$
+```
 

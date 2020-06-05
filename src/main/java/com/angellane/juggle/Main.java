@@ -46,7 +46,7 @@ public class Main {
                     modsToSearch == null ? List.of() : List.of(modsToSearch)
             );
 
-            for (Method m : j.findMethods(imports, paramTypes, returnType)) {
+            for (var m : j.findMembers(imports, paramTypes, returnType)) {
                 System.out.println(m.toString());
             }
         } catch (ParseException e) {

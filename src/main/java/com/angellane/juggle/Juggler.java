@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ResolvedModule;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -172,130 +171,47 @@ public class Juggler {
         return ret;
     }
 
-    public Method[] findMethods(String[] imports, String[] paramTypenames, String returnTypename) {
+    public Member[] findMembers(String[] imports, String[] paramTypenames, String returnTypename) {
         Class<?>[] paramTypes = Arrays.stream(paramTypenames == null ? new String[0] : paramTypenames)
                 .map(typename -> classForTypename(imports, typename))
                 .toArray(Class<?>[]::new);
         Class<?> returnType = returnTypename == null ? Void.TYPE : classForTypename(imports, returnTypename);
 
-        return findMethods(of(paramTypes), returnType);
+        return findMembers(of(paramTypes), returnType);
     }
 
-    public Method[] findMethods(List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
-        // We search the types involved in the query as well as the JARs.  This gets us a better hit rate on some
-        // JDK classes (which aren't listed in classesToSearch).  However, it won't get all methods.  Notable it'll
-        // fail to find static methods whose signatures don't include the declaring class, e.g. Math.sin().
+    public Member[] findMembers(List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
+        // Fields
+        Stream<CandidateMember> fieldStream = classesToSearch.stream()
+                .flatMap(c -> Arrays.stream(c.getDeclaredFields())
+                        .map(CandidateMember::membersFromField)
+                        .flatMap(List::stream));
 
-        Stream<Class<?>> queryTypeStream = Stream.concat(queryParamTypes.stream(), Stream.of(queryReturnType));
+        // Constructors are like static methods returning an item of their declaring class
+        Stream<CandidateMember> ctorStream = classesToSearch.stream()
+                .flatMap(cls -> Arrays.stream(cls.getDeclaredConstructors())
+                        .map(CandidateMember::memberFromConstructor));
 
-        return Stream.concat(queryTypeStream, classesToSearch.stream())
-                .distinct()
+        // Methods
+        Stream<CandidateMember> methodStream = classesToSearch.stream()
                 .flatMap(c -> {
                     try {
-                        return Arrays.stream(c.getDeclaredMethods());
+                        return Arrays.stream(c.getDeclaredMethods())
+                                .map(CandidateMember::memberFromMethod);
                     } catch (NoClassDefFoundError e) {
+                        // TODO: consider whether this is still necessary.  If it is, how can it be factored out?
                         // This might be thrown if the class file references other classes that can't be loaded.
                         // Maybe it depends on another JAR that hasn't been specified on the command-line with -j.
                         System.err.println("*** Ignoring class " + c + ": " + e);
                         return Stream.empty();
                     }
-                })
-                .filter(m -> doesMethodMatch(queryParamTypes, queryReturnType, m))
-                .toArray(Method[]::new);
+                });
+
+        return Stream.concat(fieldStream, Stream.concat(ctorStream, methodStream))  // TODO: more elegant concat
+                .filter(m -> m.matches(queryParamTypes, queryReturnType))
+                .map(CandidateMember::getMember)
+                .distinct()
+                // TODO: access filtering here
+                .toArray(Member[]::new);
     }
-
-    public boolean doesMethodMatch(List<Class<?>> queryParamTypes, Class<?> queryReturnType, Method m) {
-        List<Class<?>> methodParamTypes = new LinkedList<>();
-
-        // TODO: what about constructors?
-
-        // For instance methods, treat the declaring class as a parameter
-        if (Modifier.STATIC != (m.getModifiers() & Modifier.STATIC))
-            methodParamTypes.add(m.getDeclaringClass());
-
-        methodParamTypes.addAll(Arrays.asList(m.getParameterTypes()));
-
-        Class<?> methodReturnType = m.getReturnType();
-
-        // Now for the big questions: do the parameter types match? Does the return match?
-
-        // TODO: auto-boxing/unboxing
-
-        Iterator<Class<?>> queryTypeIter = queryParamTypes.iterator();
-
-        return queryParamTypes.size() == methodParamTypes.size()
-                && methodParamTypes.stream().allMatch(
-                        mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next())
-                    )
-                && isTypeCompatibleForAssignment(queryReturnType, methodReturnType)
-                ;
-    }
-
-    // An instinctive notion of whether two types are compatible.
-    // May or may not be correct.  Written from memory, not the JLS
-    //
-    // Are the types of writtenType and readType compatible, as if:
-    //    WrittenType w; ReadType r; w = r;
-    // or
-    //    ReadType r() {}
-    //    WrittenType w = r();
-    boolean isTypeInstinctivelyCompatible(Class<?> writtenType, Class<?> readType) {
-        // Three cases:
-        // 1. Primitive widening conversions
-        // 2. Boxing/unboxing conversions
-        // 3. Reference conversions
-        return Optional.ofNullable(wideningConversions.get(readType)).orElse(Set.of()).contains(writtenType)
-                || writtenType.equals(boxingConversions.get(readType))
-                || writtenType.isAssignableFrom(readType);
-    }
-
-
-    // These next few methods implement the conversions described in the Java Langauge Specification
-    // (Java SE 14 edition) chapter 5 "Conversions and Contexts":
-    //    https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html
-
-    // Invocation Context: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.3
-    // TODO: check against JLS
-    boolean isTypeCompatibleForInvocation(Class<?> parameterType, Class<?> argumentType) {
-        return isTypeInstinctivelyCompatible(parameterType, argumentType);
-    }
-
-    // Assignment Context: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.2
-    boolean isTypeCompatibleForAssignment(Class<?> variableType, Class<?> returnType) {
-        return isTypeInstinctivelyCompatible(variableType, returnType);
-    }
-
-    // The 19 Widening Primitive Conversions, documented in Java Language Specification (Java SE 14 edn) sect 5.1.2
-    // https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.2
-    Map<Class<?>, Set<Class<?>>> wideningConversions = Map.ofEntries(
-            Map.entry(Byte.TYPE,      Set.of(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Short.TYPE,     Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Character.TYPE, Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Integer.TYPE,   Set.of(                          Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Long.TYPE,      Set.of(                                     Float.TYPE, Double.TYPE)),
-            Map.entry(Float.TYPE,     Set.of(                                                 Double.TYPE))
-    );
-
-    // The boxing/unboxing conversions
-    Map<Class<?>, Class<?>> boxingConversions = Map.ofEntries(
-            // Boxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.7
-            Map.entry(Boolean.class,   Boolean.TYPE),
-            Map.entry(Byte.class,      Byte.TYPE),
-            Map.entry(Short.class,     Short.TYPE),
-            Map.entry(Character.class, Character.TYPE),
-            Map.entry(Integer.class,   Integer.TYPE),
-            Map.entry(Long.class,      Long.TYPE),
-            Map.entry(Float.class,     Float.TYPE),
-            Map.entry(Double.class,    Double.TYPE),
-
-            // Unboxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.8
-            Map.entry(Boolean.TYPE,   Boolean.class),
-            Map.entry(Byte.TYPE,      Byte.class),
-            Map.entry(Short.TYPE,     Short.class),
-            Map.entry(Character.TYPE, Character.class),
-            Map.entry(Integer.TYPE,   Integer.class),
-            Map.entry(Long.TYPE,      Long.class),
-            Map.entry(Float.TYPE,     Float.class),
-            Map.entry(Double.TYPE,    Double.class)
-    );
 }
