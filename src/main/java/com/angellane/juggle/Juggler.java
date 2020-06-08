@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -200,8 +201,9 @@ public class Juggler {
                 .flatMap(c -> Arrays.stream(c.getDeclaredMethods())
                         .map(CandidateMember::memberFromMethod));
 
-        return Stream.concat(fieldStream, Stream.concat(ctorStream, methodStream))  // TODO: more elegant concat
-                .filter(m -> m.matches(queryParamTypes, queryReturnType))
+        return Stream.of(fieldStream, ctorStream, methodStream)
+                .flatMap(Function.identity())
+                .filter(m -> m.matches(queryParamTypes, queryReturnType, true))
                 .map(CandidateMember::getMember)
                 .distinct()
                 .filter(m -> Accessibility.fromModifiers(m.getModifiers()).isAtLastAsAccessibleAsOther(minAccess))

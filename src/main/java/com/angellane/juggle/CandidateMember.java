@@ -2,6 +2,7 @@ package com.angellane.juggle;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This POJO contains the details of the candidate member (field, constructor or method).
@@ -49,12 +50,21 @@ class CandidateMember {
         return List.of(getter, setter);
     }
 
-    public boolean matches(List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
-        Iterator<Class<?>> queryTypeIter = queryParamTypes.iterator();
+    public boolean matches(List<Class<?>> queryParamTypes, Class<?> queryReturnType, boolean permute) {
+        // TODO: consider moving permutation generation up (main()?)
+        List<List<Class<?>>> paramPermutations = permute
+                ? (new PermutationGenerator<>(queryParamTypes)).stream().collect(Collectors.toList())
+                : List.of(queryParamTypes);
 
-        return queryParamTypes.size() == paramTypes.size()
-                && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()))
-                && isTypeCompatibleForAssignment(queryReturnType, returnType);
+        for (var permutedParamTypes : paramPermutations) {
+            Iterator<Class<?>> queryTypeIter = permutedParamTypes.iterator();
+
+            if (permutedParamTypes.size() == paramTypes.size()
+                    && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()))
+                    && isTypeCompatibleForAssignment(queryReturnType, returnType))
+                return true;
+        }
+        return false;
     }
 
     // An instinctive notion of whether two types are compatible.

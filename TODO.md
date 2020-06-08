@@ -22,9 +22,9 @@
      `-p _a -p _a -p _b -r Foo`
      
 * Should a warning be emitted for `-p void` or `void[]`?
-     
-* Matches should work with any permutation of parameters
- 
+
+* Consider refactoring the permutation invocation (maybe it should be 
+  done in main?)     
 * What about currying?
   - a search for: `Foo -> Bar -> Baz` might match `Foo -> (Bar -> Baz)`
   - Java kind of allows this return type with Functional Interfaces
