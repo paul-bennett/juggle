@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
  * methods the paramTypes field includes an implicit first entry representing the type of 'this'.
  */
 class CandidateMember {
-    private Member member;
-    private List<Class<?>> paramTypes;
-    private Class<?> returnType;
+    private final Member member;
+    private final List<Class<?>> paramTypes;
+    private final Class<?> returnType;
 
     private CandidateMember(Member member, List<Class<?>> paramTypes, Class<?> returnType) {
         this.member = member;
@@ -50,7 +50,7 @@ class CandidateMember {
         return List.of(getter, setter);
     }
 
-    public boolean matches(List<Class<?>> queryParamTypes, Class<?> queryReturnType, boolean permute) {
+    public boolean matchesParams(List<Class<?>> queryParamTypes, boolean permute) {
         // TODO: consider moving permutation generation up (main()?)
         List<List<Class<?>>> paramPermutations = permute
                 ? (new PermutationGenerator<>(queryParamTypes)).stream().collect(Collectors.toList())
@@ -60,11 +60,14 @@ class CandidateMember {
             Iterator<Class<?>> queryTypeIter = permutedParamTypes.iterator();
 
             if (permutedParamTypes.size() == paramTypes.size()
-                    && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()))
-                    && isTypeCompatibleForAssignment(queryReturnType, returnType))
+                    && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next())))
                 return true;
         }
         return false;
+    }
+
+    public boolean matchesReturn(Class<?> queryReturnType) {
+        return isTypeCompatibleForAssignment(queryReturnType, returnType);
     }
 
     // An instinctive notion of whether two types are compatible.
@@ -103,7 +106,7 @@ class CandidateMember {
 
     // The 19 Widening Primitive Conversions, documented in Java Language Specification (Java SE 14 edn) sect 5.1.2
     // https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.2
-    private static Map<Class<?>, Set<Class<?>>> wideningConversions = Map.ofEntries(
+    private static final Map<Class<?>, Set<Class<?>>> wideningConversions = Map.ofEntries(
             Map.entry(Byte.TYPE, Set.of(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
             Map.entry(Short.TYPE, Set.of(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
             Map.entry(Character.TYPE, Set.of(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
@@ -113,7 +116,7 @@ class CandidateMember {
     );
 
     // The boxing/unboxing conversions
-    private static Map<Class<?>, Class<?>> boxingConversions = Map.ofEntries(
+    private static final Map<Class<?>, Class<?>> boxingConversions = Map.ofEntries(
             // Boxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.7
             Map.entry(Boolean.class, Boolean.TYPE),
             Map.entry(Byte.class, Byte.TYPE),

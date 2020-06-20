@@ -2,10 +2,7 @@ package com.angellane.juggle;
 
 import org.apache.commons.cli.*;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -51,14 +48,21 @@ public class Main {
             String[] paramTypes = cmd.getOptionValues(OPT_PRM);
             String   returnType = cmd.getOptionValue(OPT_RET);
 
+            if (paramTypes != null) {
+                paramTypes = String.join(",", paramTypes).split(",");
+                if ((paramTypes.length == 1) && (paramTypes[0].length() == 0))
+                    paramTypes = new String[] {};
+            }
+
             Juggler j = new Juggler(
                     jarsToSearch == null ? List.of() : List.of(jarsToSearch),
                     modsToSearch == null ? List.of() : List.of(modsToSearch)
             );
 
-            for (var m : j.findMembers(imports, minAccess, paramTypes, returnType)) {
-                System.out.println(m.toString());
-            }
+            MemberDecoder decoder = new MemberDecoder(imports);
+            for (var m : j.findMembers(imports, minAccess, paramTypes, returnType))
+                System.out.println(decoder.decode(m));
+
         } catch (ParseException e) {
             System.err.println("Parsing failed" + e.getMessage());
             HelpFormatter formatter = new HelpFormatter();

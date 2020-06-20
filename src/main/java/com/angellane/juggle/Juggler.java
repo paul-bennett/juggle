@@ -17,13 +17,9 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.List.of;
-
 public class Juggler {
-    private ResolvingURLClassLoader loader;
-    private ModuleLayer layer;
-
-    private Collection<Class<?>> classesToSearch;
+    private final ResolvingURLClassLoader loader;
+    private final Collection<Class<?>> classesToSearch;
 
     public Juggler(List<String> jars, List<String> mods) {
         URL[] urls = jars.stream()
@@ -45,7 +41,7 @@ public class Juggler {
                 ModuleFinder.of(Path.of(".")),
                 mods);
 
-        layer = boot.defineModulesWithOneLoader(conf, loader);
+        ModuleLayer layer = boot.defineModulesWithOneLoader(conf, loader);
 
         var moduleClassesStream = mods.stream()
                 .flatMap(s -> classesForModule(conf, s).stream());
@@ -176,12 +172,16 @@ public class Juggler {
 
     public Member[] findMembers(String[] imports, Accessibility minAccess,
                                 String[] paramTypenames, String returnTypename) {
-        Class<?>[] paramTypes = Arrays.stream(paramTypenames == null ? new String[0] : paramTypenames)
-                .map(typename -> classForTypename(imports, typename))
-                .toArray(Class<?>[]::new);
-        Class<?> returnType = returnTypename == null ? Void.TYPE : classForTypename(imports, returnTypename);
+        List<Class<?>> paramTypes = paramTypenames == null
+                ? null
+                : List.of(
+                        Arrays.stream(paramTypenames)
+                                .map(typename -> classForTypename(imports, typename))
+                                .toArray(Class<?>[]::new)
+                );
+        Class<?> returnType = returnTypename == null ? null : classForTypename(imports, returnTypename);
 
-        return findMembers(minAccess, of(paramTypes), returnType);
+        return findMembers(minAccess, paramTypes, returnType);
     }
 
     public Member[] findMembers(Accessibility minAccess, List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
@@ -203,7 +203,12 @@ public class Juggler {
 
         return Stream.of(fieldStream, ctorStream, methodStream)
                 .flatMap(Function.identity())
-                .filter(m -> m.matches(queryParamTypes, queryReturnType, true))
+                .filter(m -> {      // Anonymous and local classes are unutterable anyway
+                    Class<?> c = m.getMember().getDeclaringClass();
+                    return !c.isAnonymousClass() && !c.isLocalClass();
+                })
+                .filter(m -> queryParamTypes == null || m.matchesParams(queryParamTypes, true))
+                .filter(m -> queryReturnType == null || m.matchesReturn(queryReturnType))
                 .map(CandidateMember::getMember)
                 .distinct()
                 .filter(m -> Accessibility.fromModifiers(m.getModifiers()).isAtLastAsAccessibleAsOther(minAccess))

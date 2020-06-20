@@ -1,11 +1,42 @@
 # TODO for Juggle
 
-* Add more tests
-  
+Not necessarily in any meaningful order. Some things here are big (e.g. Generics); others quite small.
+
+## Basic Functionality
+
 * Does Juggle solve my original two questions?
-  1. "I have a `Foo`. What can I do with it?"
-  2. "How do I get a `Bar`?"
+  1. "I have a `Foo`. What can I do with it?" <-- Not yet
+  2. "How do I get a `Bar`?" <-- Yes
+
+* Add support for module path (``-M``?)
+ 
+* Add support for directories of class files
+     
+* Should a warning be emitted for `-p void` or `void[]`?
+
+* Add support for comma-separated args in `-p`
+  - necessary so that `-p ""` returns all no-arg methods
+
       
+## Code Quality & Refactoring
+
+* Add more tests
+  - More unit tests for methods
+  - Component tests for Juggle as a whole
+    + Perhaps use contents of README as a source of samples
+    + Write script to parse README for examples and results
+  
+* Consider refactoring the permutation invocation (maybe it should be 
+    done in main?)
+
+* Review code for more TODOs
+
+* Consider back-porting to JDK9
+  - biggest problem is Class.arrayType(), from JDK12  
+
+
+## Generics
+
 * Implement constraints due to generic type parameters.
   This needs careful thought!
   - Currently Juggle treats type parameters as unconstrained `Object`
@@ -58,17 +89,34 @@
     + `-p ?` means a parameter of some unknown type
     + `-r ?` means any return type (including primitive and `void`)
     + `-p ? extends Foo` means a parameter that is `Foo` or a subclass of `Foo`.
+  - Note that interface methods won't currently be returned unless the interface is explicity
+    mentioned in a `-p`.
+    + For example to find `java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()` you pretty
+      much need to specify its entire decl: `-p java.lang.reflect.WildcardType -r java.lang.reflect.Type[]`
+    + Using `-p Object` doesn't find the interface
+    + Using `-p ?` should find it 
     
-* Currently an absence of a `-r` is treated as `-r void`. Maybe instead
-  it should be treated as `-r ?`.  (I.E. any type)
-* Add support for module path (``-M``?)
- 
-* Add support for directories of class files
-     
-* Should a warning be emitted for `-p void` or `void[]`?
 
-* Consider refactoring the permutation invocation (maybe it should be 
-  done in main?)     
+## Algorithm improvements
+
+* Check type compatibility matches Java Language Spec chapter 5
+  - See methods isTypeCompatibleForInvocation/isTypeCompatibleForAssignment
+
+* Should sort results naturally
+  - Exact matches first
+  - Permutations of parameters and partial matches later
+  - What about supertype params and subtype returns?
+  - Box/unbox cost?
+  - Prefer member funs over statics?
+  - Sort in order of specificity e.g. in calling semantics
+     
+* Optional matching algorithm?
+  - exact match vs assignment-compatible
+  - configurable as to whether to ignore optional args
+  
+  
+## Weird Ideas
+     
 * What about currying?
   - a search for: `Foo -> Bar -> Baz` might match `Foo -> (Bar -> Baz)`
   - Java kind of allows this return type with Functional Interfaces
@@ -84,24 +132,3 @@
   - Haskell-like?
     `foo -> bar -> baz`
           
-* Check type compatibility matches Java Language Spec chapter 5
-  - See methods isTypeCompatibleForInvocation/isTypeCompatibleForAssignment
-
-* When emitting decls, omit the default package name (maybe last -or first?- `-i`)
-     
-* Should sort results naturally
-  - Exact matches first
-  - Permutations of parameters and partial matches later
-  - What about supertype params and subtype returns?
-  - Box/unbox cost?
-  - Prefer member funs over statics?
-  - Sort in order of specificity e.g. in calling semantics
-     
-* Optional matching algorithm?
-  - exact match vs assignment-compatible
-  - configurable as to whether to ignore optional args
-
-* Review code for more TODOs
-
-* Consider back-porting to JDK9
-  - biggest problem is Class.arrayType(), from JDK12
