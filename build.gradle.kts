@@ -12,12 +12,12 @@ repositories {
 
 dependencies {
     testImplementation("junit", "junit", "4.12")
-    implementation("commons-cli", "commons-cli", "1.4")
+    implementation("args4j", "args4j", "2.33")
 }
 
 configure<JavaPluginConvention> {
-     sourceCompatibility = JavaVersion.VERSION_12
-     targetCompatibility = JavaVersion.VERSION_12
+    sourceCompatibility = JavaVersion.VERSION_12
+    targetCompatibility = JavaVersion.VERSION_12
 }
 
 application {

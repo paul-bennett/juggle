@@ -23,10 +23,6 @@ then
     export JAVA_HOME=`/usr/libexec/java_home -v 13`
 fi
 
-#juggle() {
-#    echo >&2 "))))" "${gradle}" -q run --args="$@"
-#    "${gradle}" -q run --args="$*"
-#}
 
 temp="${prefix}-out"
 
@@ -35,20 +31,24 @@ until [ ! -f "${prefix}-${n}.sh" ]
 do
     cmd_file="${prefix}-${n}.sh"
     out_file="${prefix}-${n}.out"
-    args=`cat ${cmd_file} | sed '1s/[^ ]* *//'`
+    # First sed expression removes command name; second strips continuation \s
+    args=`cat ${cmd_file}				\
+		| sed -e '1s/[^ ]* *//' -e 's/\\\\$//'	\
+		| tr \\\\n ' '`
     ${gradle} -q run --args="${args}" 2>&1 \
-	| diff -u - --label "actual output" "${out_file}" > "${temp}"
-    #    . "${cmd_file}" | diff - "${out_file}"
+        | diff -u - --label "actual output" "${out_file}" > "${temp}"
 
     if [ $? -ne 0 ]; then
-	echo "========================== FAILED TEST =========================="
-	cat "${cmd_file}"
-	echo "-----------------------------------------------------------------"
-	cat "${temp}"
-	echo
-	echo
+        echo "========================== FAILED TEST =========================="
+        cat "${cmd_file}"
+        echo "-----------------------------------------------------------------"
+	echo "$args"
+        echo "-----------------------------------------------------------------"
+        cat "${temp}"
+        echo
+        echo
     else
-	rm "${cmd_file}" "${out_file}"
+        rm "${cmd_file}" "${out_file}"
     fi
 
     let n+=1

@@ -1,73 +1,87 @@
 package com.angellane.juggle;
 
-import org.apache.commons.cli.*;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.Member;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
+    @Option(name="-i", aliases={"--import"}, usage="Imported package names", metaVar="packageName")
+    public void addImport(String importName) { importPackageNames.add(importName); }
+    List<String> importPackageNames = new ArrayList<>();
+
+    @Option(name="-j", aliases="--jar", usage="JAR file to include in search", metaVar="jarFilePath")
+    public void addJar(String jarName) { jarPaths.add(jarName); }
+    List<String> jarPaths = new ArrayList<>();
+
+    @Option(name="-m", aliases="--module", usage="Module to include in search", metaVar="moduleName")
+    public void addModule(String moduleName) { moduleNames.add(moduleName); }
+    List<String> moduleNames = new ArrayList<>();
+
+    @Option(name="-p", aliases="--param", usage="Parameter type of searched function", metaVar="type,type,...")
+    public void addParam(String paramTypeName) {
+        if (paramTypes == null) paramTypes = new ArrayList<>();
+
+        paramTypes.addAll(Arrays.stream(paramTypeName.split(","))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList())
+        );
+    }
+    List<String> paramTypes = null;     // null = don't match params; empty list = zero params
+
+    @Option(name="-r", aliases="--return", usage="Return type of searched function", metaVar="type")
+    String returnType;
+
+    @Option(name="-a", aliases="--access", usage="Minimum accessibility of members to return",
+            metaVar="private|protected|package|public")
+    Accessibility minAccess = Accessibility.PUBLIC;
+
+    @Option(name="-h", aliases="--help", help=true)
+    boolean helpRequested;
+
     public static void main(String[] args) {
-        final String OPT_ACC = "access";
-        final String OPT_IMP = "import";
-        final String OPT_JAR = "jar";
-        final String OPT_MOD = "module";
-        final String OPT_PRM = "param";
-        final String OPT_RET = "return";
+        Main app = new Main();
+        if (app.parseArgs(args))
+            app.goJuggle();
+    }
 
-        Options opts = new Options();
+    public Main() {
+    }
 
-        opts.addOption("a", OPT_ACC, true, "Minimum accessibility of members to return");
-        opts.addOption("i", OPT_IMP, true, "Imported packages");
-        opts.addOption("j", OPT_JAR, true, "JAR file to include in search");
-        opts.addOption("m", OPT_MOD, true, "Module to include in search");
-        opts.addOption("p", OPT_PRM, true, "Parameter type of searched function");
-        opts.addOption("r", OPT_RET, true, "Return type of searched function");
-
-        CommandLineParser parser = new DefaultParser();
+    public boolean parseArgs(String[] args) {
+        final CmdLineParser parser = new CmdLineParser(this);
         try {
-            CommandLine cmd = parser.parse(opts, args);
+            parser.parseArgument(args);
 
-            String[] imports =
-                    Stream.concat(
-                            Stream.of("java.lang"),
-                            Stream.ofNullable(cmd.getOptionValues(OPT_IMP)).flatMap(Arrays::stream)
-                    ).toArray(String[]::new);
-
-            Accessibility minAccess = Accessibility.PUBLIC;
-            try {
-                minAccess = Accessibility.fromString(cmd.getOptionValue(OPT_ACC, minAccess.name().toLowerCase()));
-            }
-            catch (IllegalArgumentException ex) {
-                System.err.println("Unknown accessibility level; defaulting to " + minAccess.name().toLowerCase());
+            if (helpRequested) {
+                parser.printUsage(System.out);
+                return false;
             }
 
-            String[] jarsToSearch = cmd.getOptionValues(OPT_JAR);
-            String[] modsToSearch = cmd.getOptionValues(OPT_MOD);
-
-            String[] paramTypes = cmd.getOptionValues(OPT_PRM);
-            String   returnType = cmd.getOptionValue(OPT_RET);
-
-            if (paramTypes != null) {
-                paramTypes = String.join(",", paramTypes).split(",");
-                if ((paramTypes.length == 1) && (paramTypes[0].length() == 0))
-                    paramTypes = new String[] {};
-            }
-
-            Juggler j = new Juggler(
-                    jarsToSearch == null ? List.of() : List.of(jarsToSearch),
-                    modsToSearch == null ? List.of() : List.of(modsToSearch)
-            );
-
-            MemberDecoder decoder = new MemberDecoder(imports);
-            for (var m : j.findMembers(imports, minAccess, paramTypes, returnType))
-                System.out.println(decoder.decode(m));
-
-        } catch (ParseException e) {
-            System.err.println("Parsing failed" + e.getMessage());
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("juggle", opts);
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            parser.printSingleLineUsage(System.out);
             System.exit(-1);
         }
+
+        return true;
+    }
+
+    public void goJuggle() {
+        String[] imports = Stream.concat(Stream.of("java.lang"), importPackageNames.stream()).toArray(String[]::new);
+
+        String[] paramTypes = this.paramTypes == null ? null : this.paramTypes.toArray(String[]::new);
+
+        Juggler j = new Juggler(jarPaths, moduleNames);
+
+        MemberDecoder decoder = new MemberDecoder(imports);
+        Arrays.stream(j.findMembers(imports, minAccess, paramTypes, returnType))
+                .forEach(m -> System.out.println(decoder.decode(m)));
+
     }
 }
