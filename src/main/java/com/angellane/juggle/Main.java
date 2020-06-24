@@ -1,9 +1,9 @@
 package com.angellane.juggle;
 
+import com.angellane.juggle.comparator.MultiComparator;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
 import java.lang.reflect.Member;
 import java.util.*;
@@ -41,17 +41,14 @@ public class Main {
             metaVar="private|protected|package|public")
     Accessibility minAccess = Accessibility.PUBLIC;
 
+    @Option(name="-s", aliases="--sort", usage="Sort criteria")
+    public void addSortCriterium(SortCriteria crit) {
+        sortCriteria.add(crit);
+    }
+    List<SortCriteria> sortCriteria = new ArrayList<>();
+
     @Option(name="-h", aliases="--help", help=true)
     boolean helpRequested;
-
-    public static void main(String[] args) {
-        Main app = new Main();
-        if (app.parseArgs(args))
-            app.goJuggle();
-    }
-
-    public Main() {
-    }
 
     public boolean parseArgs(String[] args) {
         final CmdLineParser parser = new CmdLineParser(this);
@@ -72,6 +69,12 @@ public class Main {
         return true;
     }
 
+    public Comparator<Member> getComparator() {
+        return MultiComparator.of(sortCriteria.stream()
+                .map(c -> c.getComparator(this))
+                .collect(Collectors.toList()));
+    }
+
     public void goJuggle() {
         String[] imports = Stream.concat(Stream.of("java.lang"), importPackageNames.stream()).toArray(String[]::new);
 
@@ -81,7 +84,13 @@ public class Main {
 
         MemberDecoder decoder = new MemberDecoder(imports);
         Arrays.stream(j.findMembers(imports, minAccess, paramTypes, returnType))
+                .sorted(getComparator())
                 .forEach(m -> System.out.println(decoder.decode(m)));
+    }
 
+    public static void main(String[] args) {
+        Main app = new Main();
+        if (app.parseArgs(args))
+            app.goJuggle();
     }
 }

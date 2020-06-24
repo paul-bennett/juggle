@@ -14,17 +14,11 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
      
 * Should a warning be emitted for `-p void` or `void[]`?
 
-* Add support for comma-separated args in `-p`
-  - necessary so that `-p ""` returns all no-arg methods
-
       
 ## Code Quality & Refactoring
 
 * Add more tests
   - More unit tests for methods
-  - Component tests for Juggle as a whole
-    + Perhaps use contents of README as a source of samples
-    + Write script to parse README for examples and results
   
 * Consider refactoring the permutation invocation (maybe it should be 
     done in main?)
