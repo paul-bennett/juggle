@@ -17,7 +17,7 @@ public class CartesianProductTest {
     /**
      * A Collector that concatenates characters into a String.
      */
-    Collector<Character, StringBuilder, String> concatenator = new Collector<>() {
+    final Collector<Character, StringBuilder, String> concatenator = new Collector<>() {
         @Override public Supplier<StringBuilder>                supplier()          { return StringBuilder::new;      }
         @Override public BiConsumer<StringBuilder,Character>    accumulator()       { return StringBuilder::append;   }
         @Override public BinaryOperator<StringBuilder>          combiner()          { return StringBuilder::append;   }

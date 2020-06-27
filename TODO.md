@@ -12,9 +12,9 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
  
 * Add support for directories of class files
      
-* Should a warning be emitted for `-p void` or `void[]`?
+* Should Juggle emit a warning for `-p void` or `void[]`?
 
-* Check how constructors are handled.
+* Check how Juggle handles constructors.
   Do their modifiers imply they're static?
   If they do, we shouldn't treat as if there is an implicit 'this'. 
 
@@ -30,7 +30,7 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
 * Review code for more TODOs
 
 * Consider back-porting to JDK9
-  - biggest problem is Class.arrayType(), from JDK12  
+  - the biggest problem is Class.arrayType(), from JDK12  
   
 * Check module support
   - does it work at all?
@@ -43,7 +43,7 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
 
 * Implement constraints due to generic type parameters.
   This needs careful thought!
-  - Currently Juggle treats type parameters as unconstrained `Object`
+  - Currently, Juggle treats type parameters as unconstrained `Object`
     + By not evaluating constraints, Juggle may inappropriately include (or exclude) some entries from the results
     + Consider the method `boolean java.util.Map<K,V>.replace(K, V, V)`.
       Because the last two parameters have the same generic type, this method
@@ -56,14 +56,14 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
       should match the second parameter.  Clearly this should match the query
       `juggle -p java.util.Map -p Long -p String -r` but Juggle excludes it from the output
       because it treats the method as `Object java.util.Map.putIfAbsent(Object, Object)`, 
-      and is unable to deduce the correct return type of `String`. Consequently
+      and is unable to deduce the correct return type of `String`. Consequently,
       because a `Object` return type can't be assigned to a `String` variable,
-      the method is excluded from the result set.
+      Juggle excludes the method from the result set.
     + Finally, consider type constraints such as `? extends Foo` or `? super Bar`.
       These need complicate the matching process further.
       
   - It looks like it should be possible to implement this feature using:
-    + Interfaces `java.lang.reflect.GenericDeclaration`; `java.lang.reflect.Type` and its subinterfaces
+    + Interfaces `java.lang.reflect.GenericDeclaration`; `java.lang.reflect.Type` and its sub-interfaces
       `java.lang.reflect.GenericArrayType`, `java.lang.reflect.ParameterizedType`,
       `java.lang.reflect.TypeVariable` and `java.lang.reflect.WildcardType`
     + `java.lang.Class`'s `getGenericInterfaces()`, `getGenericSuperclass()`and `getTypeParameters()` methods
@@ -93,8 +93,8 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
     + `-p ?` means a parameter of some unknown type
     + `-r ?` means any return type (including primitive and `void`)
     + `-p ? extends Foo` means a parameter that is `Foo` or a subclass of `Foo`.
-  - Note that interface methods won't currently be returned unless the interface is explicity
-    mentioned in a `-p`.
+  - Note that interface methods won't currently be returned unless you mention
+    the interface explicitly in a `-p`.
     + For example to find `java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()` you pretty
       much need to specify its entire decl: `-p java.lang.reflect.WildcardType -r java.lang.reflect.Type[]`
     + Using `-p Object` doesn't find the interface
@@ -114,7 +114,7 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
      
 * Optional matching algorithm?
   - exact match vs assignment-compatible
-  - configurable as to whether to ignore optional args
+  - configurable whether to ignore optional args
   
   
 ## Weird Ideas
@@ -128,7 +128,7 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
     `-p foo -p bar -r baz`
   - maybe like a Java declaration
     `baz myfunc(foo f, bar b)`
-    where "myfunc", "f" and "b" are ignored bits of text
+    where "myfunc", "f" and "b" are ignored bits of text.
   - or would a lambda-inspired syntax work?
     `(foo, bar) -> baz`
   - Haskell-like?

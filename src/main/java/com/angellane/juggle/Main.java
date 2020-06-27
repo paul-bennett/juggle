@@ -14,15 +14,15 @@ public class Main {
 
     @Option(name="-i", aliases={"--import"}, usage="Imported package names", metaVar="packageName")
     public void addImport(String importName) { importedPackageNames.add(importName); }
-    List<String> importedPackageNames = new ArrayList<>(List.of("java.lang"));
+    final List<String> importedPackageNames = new ArrayList<>(List.of("java.lang"));
 
     @Option(name="-j", aliases="--jar", usage="JAR file to include in search", metaVar="jarFilePath")
     public void addJar(String jarName) { jarPaths.add(jarName); }
-    List<String> jarPaths = new ArrayList<>();
+    final List<String> jarPaths = new ArrayList<>();
 
     @Option(name="-m", aliases="--module", usage="Module to include in search", metaVar="moduleName")
     public void addModule(String moduleName) { moduleNames.add(moduleName); }
-    List<String> moduleNames = new ArrayList<>();
+    final List<String> moduleNames = new ArrayList<>();
 
     @Option(name="-p", aliases="--param", usage="Parameter type of searched function", metaVar="type,type,...")
     public void addParam(String paramTypeName) {
@@ -43,7 +43,7 @@ public class Main {
     Accessibility minAccess = Accessibility.PUBLIC;
 
     @Option(name="-s", aliases="--sort", usage="Sort criteria")
-    public void addSortCriterium(SortCriteria crit) {
+    public void addSortCriteria(SortCriteria crit) {
         if (sortCriteria == null)
             sortCriteria = new ArrayList<>();
         sortCriteria.add(crit);

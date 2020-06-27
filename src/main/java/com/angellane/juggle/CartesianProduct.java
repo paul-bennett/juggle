@@ -1,6 +1,5 @@
 package com.angellane.juggle;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
@@ -41,10 +40,10 @@ public class CartesianProduct<T> {
 
 
     public static class CartesianProductSpliterator<T> implements Spliterator<List<T>> {
-        List<T>[] lists;
+        final List<T>[] lists;
 
         /** divisors[i] is the number entries in the CartesianProduct stream between changes to lists[i]. */
-        int[] divisors;
+        final int[] divisors;
 
         /** the index of the next entry to emit */
         int pos;

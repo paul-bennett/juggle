@@ -21,8 +21,8 @@ public class ByClosestType implements Comparator<Member> {
     private final TypeComparator typeComparator = new TypeComparator();
 
     static class TypeSignature {
-        public List<Class<?>> paramTypes;
-        public Class<?> returnType;
+        public final List<Class<?>> paramTypes;
+        public final Class<?> returnType;
 
         public TypeSignature(List<Class<?>> paramTypes, Class<?> returnType) {
             this.paramTypes = paramTypes;
@@ -90,7 +90,7 @@ public class ByClosestType implements Comparator<Member> {
         //
         // After examining all permutations, find the score with the highest absolute value.  Return the sign of
         // the highest score.  So if we had scores of 0, -5, 4 and -2, we're return -1 because -5 has the largest
-        // absolute value so it wins, and it's a negative value so the retun value is -1.
+        // absolute value so it wins, and it's a negative value so the return value is -1.
 
         List<TypeSignature> m1Sigs = TypeSignature.signaturesOf(m1);
         List<TypeSignature> m2Sigs = TypeSignature.signaturesOf(m2);

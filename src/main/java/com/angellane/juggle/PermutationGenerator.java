@@ -49,7 +49,7 @@ public class PermutationGenerator<T> {
         }
 
         /**
-         * Computes the permutation that follows current lexicographically. If current is the lexigraphical
+         * Computes the permutation that follows current lexicographically. If current is the lexicographical
          * last permutation, returns the lexigraphical first one.  (I.E. repeatedly calling this function
          * will cycle through all permutations infinitely; you can start with any permutation.)
          *

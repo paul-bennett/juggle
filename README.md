@@ -71,14 +71,14 @@ $
 So the only ways of getting a `URLPermission` is by using either of its two
 constructors.  (Of course methods which declare their return type to be
 a superclass of `URLPermission` may in fact return a `URLPermission` object,
-but Juggle can't be certain that they will so doesn't include them in its
+but Juggle can't be certain they will so doesn't include them in its
 output.)
 
-Omitting `-p` and also omitting `-r` will list all methods in the JDK.
+Omitting `-p` and omitting `-r` will list all methods in the JDK.
 While marginally interesting, the output is rather too long to be helpful!
 
-Non-static methods are treated as if
-there is a silent first parameter whose type is the class in question:
+Juggle treats non-static methods as if they have a silent
+first parameter whose type is the class in question:
 ````
 $ juggle -p java.util.regex.Matcher -p java.lang.String -r java.lang.String
 public String java.util.regex.Matcher.group(String)
@@ -92,7 +92,7 @@ Juggle includes this method in the result set because Java allows instances of a
 a function that is expecting a parent class (Widening Reference Conversion).
 
 Juggle treats data fields as a pair of methods: a setter (which takes an
-argument of the field's type and returns `void`) and a getter (which takes
+argument of the field's type and returns `void`), and a getter (which takes
 no additional arguments and returns a value of the field's type). 
 
 As with non-static methods, non-static fields have an additional implicit 
@@ -118,19 +118,19 @@ You can tell Juggle to which JARs to include in the search by using the `-j` opt
 ````
 % juggle                                                                \
     -j mylib.jar                                                        \
+...
 ````
 
 The `-m` flag can be used to specify JMODs to search.
 (Caveats: modules must be in the current working directory;
-this feature hasn't been throughly tested yet.)
+this feature hasn't been thoroughly tested yet.)
 
-At present there's no support for scanning an unpacked JAR or a directory of class files.
+At present there's no support for scanning an unpacked JAR, or a directory of class files.
 
 ## Sorting the results
 
-Juggle can sort its output in a number of ways. Sort criteria are specified using `-s`
-and are cumulative.  The output is first sorted by the first criteria; ties are resolved
-by any subsequent criteria.
+Juggle can sort its output in a number of ways. Specify sort criteria using `-s`.
+The first criteria sorts the results, with ties resolved by any subsequent criteria.
 
 | Option       | Description                                                     |
 |--------------|-----------------------------------------------------------------|
@@ -165,10 +165,10 @@ public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
 $
 ````
 (We see another example of Reference Widening here too: `FileInputStream` and `StringBufferInputStream`
-are both descendent classes of `InputStream`, so objects of those first two types can be assigned to a
+are both descendant classes of `InputStream`, so objects of those first two types can be assigned to a
 variable of the latter type.)
 
-By default Juggle will only show `public` members. Use the `-a` option to set an alternative minimum level of accessibility (`public`, `package`, `protected`, or `private`).
+By default, Juggle will only show `public` members. Use the `-a` option to set an alternative minimum level of accessibility (`public`, `package`, `protected`, or `private`).
 
 ````
 $ juggle -r java.io.OutputStream -p '' -a private
