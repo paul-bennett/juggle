@@ -8,12 +8,13 @@ import org.kohsuke.args4j.Option;
 import java.lang.reflect.Member;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
+    // Command-line options
+
     @Option(name="-i", aliases={"--import"}, usage="Imported package names", metaVar="packageName")
-    public void addImport(String importName) { importPackageNames.add(importName); }
-    List<String> importPackageNames = new ArrayList<>();
+    public void addImport(String importName) { importedPackageNames.add(importName); }
+    List<String> importedPackageNames = new ArrayList<>(List.of("java.lang"));
 
     @Option(name="-j", aliases="--jar", usage="JAR file to include in search", metaVar="jarFilePath")
     public void addJar(String jarName) { jarPaths.add(jarName); }
@@ -25,17 +26,17 @@ public class Main {
 
     @Option(name="-p", aliases="--param", usage="Parameter type of searched function", metaVar="type,type,...")
     public void addParam(String paramTypeName) {
-        if (paramTypes == null) paramTypes = new ArrayList<>();
+        if (paramTypeNames == null) paramTypeNames = new ArrayList<>();
 
-        paramTypes.addAll(Arrays.stream(paramTypeName.split(","))
+        paramTypeNames.addAll(Arrays.stream(paramTypeName.split(","))
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList())
         );
     }
-    List<String> paramTypes = null;     // null = don't match params; empty list = zero params
+    List<String> paramTypeNames = null;     // null = don't match params; empty list = zero params
 
     @Option(name="-r", aliases="--return", usage="Return type of searched function", metaVar="type")
-    String returnType;
+    String returnTypeName;
 
     @Option(name="-a", aliases="--access", usage="Minimum accessibility of members to return",
             metaVar="private|protected|package|public")
@@ -43,12 +44,35 @@ public class Main {
 
     @Option(name="-s", aliases="--sort", usage="Sort criteria")
     public void addSortCriterium(SortCriteria crit) {
+        if (sortCriteria == null)
+            sortCriteria = new ArrayList<>();
         sortCriteria.add(crit);
     }
-    List<SortCriteria> sortCriteria = new ArrayList<>();
+    List<SortCriteria> sortCriteria = null;
+    public List<SortCriteria> getSortCriteria() {
+        // Return default criteria of none were set.
+        return sortCriteria != null
+                ? sortCriteria
+                : List.of(SortCriteria.TYPE, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
+    }
 
     @Option(name="-h", aliases="--help", help=true)
     boolean helpRequested;
+
+
+    // Application logic follows.
+
+    public Juggler juggler;
+
+    public List<Class<?>> getParamTypes() {
+        return paramTypeNames == null ? null : paramTypeNames.stream()
+                .map(juggler::classForTypename)
+                .collect(Collectors.toList());
+    }
+
+    public Class<?> getReturnType() {
+        return returnTypeName == null ? null : juggler.classForTypename(returnTypeName);
+    }
 
     public boolean parseArgs(String[] args) {
         final CmdLineParser parser = new CmdLineParser(this);
@@ -70,20 +94,17 @@ public class Main {
     }
 
     public Comparator<Member> getComparator() {
-        return MultiComparator.of(sortCriteria.stream()
+        return MultiComparator.of(getSortCriteria().stream()
                 .map(c -> c.getComparator(this))
                 .collect(Collectors.toList()));
     }
 
     public void goJuggle() {
-        String[] imports = Stream.concat(Stream.of("java.lang"), importPackageNames.stream()).toArray(String[]::new);
+        juggler = new Juggler(jarPaths, moduleNames, importedPackageNames);
 
-        String[] paramTypes = this.paramTypes == null ? null : this.paramTypes.toArray(String[]::new);
+        MemberDecoder decoder = new MemberDecoder(importedPackageNames);
 
-        Juggler j = new Juggler(jarPaths, moduleNames);
-
-        MemberDecoder decoder = new MemberDecoder(imports);
-        Arrays.stream(j.findMembers(imports, minAccess, paramTypes, returnType))
+        Arrays.stream(juggler.findMembers(minAccess, getParamTypes(), getReturnType()))
                 .sorted(getComparator())
                 .forEach(m -> System.out.println(decoder.decode(m)));
     }

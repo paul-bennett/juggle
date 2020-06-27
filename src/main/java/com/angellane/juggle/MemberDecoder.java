@@ -2,14 +2,13 @@ package com.angellane.juggle;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MemberDecoder {
-    private Set<String> imports;
+    private final Set<String> imports;
 
-    public MemberDecoder(String[] imports) {
-        this.imports = Set.of(imports);
+    public MemberDecoder(List<String> importedPackageNames) {
+        this.imports = Set.copyOf(importedPackageNames);
     }
 
     public String decode(Member m) {

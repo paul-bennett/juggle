@@ -20,8 +20,11 @@ import java.util.stream.Stream;
 public class Juggler {
     private final ResolvingURLClassLoader loader;
     private final Collection<Class<?>> classesToSearch;
+    private final List<String> importedPackageNames;
 
-    public Juggler(List<String> jars, List<String> mods) {
+    public Juggler(List<String> jars, List<String> mods, List<String> importedPackageNames) {
+        this.importedPackageNames = importedPackageNames;
+
         URL[] urls = jars.stream()
                 .flatMap(path -> {
                     try {
@@ -35,20 +38,18 @@ public class Juggler {
         loader = new ResolvingURLClassLoader(urls);
 
         var boot = ModuleLayer.boot();
-        ModuleFinder finder = ModuleFinder.ofSystem();
+
         Configuration conf = boot.configuration().resolve(
                 ModuleFinder.ofSystem(),
                 ModuleFinder.of(Path.of(".")),
                 mods);
-
-        ModuleLayer layer = boot.defineModulesWithOneLoader(conf, loader);
 
         var moduleClassesStream = mods.stream()
                 .flatMap(s -> classesForModule(conf, s).stream());
 
         var baseClassesStream = classesForModule(conf, "java.base").stream();
 
-        var jarClassesStream = jars.stream()
+        Stream<Class<?>> jarClassesStream = jars.stream()
           .flatMap(jarName -> classesInJar(jarName).stream())
           .flatMap(className -> {
               try {
@@ -64,9 +65,10 @@ public class Juggler {
                   System.err.println("*** Ignoring class " + className + ": " + e);
                   return Stream.empty();
               }
-    });
+          });
 
-        classesToSearch = Stream.concat(baseClassesStream, Stream.concat(moduleClassesStream, jarClassesStream))
+        classesToSearch = Stream.of(baseClassesStream, moduleClassesStream, jarClassesStream)
+                .flatMap(Function.identity())
                 .collect(Collectors.toList());
     }
 
@@ -121,7 +123,7 @@ public class Juggler {
         return List.of();
     }
 
-    public Class<?> classForTypename(String[] imports, String typename) {
+    public Class<?> classForTypename(String typename) {
         final String ARRAY_SUFFIX = "[]";
 
         // If this is an array, work out how many dimensions are involved.
@@ -146,8 +148,9 @@ public class Juggler {
             default:
                 // Actually now want to try typename plainly, then prefixed by each import in turn
                 // Default to Object if we can't find any match
-                for (var prefix : Stream.concat(Stream.of(""),
-                        Arrays.stream(imports).map(i -> i + ".")).collect(Collectors.toList()))
+                for (var prefix : Stream.of(Stream.of(""), importedPackageNames.stream().map(i -> i + "."))
+                                .flatMap(Function.identity())
+                                .collect(Collectors.toList()))
                     try {
                         ret = loader.loadClass(prefix + typename);
                         break;
@@ -168,20 +171,6 @@ public class Juggler {
             ret = ret.arrayType();
 
         return ret;
-    }
-
-    public Member[] findMembers(String[] imports, Accessibility minAccess,
-                                String[] paramTypenames, String returnTypename) {
-        List<Class<?>> paramTypes = paramTypenames == null
-                ? null
-                : List.of(
-                        Arrays.stream(paramTypenames)
-                                .map(typename -> classForTypename(imports, typename))
-                                .toArray(Class<?>[]::new)
-                );
-        Class<?> returnType = returnTypename == null ? null : classForTypename(imports, returnTypename);
-
-        return findMembers(minAccess, paramTypes, returnType);
     }
 
     public Member[] findMembers(Accessibility minAccess, List<Class<?>> queryParamTypes, Class<?> queryReturnType) {

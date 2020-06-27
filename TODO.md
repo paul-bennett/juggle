@@ -8,11 +8,15 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
   1. "I have a `Foo`. What can I do with it?" <-- Not yet
   2. "How do I get a `Bar`?" <-- Yes
 
-* Add support for module path (``-M``?)
+* Add support for module path (`-M`?)
  
 * Add support for directories of class files
      
 * Should a warning be emitted for `-p void` or `void[]`?
+
+* Check how constructors are handled.
+  Do their modifiers imply they're static?
+  If they do, we shouldn't treat as if there is an implicit 'this'. 
 
       
 ## Code Quality & Refactoring
@@ -20,13 +24,19 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
 * Add more tests
   - More unit tests for methods
   
-* Consider refactoring the permutation invocation (maybe it should be 
-    done in main?)
+* Consider refactoring the permutation invocation 
+  - maybe it should be done in main?
 
 * Review code for more TODOs
 
 * Consider back-porting to JDK9
   - biggest problem is Class.arrayType(), from JDK12  
+  
+* Check module support
+  - does it work at all?
+  - where do JMOD files have to be?
+  - does it work with system modules?
+  - does it work with user-provided modules?
 
 
 ## Generics
@@ -94,15 +104,13 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
 ## Algorithm improvements
 
 * Check type compatibility matches Java Language Spec chapter 5
-  - See methods isTypeCompatibleForInvocation/isTypeCompatibleForAssignment
+  - See methods `isTypeCompatibleForInvocation` and `isTypeCompatibleForAssignment`
 
-* Should sort results naturally
-  - Exact matches first
-  - Permutations of parameters and partial matches later
-  - What about supertype params and subtype returns?
-  - Box/unbox cost?
-  - Prefer member funs over statics?
-  - Sort in order of specificity e.g. in calling semantics
+* Improve results sorting
+  - Does it always show exact matches first?
+  - Should it take autoboxing into account?
+  - Perhaps `ByClosestType` comparator should take requested types
+    into account (pass into c'tor from `SortCriteria`)
      
 * Optional matching algorithm?
   - exact match vs assignment-compatible

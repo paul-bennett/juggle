@@ -14,10 +14,10 @@ public class CmdLineTest {
 
         assertTrue(parseResult);
 
-        assertNull(app.paramTypes);
+        assertNull(app.paramTypeNames);
         assertFalse(app.helpRequested);
-        assertEquals(0, app.importPackageNames.size());
-        assertNull(app.returnType);
+        assertEquals(0, app.importedPackageNames.size());
+        assertNull(app.returnTypeName);
         assertEquals(0, app.jarPaths.size());
         assertEquals(Accessibility.PUBLIC, app.minAccess);
         assertEquals(0, app.moduleNames.size());
@@ -30,7 +30,7 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNull(app.paramTypes);
+        assertNull(app.paramTypeNames);
     }
 
     @Test
@@ -40,8 +40,8 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(0, app.paramTypes.size());
+        assertNotNull(app.paramTypeNames);
+        assertEquals(0, app.paramTypeNames.size());
     }
 
     @Test
@@ -51,9 +51,9 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(1, app.paramTypes.size());
-        assertEquals("one", app.paramTypes.get(0));
+        assertNotNull(app.paramTypeNames);
+        assertEquals(1, app.paramTypeNames.size());
+        assertEquals("one", app.paramTypeNames.get(0));
     }
 
     @Test
@@ -63,9 +63,9 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(1, app.paramTypes.size());
-        assertEquals("one", app.paramTypes.get(0));
+        assertNotNull(app.paramTypeNames);
+        assertEquals(1, app.paramTypeNames.size());
+        assertEquals("one", app.paramTypeNames.get(0));
     }
 
     @Test
@@ -75,9 +75,9 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(1, app.paramTypes.size());
-        assertEquals("one", app.paramTypes.get(0));
+        assertNotNull(app.paramTypeNames);
+        assertEquals(1, app.paramTypeNames.size());
+        assertEquals("one", app.paramTypeNames.get(0));
     }
 
     @Test
@@ -87,9 +87,9 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(1, app.paramTypes.size());
-        assertEquals("one", app.paramTypes.get(0));
+        assertNotNull(app.paramTypeNames);
+        assertEquals(1, app.paramTypeNames.size());
+        assertEquals("one", app.paramTypeNames.get(0));
     }
 
     @Test
@@ -99,10 +99,10 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(2, app.paramTypes.size());
-        assertEquals("one", app.paramTypes.get(0));
-        assertEquals("two", app.paramTypes.get(1));
+        assertNotNull(app.paramTypeNames);
+        assertEquals(2, app.paramTypeNames.size());
+        assertEquals("one", app.paramTypeNames.get(0));
+        assertEquals("two", app.paramTypeNames.get(1));
     }
 
     @Test
@@ -112,11 +112,11 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(3, app.paramTypes.size());
-        assertEquals("one", app.paramTypes.get(0));
-        assertEquals("two", app.paramTypes.get(1));
-        assertEquals("three", app.paramTypes.get(2));
+        assertNotNull(app.paramTypeNames);
+        assertEquals(3, app.paramTypeNames.size());
+        assertEquals("one", app.paramTypeNames.get(0));
+        assertEquals("two", app.paramTypeNames.get(1));
+        assertEquals("three", app.paramTypeNames.get(2));
     }
 
     @Test
@@ -126,9 +126,9 @@ public class CmdLineTest {
         boolean parseResult = app.parseArgs(args);
 
         assertTrue(parseResult);
-        assertNotNull(app.paramTypes);
-        assertEquals(2, app.paramTypes.size());
-        assertEquals("one", app.paramTypes.get(0));
-        assertEquals("two", app.paramTypes.get(1));
+        assertNotNull(app.paramTypeNames);
+        assertEquals(2, app.paramTypeNames.size());
+        assertEquals("one", app.paramTypeNames.get(0));
+        assertEquals("two", app.paramTypeNames.get(1));
     }
 }

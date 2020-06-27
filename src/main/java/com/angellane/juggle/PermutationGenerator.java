@@ -9,7 +9,6 @@ public class PermutationGenerator<T> {
 
     public PermutationGenerator(Collection<T> coll) {
         contents = new ArrayList<>(coll);
-//        contents = coll;
     }
 
     public static <T> Collector<T, ?, PermutationGenerator<T>> collector() {
@@ -27,7 +26,7 @@ public class PermutationGenerator<T> {
     public static class PermSpliterator<T> implements Spliterator<List<T>> {
 
         // This is the thing we're going to permute over
-        private List<T> contents;
+        private final List<T> contents;
 
         // The indices of the next permutation to emit
         private int[] permutation;
@@ -120,43 +119,6 @@ public class PermutationGenerator<T> {
             return a;
         }
 
-        /*
-        public static int[] permutationAfter_alt(int[] current) {
-            // Alternative implementation, inspired by libc++ follows
-
-            int first = 0, last = current.length;
-
-            int i = last;
-
-            if (first == last || first == --i)
-                return current;
-
-            int[] a = Arrays.copyOf(current, current.length);
-
-            while (true) {
-                int ip1 = i;
-
-                if (a[--i] < a[ip1]) {
-                    int j = last;
-
-                    while (a[i] >= a[--j])
-                        ;
-
-                    int temp = a[i]; a[i] = a[j]; a[j] = temp;
-
-                    reverseIntArray(a, ip1, last-1);
-
-                    return a;
-                }
-
-                if (i == first) {
-                    reverseIntArray(a, first, last-1);
-                    return a;
-                }
-            }
-        }
-         */
-
         /**
          * Reverses the contents of a span of a, between indexes nearIx and farIx inclusive.
          * To reverse the entire array, call reverseIntArray(a, 0, a.length-1).
@@ -178,7 +140,7 @@ public class PermutationGenerator<T> {
             if (remaining > 0) {
                 int[] next = permutationAfter(permutation);
                 action.accept(IntStream.of(permutation)
-                        .mapToObj(i -> contents.get(i))
+                        .mapToObj(contents::get)
                         .collect(Collectors.toList()));
                 permutation = next;
                 --remaining;

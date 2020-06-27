@@ -1,7 +1,9 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.com.angellane.juggle.comparator.ByCanonicalName;
-import com.angellane.juggle.com.angellane.juggle.comparator.ByPackage;
+import com.angellane.juggle.comparator.ByAccessibility;
+import com.angellane.juggle.comparator.ByCanonicalName;
+import com.angellane.juggle.comparator.ByClosestType;
+import com.angellane.juggle.comparator.ByPackage;
 
 import java.lang.reflect.Member;
 import java.util.Comparator;
@@ -21,10 +23,12 @@ import java.util.function.Function;
  *       - constructor arg is a Function<Main, Comparator<Member>>
  */
 enum SortCriteria {
-    PACKAGE (m -> new ByPackage(m.importPackageNames)),
+    ACCESS  (m -> new ByAccessibility()),
+    TYPE    (m -> new ByClosestType()),
+    PACKAGE (m -> new ByPackage(m.importedPackageNames)),
     NAME    (m -> new ByCanonicalName());
 
-    private Function<Main, Comparator<Member>> comparatorGenerator;
+    private final Function<Main, Comparator<Member>> comparatorGenerator;
 
     SortCriteria(Function<Main, Comparator<Member>> comparatorGenerator) {
         this.comparatorGenerator = comparatorGenerator;

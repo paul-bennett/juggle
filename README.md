@@ -38,6 +38,8 @@ Answer: yes, the `now()` method of the `java.time.LocalTime` class.
 Juggle shows the signature for the method, with the class and method
 names separated by a period.
 
+## What to look for
+
 Use the `-r` option to specify the function's desired return type.
 
 The `-p` option specifies a comma-separated list of parameter types.
@@ -52,8 +54,8 @@ $
 If no `-r` is specified, Juggle shows matching methods with _any_ return type:
 ````
 $ juggle -p double[] -p int -p int -p double 
-public static void java.util.Arrays.fill(double[],int,int,double)
 public static int java.util.Arrays.binarySearch(double[],int,int,double)
+public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
 
@@ -62,8 +64,8 @@ of _any type_.  This provides a means of listing all the ways of obtaining
 an object of a specific type:
 ````
 $ juggle -r java.net.URLPermission
-public java.net.URLPermission(String,String)
 public java.net.URLPermission(String)
+public java.net.URLPermission(String,String)
 $
 ````
 So the only ways of getting a `URLPermission` is by using either of its two
@@ -79,10 +81,10 @@ Non-static methods are treated as if
 there is a silent first parameter whose type is the class in question:
 ````
 $ juggle -p java.util.regex.Matcher -p java.lang.String -r java.lang.String
-public static String java.util.Objects.toString(Object,String)
 public String java.util.regex.Matcher.group(String)
-public String java.util.regex.Matcher.replaceFirst(String)
 public String java.util.regex.Matcher.replaceAll(String)
+public String java.util.regex.Matcher.replaceFirst(String)
+public static String java.util.Objects.toString(Object,String)
 $
 ````````
 In the above note how the first argument to `Objects.toString` is an `Object`, not a `String` (as specified with `-p`).
@@ -98,10 +100,10 @@ As with non-static methods, non-static fields have an additional implicit
 ````
 $ juggle -r int -p java.io.InterruptedIOException
 public int java.io.InterruptedIOException.bytesTransferred
-public static int sun.invoke.util.ValueConversions.widenSubword(Object)
-public static int java.util.Objects.hashCode(Object)
 public int Object.hashCode()
 public static int System.identityHashCode(Object)
+public static int java.util.Objects.hashCode(Object)
+public static int sun.invoke.util.ValueConversions.widenSubword(Object)
 public static int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 $
 ````
@@ -110,18 +112,39 @@ To list static methods which take no arguments (along with static fields
 by virtue of Juggle treating fields as having zero-arg pseudo-getters),
 use `-p ""`.
 
-You can tell Juggle to JARs to search through can be specified using the `-j` option:
+## Where to look
+
+You can tell Juggle to which JARs to include in the search by using the `-j` option:
 ````
 % juggle                                                                \
     -j mylib.jar                                                        \
-...
 ````
- 
-The ``-m`` flag can be used to specify JMODs to search.
+
+The `-m` flag can be used to specify JMODs to search.
 (Caveats: modules must be in the current working directory;
 this feature hasn't been throughly tested yet.)
 
 At present there's no support for scanning an unpacked JAR or a directory of class files.
+
+## Sorting the results
+
+Juggle can sort its output in a number of ways. Sort criteria are specified using `-s`
+and are cumulative.  The output is first sorted by the first criteria; ties are resolved
+by any subsequent criteria.
+
+| Option       | Description                                                     |
+|--------------|-----------------------------------------------------------------|
+| `-s access`  | Shows members by access, with `public` first and `private` last |
+| `-s name`    | Sorts results by name alphabetically                            |
+| `-s package` | Orders members from imported (`-i`) packages before others      |
+| `-s type`    | Presents more specific types before less specific ones          |
+|              |                                                                 |
+
+The default sort criteria are equivalent to specifying `-s type -s access -s package -s name`.
+The intent is that this default causes Juggle to list the "best" matches first. If that's not
+what's happening in practice, I'd like to hear about it! 
+ 
+## Extra goodies
 
 To make life easier, packages can be imported with `-i` so that fully qualified class
 names don't have to be written out each time. As you would expect, `java.lang` is
@@ -129,7 +152,6 @@ always imported automatically.  Juggle omits imported package names in its outpu
 ````
 % juggle                                                                \
     -i java.net                                                         \
-...
 ````
 
 Juggle treats constructors as if they were methods returning an instance of the
@@ -150,19 +172,19 @@ By default Juggle will only show `public` members. Use the `-a` option to set an
 
 ````
 $ juggle -r java.io.OutputStream -p '' -a private
-private static java.io.PrintStream sun.launcher.LauncherHelper.ostream
-static ProcessBuilder.NullOutputStream ProcessBuilder.NullOutputStream.INSTANCE
-public static java.io.PrintStream System.out
 public static java.io.PrintStream System.err
-public sun.security.util.DerOutputStream()
-public sun.net.www.http.PosterOutputStream()
-private ProcessBuilder.NullOutputStream()
-public java.io.ByteArrayOutputStream()
-protected java.io.ObjectOutputStream() throws java.io.IOException,SecurityException
-public java.io.OutputStream()
+public static java.io.PrintStream System.out
 public java.io.PipedOutputStream()
+public sun.net.www.http.PosterOutputStream()
+public sun.security.util.DerOutputStream()
+public java.io.ByteArrayOutputStream()
+static ProcessBuilder.NullOutputStream ProcessBuilder.NullOutputStream.INSTANCE
 com.sun.java.util.jar.pack.CodingChooser.Sizer()
 static java.io.PrintStream jdk.internal.logger.SimpleConsoleLogger.outputStream()
+protected java.io.ObjectOutputStream() throws java.io.IOException,SecurityException
+private ProcessBuilder.NullOutputStream()
+private static java.io.PrintStream sun.launcher.LauncherHelper.ostream
+public java.io.OutputStream()
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 $
 ````
@@ -171,4 +193,18 @@ Of course `private` members can't be used, so `-a protected` is likely the most 
 
 This output also shows that Juggle is inspecting the runtime and not the specification. That can result
 in some pseudo-private members or classes (such as `sun.security.util.DerOutputStream` above) leaking
-into output. Just because you _can_ call a method doesn't mean you _should_.  
+into output. Just because you _can_ call a method doesn't mean you _should_.
+
+## Command-line summary
+
+Each command-line option has a long name equivalent. This table summarises all options.
+
+| Option | Long Equivalent | Argument | Default | Description |
+|--------|-----------------|----------|----------|-------------|
+| `-a`   | `--access`      | `private`, `protected`, `package`, `public` | `-a public` | Minimum accessibility |
+| `-i`   | `--import`      | package name |  | Packages to import (`java.lang` is always searched) |
+| `-j`   | `--jar`         | file path | | JAR files to search |
+| `-m`   | `--module`      | module name | | JMODs to search (must be in current directory) |
+| `-p`   | `--param`       | type name | (don't match parameters) | Type of parameters to search for |
+| `-r`   | `--return`      | type name | (don't match return)     | Return type to search for |
+| `-s`   | `--sort`        | `import`, `name`, `package`, `type` | `-s type -s access -s package -s name` | Sort criteria
