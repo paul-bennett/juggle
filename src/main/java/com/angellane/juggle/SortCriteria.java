@@ -1,9 +1,6 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.comparator.ByAccessibility;
-import com.angellane.juggle.comparator.ByCanonicalName;
-import com.angellane.juggle.comparator.ByMostSpecificType;
-import com.angellane.juggle.comparator.ByPackage;
+import com.angellane.juggle.comparator.*;
 
 import java.lang.reflect.Member;
 import java.util.Comparator;
@@ -25,6 +22,7 @@ import java.util.function.Function;
 enum SortCriteria {
     ACCESS  (m -> new ByAccessibility()),
     TYPE    (m -> new ByMostSpecificType()),
+    CLOSEST (m -> new ByClosestType(new TypeSignature(m.getParamTypes(), m.getReturnType()))),
     PACKAGE (m -> new ByPackage(m.importedPackageNames)),
     NAME    (m -> new ByCanonicalName());
 

@@ -135,6 +135,7 @@ The first criteria sorts the results, with ties resolved by any subsequent crite
 | Option       | Description                                                     |
 |--------------|-----------------------------------------------------------------|
 | `-s access`  | Shows members by access, with `public` first and `private` last |
+| `-s closest` | Member that most closely matches query type first.              |
 | `-s name`    | Sorts results by name alphabetically                            |
 | `-s package` | Orders members from imported (`-i`) packages before others      |
 | `-s type`    | Presents more specific types before less specific ones          |
@@ -159,9 +160,9 @@ declaring class.  In the following example you'll see a couple of constructors
 and a static method, all with broadly similar signatures:
 ````
 $ juggle -p String -r java.io.InputStream
+public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
 public java.io.FileInputStream(String) throws java.io.FileNotFoundException
 public java.io.StringBufferInputStream(String)
-public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
 $
 ````
 (We see another example of Reference Widening here too: `FileInputStream` and `StringBufferInputStream`
@@ -172,20 +173,20 @@ By default, Juggle will only show `public` members. Use the `-a` option to set a
 
 ````
 $ juggle -r java.io.OutputStream -p '' -a private
+public java.io.OutputStream()
+public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static java.io.PrintStream System.err
 public static java.io.PrintStream System.out
+public java.io.ByteArrayOutputStream()
 public java.io.PipedOutputStream()
 public sun.net.www.http.PosterOutputStream()
 public sun.security.util.DerOutputStream()
-public java.io.ByteArrayOutputStream()
 static ProcessBuilder.NullOutputStream ProcessBuilder.NullOutputStream.INSTANCE
 com.sun.java.util.jar.pack.CodingChooser.Sizer()
 static java.io.PrintStream jdk.internal.logger.SimpleConsoleLogger.outputStream()
 protected java.io.ObjectOutputStream() throws java.io.IOException,SecurityException
 private ProcessBuilder.NullOutputStream()
 private static java.io.PrintStream sun.launcher.LauncherHelper.ostream
-public java.io.OutputStream()
-public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 $
 ````
 
@@ -207,4 +208,5 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-m`   | `--module`      | module name | | JMODs to search (must be in current directory) |
 | `-p`   | `--param`       | type name | (don't match parameters) | Type of parameters to search for |
 | `-r`   | `--return`      | type name | (don't match return)     | Return type to search for |
-| `-s`   | `--sort`        | `import`, `name`, `package`, `type` | `-s type -s access -s package -s name` | Sort criteria
+| `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria
+

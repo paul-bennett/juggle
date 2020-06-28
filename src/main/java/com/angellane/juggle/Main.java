@@ -53,7 +53,7 @@ public class Main {
         // Return default criteria of none were set.
         return sortCriteria != null
                 ? sortCriteria
-                : List.of(SortCriteria.TYPE, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
+                : List.of(SortCriteria.CLOSEST, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
     }
 
     @Option(name="-h", aliases="--help", help=true)

@@ -107,10 +107,7 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
   - See methods `isTypeCompatibleForInvocation` and `isTypeCompatibleForAssignment`
 
 * Improve results sorting
-  - Does it always show exact matches first?
   - Should it take autoboxing into account?
-  - Perhaps `ByClosestType` comparator should take requested types
-    into account (pass into c'tor from `SortCriteria`)
      
 * Optional matching algorithm?
   - exact match vs assignment-compatible
