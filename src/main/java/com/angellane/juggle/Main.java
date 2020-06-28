@@ -95,7 +95,7 @@ public class Main {
 
     public Comparator<Member> getComparator() {
         return MultiComparator.of(getSortCriteria().stream()
-                .map(c -> c.getComparator(this))
+                .map(g -> g.getComparator(this))
                 .collect(Collectors.toList()));
     }
 
@@ -104,7 +104,7 @@ public class Main {
 
         MemberDecoder decoder = new MemberDecoder(importedPackageNames);
 
-        Arrays.stream(juggler.findMembers(minAccess, getParamTypes(), getReturnType()))
+        Arrays.stream(juggler.findMembers(minAccess, new TypeSignature(getParamTypes(), getReturnType())))
                 .sorted(getComparator())
                 .forEach(m -> System.out.println(decoder.decode(m)));
     }

@@ -173,7 +173,7 @@ public class Juggler {
         return ret;
     }
 
-    public Member[] findMembers(Accessibility minAccess, List<Class<?>> queryParamTypes, Class<?> queryReturnType) {
+    public Member[] findMembers(Accessibility minAccess, TypeSignature query) {
         // Fields
         Stream<CandidateMember> fieldStream = classesToSearch.stream()
                 .flatMap(c -> Arrays.stream(c.getDeclaredFields())
@@ -196,8 +196,8 @@ public class Juggler {
                     Class<?> c = m.getMember().getDeclaringClass();
                     return !c.isAnonymousClass() && !c.isLocalClass();
                 })
-                .filter(m -> queryParamTypes == null || m.matchesParams(queryParamTypes, true))
-                .filter(m -> queryReturnType == null || m.matchesReturn(queryReturnType))
+                .filter(m -> query.paramTypes == null || m.matchesParams(query.paramTypes, true))
+                .filter(m -> query.returnType == null || m.matchesReturn(query.returnType))
                 .map(CandidateMember::getMember)
                 .distinct()
                 .filter(m -> Accessibility.fromModifiers(m.getModifiers()).isAtLastAsAccessibleAsOther(minAccess))
