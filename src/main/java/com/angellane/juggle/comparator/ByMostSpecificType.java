@@ -10,10 +10,9 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Compares two class Members based on their package's position in a list.
- * Members that aren't in a package on the list are sorted last.
+ * Compares two class Members based on their type specificity.  More specific types before less specific ones.
  */
-public class ByClosestType implements Comparator<Member> {
+public class ByMostSpecificType implements Comparator<Member> {
     private final TypeComparator typeComparator = new TypeComparator();
 
     @Override
