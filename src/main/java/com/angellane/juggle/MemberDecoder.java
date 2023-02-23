@@ -61,7 +61,7 @@ public class MemberDecoder {
                 joiner.add(tv.getName());
                 // TODO: add bounds and handle wildcards
             }
-            ret.append(joiner.toString());
+            ret.append(joiner);
             ret.append("> ");
             return ret.toString();
         }
@@ -108,14 +108,14 @@ public class MemberDecoder {
             else
                 ret.append(canonicalName);
 
-            TypeVariable<?>[] tvars = c.getTypeParameters();
+            TypeVariable<?>[] typeVars = c.getTypeParameters();
 
-            if (tvars.length > 0) {
+            if (typeVars.length > 0) {
                 ret.append('<');
                 StringJoiner j = new StringJoiner(",");
-                for (var tv : tvars)
+                for (var tv : typeVars)
                     j.add(tv.toString());
-                ret.append(j.toString());
+                ret.append(j);
                 ret.append('>');
             }
 

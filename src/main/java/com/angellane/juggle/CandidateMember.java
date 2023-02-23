@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 /**
  * This POJO contains the details of the candidate member (field, constructor or method).
- *
+ * <p>
  * The 'member' field is the member itself.  More interesting are the paramTypes and returnType fields,
  * which represent the type the member would have if considered as a static function.  For static
  * methods the paramTypes field includes an implicit first entry representing the type of 'this'.
@@ -89,7 +89,7 @@ class CandidateMember {
     }
 
 
-    // These next few methods implement the conversions described in the Java Langauge Specification
+    // These next few methods implement the conversions described in the Java Language Specification
     // (Java SE 14 edition) chapter 5 "Conversions and Contexts":
     //    https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html
 

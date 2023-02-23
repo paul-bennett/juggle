@@ -50,9 +50,9 @@ public class PermutationGenerator<T> {
 
         /**
          * Computes the permutation that follows current lexicographically. If current is the lexicographical
-         * last permutation, returns the lexigraphical first one.  (I.E. repeatedly calling this function
+         * last permutation, returns the lexicographically first one.  (I.E. repeatedly calling this function
          * will cycle through all permutations infinitely; you can start with any permutation.)
-         *
+         * <p>
          * If input array's elements are distinct, this function will wrap after being called
          * factorial(current.size) times.  If the input elements aren't distinct, it will wrap sooner.
          *
@@ -120,9 +120,9 @@ public class PermutationGenerator<T> {
         }
 
         /**
-         * Reverses the contents of a span of a, between indexes nearIx and farIx inclusive.
+         * Reverses the contents of a span of `a`, between indexes nearIx and farIx inclusive.
          * To reverse the entire array, call reverseIntArray(a, 0, a.length-1).
-         *
+         * <p>
          * @param a the array to reverse
          * @param nearIx the index of the first element of the span
          * @param farIx the index of the last element of the span

@@ -21,7 +21,7 @@ public class TypeSignature {
         List<Class<?>> implicitParams = new ArrayList<>();
 
         // Handle the 'this' pointer for non-static members.
-        // Note that Constructors appear to be non-static but they don't have a silent 'this'.
+        // Note that Constructors appear to be non-static, but they don't have a silent 'this'.
         if (!Modifier.isStatic(m.getModifiers()) && !(m instanceof Constructor<?>))
             implicitParams.add(m.getDeclaringClass());
 

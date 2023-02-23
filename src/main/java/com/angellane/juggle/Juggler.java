@@ -1,9 +1,7 @@
 package com.angellane.juggle;
 
 import java.io.IOException;
-import java.lang.module.Configuration;
-import java.lang.module.ModuleFinder;
-import java.lang.module.ResolvedModule;
+import java.lang.module.*;
 import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -98,10 +96,8 @@ public class Juggler {
         if (maybeMod.isEmpty())
             System.err.println("Warning: couldn't find module " + moduleName);
         else {
-            ResolvedModule mod = maybeMod.get();
-
-            try {
-                return mod.reference().open().list()
+            try (ModuleReader reader = maybeMod.get().reference().open()) {
+                return reader.list()
                         .filter(s -> s.endsWith(CLASS_SUFFIX))
                         .map(s -> s.substring(0, s.length() - CLASS_SUFFIX.length()))
                         .filter(s -> !s.equals(MODULE_INFO))

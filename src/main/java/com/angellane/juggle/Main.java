@@ -43,10 +43,10 @@ public class Main {
     Accessibility minAccess = Accessibility.PUBLIC;
 
     @Option(name="-s", aliases="--sort", usage="Sort criteria")
-    public void addSortCriteria(SortCriteria crit) {
+    public void addSortCriteria(SortCriteria criteria) {
         if (sortCriteria == null)
             sortCriteria = new ArrayList<>();
-        sortCriteria.add(crit);
+        sortCriteria.add(criteria);
     }
     List<SortCriteria> sortCriteria = null;
     public List<SortCriteria> getSortCriteria() {

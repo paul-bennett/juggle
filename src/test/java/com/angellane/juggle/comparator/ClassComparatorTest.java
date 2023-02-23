@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 public class ClassComparatorTest {
 
     @Test
+    @SuppressWarnings("EqualsWithItself")
     public void compare() {
         TypeComparator c = new TypeComparator();
 

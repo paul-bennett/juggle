@@ -78,8 +78,8 @@ public class PermutationGeneratorTest {
 
         assertEquals(input.size(), 4);
 
-        // Should be 4! permutations, assuming 4 distinct input elements.
-        assertEquals(perms.size(), 4*3*2*1);
+        // Should be size! permutations, assuming distinct input elements.
+        assertEquals(perms.size(), factorial(input.size()));
 
         // There should be no duplicates
         assertEquals(perms.stream().distinct().count(), perms.size());
@@ -99,7 +99,7 @@ public class PermutationGeneratorTest {
         assertEquals(input.size(), 4);
 
         // Should be 4! permutations, assuming 4 distinct input elements.
-        assertEquals(perms.size(), 4*3*2*1);
+        assertEquals(perms.size(), factorial(input.size()));
 
         // There should be no duplicates
         assertEquals(perms.stream().distinct().count(), perms.size());
@@ -114,7 +114,7 @@ public class PermutationGeneratorTest {
                 .stream()
                 .collect(Collectors.toList());
 
-        assertEquals(perms.size(), 10*9*8*7*6*5*4*3*2*1);
+        assertEquals(perms.size(), factorial(input.size()));
     }
 
     @Test
@@ -128,6 +128,9 @@ public class PermutationGeneratorTest {
                 .parallel()
                 .collect(Collectors.toList());
 
-        assertEquals(perms.size(), 10*9*8*7*6*5*4*3*2*1);
+        assertEquals(perms.size(), factorial(input.size()));
     }
+
+    /** Compute the factorial of the argument */
+    private int factorial(int i) { return i == 1 ? 1 : i * factorial(i-1); }
 }
