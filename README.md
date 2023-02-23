@@ -28,7 +28,8 @@ Juggle searches Java libraries for methods that match a given type signature.
   use an alternative shell prompt such as %
 -->
 
-For example, is there a method that when given a `java.time.Clock` returns a `java.time.LocalTime`?
+For example, is there a method that when given a `java.time.Clock` returns a
+`java.time.LocalTime`?
 ````
 $ juggle -p java.time.Clock -r java.time.LocalTime
 public static java.time.LocalTime java.time.LocalTime.now(java.time.Clock)
@@ -63,19 +64,32 @@ Similarly, omitting `-p` lists methods that take _any number_ of arguments
 of _any type_.  This provides a means of listing all the ways of obtaining
 an object of a specific type:
 ````
-$ juggle -r java.net.URLPermission
-public java.net.URLPermission(String)
-public java.net.URLPermission(String,String)
+$ juggle -r java.net.Inet6Address
+public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],int) throws java.net.UnknownHostException
+public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],java.net.NetworkInterface) throws java.net.UnknownHostException
 $
 ````
-So the only ways of getting a `URLPermission` is by using either of its two
-constructors.  (Of course methods which declare their return type to be
-a superclass of `URLPermission` may in fact return a `URLPermission` object,
-but Juggle can't be certain they will so doesn't include them in its
-output.)
+So the only way to get a `Inet6Address` appears to be either of the two
+static `getByAddress` methods on the `Inet6Address` class.   
+
+Of course methods may return an instance of a subclass of their declared return
+type.  `Inet6Address` is a member of a small family of classes rooted in its
+parent `InetAddress` class, and indeed searching `juggle -r InetAddress` will
+reveal many other way of obtaining an instance of a member this family, such
+as `Inet6Address`.
+
+Juggle won't list these methods-returning-a-superclass though, since doing that
+would result in long and not particularly helpful outputs. (Since `Object` is a
+superclass of every reference type, at a minimum Juggle would have to include
+hundreds of methods that return `Object` in every result.)
 
 Omitting `-p` and omitting `-r` will list all methods in the JDK.
 While marginally interesting, the output is rather too long to be helpful!
+(This is also very slow unless you tweak the sort options; see below.)
+
+If Juggle can't find classes that you mention in `-p` or `-r` arguments, it
+emits a warning and treats them as if you specified `Object` instead.  This
+can result in exceedingly lengthy output.
 
 Juggle treats non-static methods as if they have a silent
 first parameter whose type is the class in question:
@@ -87,8 +101,9 @@ public String java.util.regex.Matcher.replaceFirst(String)
 public static String java.util.Objects.toString(Object,String)
 $
 ````````
-In the above note how the first argument to `Objects.toString` is an `Object`, not a `String` (as specified with `-p`).
-Juggle includes this method in the result set because Java allows instances of a subclass to be passed to
+In the above note how the first argument to `Objects.toString` is an `Object`,
+not a `String` (as specified with `-p`). Juggle includes this method in the
+result set because Java allows instances of a subclass to be passed to
 a function that is expecting a parent class (Widening Reference Conversion).
 
 Juggle treats data fields as a pair of methods: a setter (which takes an
@@ -108,13 +123,15 @@ public static int java.lang.reflect.Array.getLength(Object) throws IllegalArgume
 $
 ````
 
-To list static methods which take no arguments (along with static fields
-by virtue of Juggle treating fields as having zero-arg pseudo-getters),
-use `-p ""`.
+To list static methods which take no arguments use `-p ""`.
+
+(This also lists all default constructors, as well as static fields
+by virtue of Juggle treating fields as having zero-arg pseudo-getters.)
 
 ## Where to look
 
-You can tell Juggle to which JARs to include in the search by using the `-j` option:
+You can tell Juggle which JARs to include in the search by using the `-j`
+option:
 ````
 % juggle                                                                \
     -j mylib.jar                                                        \
@@ -125,12 +142,14 @@ The `-m` flag can be used to specify JMODs to search.
 (Caveats: modules must be in the current working directory;
 this feature hasn't been thoroughly tested yet.)
 
-At present there's no support for scanning an unpacked JAR, or a directory of class files.
+At present there's no support for scanning an unpacked JAR, or a directory of
+class files.
 
 ## Sorting the results
 
-Juggle can sort its output in a number of ways. Specify sort criteria using `-s`.
-The first criteria sorts the results, with ties resolved by any subsequent criteria.
+Juggle can sort its output in a number of ways. Specify sort criteria using
+`-s`. The first criteria sorts the results, with ties resolved by any
+subsequent criteria.
 
 | Option       | Description                                                     |
 |--------------|-----------------------------------------------------------------|
@@ -141,72 +160,83 @@ The first criteria sorts the results, with ties resolved by any subsequent crite
 | `-s type`    | Presents more specific types before less specific ones          |
 |              |                                                                 |
 
-The default sort criteria are equivalent to specifying `-s type -s access -s package -s name`.
-The intent is that this default causes Juggle to list the "best" matches first. If that's not
-what's happening in practice, I'd like to hear about it! 
+The default sort is equivalent to `-s type -s access -s package -s name`.
+The intent is that this default causes Juggle to list the "best" matches first.
+If that's not what's happening in practice, I'd like to hear about it! 
  
+Warning: `-s closest` slows things down tremendously, especially for large
+result sets.  If Juggle appears to be taking too long, re-run your query
+with a simpler search order such as `-s name`.
+
 ## Extra goodies
 
-To make life easier, packages can be imported with `-i` so that fully qualified class
-names don't have to be written out each time. As you would expect, `java.lang` is
-always imported automatically.  Juggle omits imported package names in its output.
+To make life easier, packages can be imported with `-i` so that fully qualified
+class names don't have to be written out each time. As you would expect,
+`java.lang` is always implicitly imported.  Juggle omits imported package 
+names in its output.
 ````
 % juggle                                                                \
     -i java.net                                                         \
+...
 ````
 
-Juggle treats constructors as if they were methods returning an instance of the
-declaring class.  In the following example you'll see a couple of constructors
-and a static method, all with broadly similar signatures:
+Juggle treats constructors as if they were static methods called `<init>`
+returning an instance of the declaring class.  In the following example
+you'll see a couple of constructors and a static method, all with broadly
+similar signatures:
 ````
 $ juggle -p String -r java.io.InputStream
 public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
-public java.io.FileInputStream(String) throws java.io.FileNotFoundException
-public java.io.StringBufferInputStream(String)
+public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.StringBufferInputStream.<init>(String)
 $
 ````
-(We see another example of Reference Widening here too: `FileInputStream` and `StringBufferInputStream`
-are both descendant classes of `InputStream`, so objects of those first two types can be assigned to a
-variable of the latter type.)
+(We see another example of Reference Widening here too: `FileInputStream` 
+and `StringBufferInputStream` are both descendant classes of `InputStream`, 
+so objects of those first two types can be assigned to a variable of the 
+latter type.)
 
-By default, Juggle will only show `public` members. Use the `-a` option to set an alternative minimum level of accessibility (`public`, `package`, `protected`, or `private`).
+By default, Juggle will only show `public` members. Use the `-a` option to
+set an alternative minimum level of accessibility (`public`, `package`, 
+`protected`, or `private`).
 
 ````
 $ juggle -r java.io.OutputStream -p '' -a private
-public java.io.OutputStream()
+public java.io.OutputStream.<init>()
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static java.io.PrintStream System.err
 public static java.io.PrintStream System.out
-public java.io.ByteArrayOutputStream()
-public java.io.PipedOutputStream()
-public sun.net.www.http.PosterOutputStream()
-public sun.security.util.DerOutputStream()
+public java.io.ByteArrayOutputStream.<init>()
+public java.io.PipedOutputStream.<init>()
+public sun.net.www.http.PosterOutputStream.<init>()
+public sun.security.util.DerOutputStream.<init>()
 static ProcessBuilder.NullOutputStream ProcessBuilder.NullOutputStream.INSTANCE
-com.sun.java.util.jar.pack.CodingChooser.Sizer()
 static java.io.PrintStream jdk.internal.logger.SimpleConsoleLogger.outputStream()
-protected java.io.ObjectOutputStream() throws java.io.IOException,SecurityException
-private ProcessBuilder.NullOutputStream()
+protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
+private ProcessBuilder.NullOutputStream.<init>()
+private static java.io.PrintStream System.initialErrStream
 private static java.io.PrintStream sun.launcher.LauncherHelper.ostream
 $
 ````
 
-Of course `private` members can't be used, so `-a protected` is likely the most nosey you should be.
+Of course `private` members can't be used, so `-a protected` is likely the most
+nosey you should be.
 
-This output also shows that Juggle is inspecting the runtime and not the specification. That can result
-in some pseudo-private members or classes (such as `sun.security.util.DerOutputStream` above) leaking
-into output. Just because you _can_ call a method doesn't mean you _should_.
+This output also shows that Juggle is inspecting the runtime and not the
+specification. That can result in some pseudo-private members or classes
+(such as `sun.security.util.DerOutputStream` above) leaking into output.
+Just because you _can_ call a method doesn't mean you _should_.
 
 ## Command-line summary
 
 Each command-line option has a long name equivalent. This table summarises all options.
 
-| Option | Long Equivalent | Argument | Default | Description |
-|--------|-----------------|----------|----------|-------------|
-| `-a`   | `--access`      | `private`, `protected`, `package`, `public` | `-a public` | Minimum accessibility |
-| `-i`   | `--import`      | package name |  | Packages to import (`java.lang` is always searched) |
-| `-j`   | `--jar`         | file path | | JAR files to search |
-| `-m`   | `--module`      | module name | | JMODs to search (must be in current directory) |
-| `-p`   | `--param`       | type name | (don't match parameters) | Type of parameters to search for |
-| `-r`   | `--return`      | type name | (don't match return)     | Return type to search for |
-| `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria
-
+| Option | Long Equivalent | Argument                                                 | Default                                   | Description                                         |
+|--------|-----------------|----------------------------------------------------------|-------------------------------------------|-----------------------------------------------------|
+| `-a`   | `--access`      | `private`, `protected`, `package`, `public`              | `-a public`                               | Minimum accessibility                               |
+| `-i`   | `--import`      | package name                                             |                                           | Packages to import (`java.lang` is always searched) |
+| `-j`   | `--jar`         | file path                                                |                                           | JAR files to search                                 |
+| `-m`   | `--module`      | module name                                              |                                           | JMODs to search (must be in current directory)      |
+| `-p`   | `--param`       | type name                                                | (don't match parameters)                  | Type of parameters to search for                    |
+| `-r`   | `--return`      | type name                                                | (don't match return)                      | Return type to search for                           |
+| `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria                                       |

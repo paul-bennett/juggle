@@ -24,10 +24,8 @@ public class MemberDecoder {
         ret.append(decodeDeclType(m));
         ret.append(decodeType(m.getDeclaringClass()));
 
-        if (!(m instanceof Constructor)) {
-            ret.append('.');
-            ret.append(m.getName());
-        }
+        ret.append('.');
+        ret.append(m instanceof Constructor ? "<init>" : m.getName());
 
         if (e != null) {
             ret.append(decodeParams(e.getGenericParameterTypes()));

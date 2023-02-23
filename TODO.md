@@ -16,7 +16,9 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
 
 * Check how Juggle handles constructors.
   Do their modifiers imply they're static?
-  If they do, we shouldn't treat as if there is an implicit 'this'. 
+  If they do, we shouldn't treat as if there is an implicit 'this'.
+
+* Add a `-t` option to match thrown exceptions
 
       
 ## Code Quality & Refactoring
@@ -38,6 +40,12 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
   - does it work with system modules?
   - does it work with user-provided modules?
 
+* The `TypeComparator` seems to have a bug which is demonstrated
+  when listing all methods (`juggle -s type`)
+
+* Test suite should extract and verify all examples in `README.md`
+
+* Performance of `-s closest` is lousy
 
 ## Generics
 
