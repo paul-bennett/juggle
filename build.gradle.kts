@@ -11,17 +11,17 @@ repositories {
 }
 
 dependencies {
-    testImplementation("junit", "junit", "4.12")
+    testImplementation("junit", "junit", "4.13.2")
     implementation("args4j", "args4j", "2.33")
 }
 
-configure<JavaPluginConvention> {
+configure<JavaPluginExtension> {
     sourceCompatibility = JavaVersion.VERSION_12
     targetCompatibility = JavaVersion.VERSION_12
 }
 
 application {
-    mainClassName = "com.angellane.juggle.Main"
+    mainClass.set("com.angellane.juggle.Main")
 }
 
 afterEvaluate {
