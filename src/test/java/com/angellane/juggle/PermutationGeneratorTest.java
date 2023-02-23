@@ -1,13 +1,12 @@
 package com.angellane.juggle;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-
-import static com.angellane.juggle.PermutationGenerator.PermSpliterator.permutationAfter;
 
 public class PermutationGeneratorTest {
 
@@ -16,7 +15,7 @@ public class PermutationGeneratorTest {
      */
     @Test
     public void permutationAfter_0() {
-        assertArrayEquals(permutationAfter(new int[] {}), new int[] {});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {}), new int[] {});
     }
 
     /**
@@ -24,7 +23,7 @@ public class PermutationGeneratorTest {
      */
     @Test
     public void permutationAfter_1() {
-        assertArrayEquals(permutationAfter(new int[] {42}), new int[] {42});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {42}), new int[] {42});
     }
 
     /**
@@ -32,8 +31,8 @@ public class PermutationGeneratorTest {
      */
     @Test
     public void permutationAfter_2() {
-        assertArrayEquals(permutationAfter(new int[] {1,2}), new int[] {2,1});
-        assertArrayEquals(permutationAfter(new int[] {2,1}), new int[] {1,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {1,2}), new int[] {2,1});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,1}), new int[] {1,2});
     }
 
     /**
@@ -41,12 +40,12 @@ public class PermutationGeneratorTest {
      */
     @Test
     public void permutationAfter_3() {
-        assertArrayEquals(permutationAfter(new int[] {1,2,3}), new int[] {1,3,2});
-        assertArrayEquals(permutationAfter(new int[] {1,3,2}), new int[] {2,1,3});
-        assertArrayEquals(permutationAfter(new int[] {2,1,3}), new int[] {2,3,1});
-        assertArrayEquals(permutationAfter(new int[] {2,3,1}), new int[] {3,1,2});
-        assertArrayEquals(permutationAfter(new int[] {3,1,2}), new int[] {3,2,1});
-        assertArrayEquals(permutationAfter(new int[] {2,1,0}), new int[] {0,1,2});  // Note: should wrap to start
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {1,2,3}), new int[] {1,3,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {1,3,2}), new int[] {2,1,3});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,1,3}), new int[] {2,3,1});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,3,1}), new int[] {3,1,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {3,1,2}), new int[] {3,2,1});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,1,0}), new int[] {0,1,2});  // Note: should wrap to start
     }
 
     /**
@@ -55,18 +54,18 @@ public class PermutationGeneratorTest {
      */
     @Test
     public void permutationAfter_Knuth() {
-        assertArrayEquals(permutationAfter(new int[] {1,2,2,3}), new int[] {1,2,3,2});
-        assertArrayEquals(permutationAfter(new int[] {1,2,3,2}), new int[] {1,3,2,2});
-        assertArrayEquals(permutationAfter(new int[] {1,3,2,2}), new int[] {2,1,2,3});
-        assertArrayEquals(permutationAfter(new int[] {2,1,2,3}), new int[] {2,1,3,2});
-        assertArrayEquals(permutationAfter(new int[] {2,1,3,2}), new int[] {2,2,1,3});
-        assertArrayEquals(permutationAfter(new int[] {2,2,1,3}), new int[] {2,2,3,1});
-        assertArrayEquals(permutationAfter(new int[] {2,2,3,1}), new int[] {2,3,1,2});
-        assertArrayEquals(permutationAfter(new int[] {2,3,1,2}), new int[] {2,3,2,1});
-        assertArrayEquals(permutationAfter(new int[] {2,3,2,1}), new int[] {3,1,2,2});
-        assertArrayEquals(permutationAfter(new int[] {3,1,2,2}), new int[] {3,2,1,2});
-        assertArrayEquals(permutationAfter(new int[] {3,2,1,2}), new int[] {3,2,2,1});
-        assertArrayEquals(permutationAfter(new int[] {3,2,2,1}), new int[] {1,2,2,3});  // Cycle back to start
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {1,2,2,3}), new int[] {1,2,3,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {1,2,3,2}), new int[] {1,3,2,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {1,3,2,2}), new int[] {2,1,2,3});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,1,2,3}), new int[] {2,1,3,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,1,3,2}), new int[] {2,2,1,3});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,2,1,3}), new int[] {2,2,3,1});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,2,3,1}), new int[] {2,3,1,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,3,1,2}), new int[] {2,3,2,1});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {2,3,2,1}), new int[] {3,1,2,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {3,1,2,2}), new int[] {3,2,1,2});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {3,2,1,2}), new int[] {3,2,2,1});
+        Assert.assertArrayEquals(PermutationGenerator.PermSpliterator.permutationAfter(new int[] {3,2,2,1}), new int[] {1,2,2,3});  // Cycle back to start
     }
 
     @Test

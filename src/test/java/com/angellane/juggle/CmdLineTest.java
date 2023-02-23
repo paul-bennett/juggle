@@ -16,7 +16,7 @@ public class CmdLineTest {
 
         assertNull(app.paramTypeNames);
         assertFalse(app.helpRequested);
-        assertEquals(0, app.importedPackageNames.size());
+        assertEquals(1, app.importedPackageNames.size());   // java.lang
         assertNull(app.returnTypeName);
         assertEquals(0, app.jarPaths.size());
         assertEquals(Accessibility.PUBLIC, app.minAccess);
