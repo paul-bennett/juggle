@@ -194,6 +194,7 @@ public class Juggler {
                 })
                 .filter(m -> query.paramTypes == null || m.matchesParams(query.paramTypes, true))
                 .filter(m -> query.returnType == null || m.matchesReturn(query.returnType))
+                .filter(m -> query.throwTypes == null || m.matchesThrows(query.throwTypes))
                 .map(CandidateMember::getMember)
                 .distinct()
                 .filter(m -> Accessibility.fromModifiers(m.getModifiers()).isAtLastAsAccessibleAsOther(minAccess))

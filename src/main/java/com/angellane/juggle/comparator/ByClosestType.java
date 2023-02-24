@@ -48,7 +48,7 @@ public class ByClosestType implements Comparator<Member> {
                   .flatMap(sig -> sig.paramTypes.stream()                               // Permute parameters
                           .collect(PermutationGenerator.collector())
                           .stream()
-                          .map(params -> new TypeSignature(params, sig.returnType)))
+                          .map(params -> new TypeSignature(params, sig.returnType, sig.throwTypes)))
                   .mapToInt(this::computeSignatureScore)                                // Compute the score
                   .reduce(Integer.MAX_VALUE, (a,b) -> Math.abs(a) < Math.abs(b) ? a : b); // Find the best score
     }

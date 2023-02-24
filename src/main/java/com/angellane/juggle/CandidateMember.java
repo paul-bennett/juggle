@@ -15,21 +15,29 @@ class CandidateMember {
     private final Member member;
     private final List<Class<?>> paramTypes;
     private final Class<?> returnType;
+    private final Set<Class<?>> throwTypes;
 
-    private CandidateMember(Member member, List<Class<?>> paramTypes, Class<?> returnType) {
+    private CandidateMember(Member member, List<Class<?>> paramTypes, Class<?> returnType, Set<Class<?>> throwTypes) {
         this.member = member;
         this.paramTypes = paramTypes;
         this.returnType = returnType;
+        this.throwTypes = throwTypes;
     }
 
     public Member getMember() { return member; }
 
     public static CandidateMember memberFromMethod(Method m) {
-        return new CandidateMember(m, paramsWithImplicitThis(m, Arrays.asList(m.getParameterTypes())), m.getReturnType());
+        return new CandidateMember(m,
+                paramsWithImplicitThis(m, Arrays.asList(m.getParameterTypes())),
+                m.getReturnType(),
+                Set.of(m.getExceptionTypes()));
     }
 
     public static CandidateMember memberFromConstructor(Constructor<?> c) {
-        return new CandidateMember(c, Arrays.asList(c.getParameterTypes()), c.getDeclaringClass());
+        return new CandidateMember(c,
+                Arrays.asList(c.getParameterTypes()),
+                c.getDeclaringClass(),
+                Set.of(c.getExceptionTypes()));
     }
 
     private static List<Class<?>> paramsWithImplicitThis(Member m, List<Class<?>> paramTypes) {
@@ -44,8 +52,8 @@ class CandidateMember {
     }
 
     public static List<CandidateMember> membersFromField(Field f) {
-        var getter = new CandidateMember(f, paramsWithImplicitThis(f, List.of()), f.getType());
-        var setter = new CandidateMember(f, paramsWithImplicitThis(f, List.of(f.getType())), Void.TYPE);
+        var getter = new CandidateMember(f, paramsWithImplicitThis(f, List.of()), f.getType(), Set.of());
+        var setter = new CandidateMember(f, paramsWithImplicitThis(f, List.of(f.getType())), Void.TYPE, Set.of());
 
         return List.of(getter, setter);
     }
@@ -68,6 +76,20 @@ class CandidateMember {
 
     public boolean matchesReturn(Class<?> queryReturnType) {
         return isTypeCompatibleForAssignment(queryReturnType, returnType);
+    }
+
+    public boolean matchesThrows(Set<Class<?>> queryThrowTypes) {
+        // Special case for a query for methods that throw nothing
+        if (queryThrowTypes.size() == 0)
+            return throwTypes.size() == 0;
+
+        // A candidate's throws clause matches if all of the types it might throw are listed
+        // in the query's set of caught exceptions
+        for (var caughtType : queryThrowTypes) {
+            if (throwTypes.stream().noneMatch(thrownType -> isTypeCompatibleForAssignment(caughtType, thrownType)))
+                return false;
+        }
+        return true;
     }
 
     // An instinctive notion of whether two types are compatible.

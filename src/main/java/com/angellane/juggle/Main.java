@@ -34,9 +34,20 @@ public class Main {
         );
     }
     List<String> paramTypeNames = null;     // null = don't match params; empty list = zero params
+    Set<String>  throwTypeNames = null;     // null = don't care; empty set = throws nothing
 
     @Option(name="-r", aliases="--return", usage="Return type of searched function", metaVar="type")
     String returnTypeName;
+
+    @Option(name="-t", aliases="--throws", usage="Thrown types", metaVar="type,type,...")
+    public void addThrows(String throwTypeName) {
+        if (throwTypeNames == null) throwTypeNames = new HashSet<>();
+
+        throwTypeNames.addAll(Arrays.stream(throwTypeName.split(","))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toSet())
+        );
+    }
 
     @Option(name="-a", aliases="--access", usage="Minimum accessibility of members to return",
             metaVar="private|protected|package|public")
@@ -74,6 +85,12 @@ public class Main {
         return returnTypeName == null ? null : juggler.classForTypename(returnTypeName);
     }
 
+    public Set<Class<?>> getThrowTypes() {
+        return throwTypeNames == null ? null : throwTypeNames.stream()
+                .map(juggler::classForTypename)
+                .collect(Collectors.toSet());
+    }
+
     public boolean parseArgs(String[] args) {
         final CmdLineParser parser = new CmdLineParser(this);
         try {
@@ -104,7 +121,8 @@ public class Main {
 
         MemberDecoder decoder = new MemberDecoder(importedPackageNames);
 
-        Arrays.stream(juggler.findMembers(minAccess, new TypeSignature(getParamTypes(), getReturnType())))
+        Arrays.stream(juggler.findMembers(minAccess,
+                        new TypeSignature(getParamTypes(), getReturnType(), getThrowTypes())))
                 .sorted(getComparator())
                 .forEach(m -> System.out.println(decoder.decode(m)));
     }

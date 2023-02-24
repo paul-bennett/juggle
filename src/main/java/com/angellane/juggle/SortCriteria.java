@@ -22,7 +22,7 @@ import java.util.function.Function;
 enum SortCriteria {
     ACCESS  (m -> new ByAccessibility()),
     TYPE    (m -> new ByMostSpecificType()),
-    CLOSEST (m -> new ByClosestType(new TypeSignature(m.getParamTypes(), m.getReturnType()))),
+    CLOSEST (m -> new ByClosestType(new TypeSignature(m.getParamTypes(), m.getReturnType(), m.getThrowTypes()))),
     PACKAGE (m -> new ByPackage(m.importedPackageNames)),
     NAME    (m -> new ByCanonicalName());
 

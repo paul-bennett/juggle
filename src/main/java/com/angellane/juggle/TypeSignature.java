@@ -4,6 +4,7 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -11,10 +12,12 @@ import java.util.stream.Stream;
 public class TypeSignature {
     public final List<Class<?>> paramTypes;
     public final Class<?> returnType;
+    public final Set<Class<?>> throwTypes;
 
-    public TypeSignature(List<Class<?>> paramTypes, Class<?> returnType) {
+    public TypeSignature(List<Class<?>> paramTypes, Class<?> returnType, Set<Class<?>> throwTypes) {
         this.paramTypes = paramTypes;
         this.returnType = returnType;
+        this.throwTypes = throwTypes;
     }
 
     public static List<TypeSignature> of(Member m) {
@@ -30,7 +33,8 @@ public class TypeSignature {
 
             return List.of(new TypeSignature(
                     List.of(c.getParameterTypes()),
-                    c.getDeclaringClass()
+                    c.getDeclaringClass(),
+                    Set.of(c.getExceptionTypes())
             ));
         }
         if (m instanceof Method) {
@@ -40,19 +44,21 @@ public class TypeSignature {
                     Stream.of(implicitParams.stream(), Arrays.stream(e.getParameterTypes()))
                             .flatMap(Function.identity())
                             .collect(Collectors.toList()),
-                    e.getReturnType()
+                    e.getReturnType(),
+                    Set.of(e.getExceptionTypes())
             ));
         }
         else if (m instanceof Field) {
             Field f = (Field)m;
 
             return List.of(
-                    new TypeSignature(implicitParams, f.getType()),                             // Getter
+                    new TypeSignature(implicitParams, f.getType(), Set.of()),                   // Getter
                     new TypeSignature(                                                          // Setter
                             Stream.of(implicitParams.stream(), Stream.<Class<?>>of(f.getType()))
                                     .flatMap(Function.identity())
                                     .collect(Collectors.toList()),
-                            Void.TYPE
+                            Void.TYPE,
+                            Set.of()
                     )
             );
         }

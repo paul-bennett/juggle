@@ -7,6 +7,7 @@ import com.angellane.juggle.TypeSignature;
 import java.lang.reflect.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
@@ -34,6 +35,8 @@ public class ByMostSpecificType implements Comparator<Member> {
         // After examining all permutations, find the score with the highest absolute value.  Return the sign of
         // the highest score.  So if we had scores of 0, -5, 4 and -2, we're return -1 because -5 has the largest
         // absolute value so it wins, and it's a negative value so the return value is -1.
+        //
+        // Exceptions thrown by the candidate members are ignored in this process
 
         int winningScore = CartesianProduct.of(TypeSignature.of(m1), TypeSignature.of(m2)).stream()
                 .peek(ts -> { assert(ts.size() == 2); })                        // Sanity check: elements are pairs
@@ -46,7 +49,7 @@ public class ByMostSpecificType implements Comparator<Member> {
                     return ts1.paramTypes.stream()
                                 .collect(PermutationGenerator.collector())
                                 .stream()
-                                .map(params1 -> List.of(new TypeSignature(params1, ts1.returnType), ts2));
+                                .map(params1 -> List.of(new TypeSignature(params1, ts1.returnType, Set.of()), ts2));
                 })
 
                 .mapToInt(this::computeScore)                                   // Give the pair a score
