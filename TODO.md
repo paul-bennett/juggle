@@ -18,8 +18,6 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
   Do their modifiers imply they're static?
   If they do, we shouldn't treat as if there is an implicit 'this'.
 
-* Add a `-t` option to match thrown exceptions
-
       
 ## Code Quality & Refactoring
 
