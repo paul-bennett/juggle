@@ -31,3 +31,14 @@ afterEvaluate {
         options.compilerArgs.add("-Xlint:deprecation")
     }
 }
+
+tasks.jar {
+    manifest.attributes["Main-Class"] = application.mainClass
+    val dependencies = configurations
+        .runtimeClasspath
+        .get()
+        .map(::zipTree)
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
