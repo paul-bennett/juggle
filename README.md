@@ -196,9 +196,14 @@ class names don't have to be written out each time. As you would expect,
 `java.lang` is always implicitly imported.  Juggle omits imported package 
 names in its output.
 ````
-% juggle                                                                \
-    -i java.net                                                         \
-...
+$ juggle                                                                \
+    -j build/libs/juggle-1.0-SNAPSHOT.jar                               \
+    -i com.angellane.juggle                                             \
+    -i java.util                                                        \
+    -r CartesianProduct
+ public CartesianProduct<T>.<init>(List<T>[])
+ public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<T>[])
+$
 ````
 
 Juggle treats constructors as if they were static methods called `<init>`

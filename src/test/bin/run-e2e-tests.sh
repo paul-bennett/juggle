@@ -16,14 +16,6 @@ prefix="$tmp_dir"/juggle-test
 
 awk -f "${bin_dir}/split-tests.awk" prefix="${prefix}"
 
-# On macOS use JDK13 because this version of Gradle barfs on JDK14.
-gradle_ver=`${gradle} --version | grep Gradle | cut -d\  -f2`
-if [ `uname -s` = "Darwin" -a "${gradle_ver}" = "6.1.1" ]
-then
-    export JAVA_HOME=`/usr/libexec/java_home -v 13`
-fi
-
-
 temp="${prefix}-out"
 
 n=1
@@ -36,20 +28,19 @@ do
 		| sed -e '1s/[^ ]* *//' -e 's/\\\\$//'	\
 		| tr \\\\n ' '`
     ${gradle} -q run --args="${args}" 2>&1 \
-        | diff -u - --label "actual output" "${out_file}" > "${temp}"
+        | diff -u --label "expected output" --label "actual output" "${out_file}" - > "${temp}"
 
     if [ $? -ne 0 ]; then
-        echo "========================== FAILED TEST =========================="
+        echo "============================== FAILED TEST =============================="
+        /bin/echo -n '$ '
         cat "${cmd_file}"
-        echo "-----------------------------------------------------------------"
-	echo "$args"
-        echo "-----------------------------------------------------------------"
+        echo "-------------------------------------------------------------------------"
         cat "${temp}"
         echo
         echo
-    else
-        rm "${cmd_file}" "${out_file}"
     fi
+
+    rm "${cmd_file}" "${out_file}"
 
     let n+=1
 done
