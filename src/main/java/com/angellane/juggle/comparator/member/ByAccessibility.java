@@ -1,4 +1,4 @@
-package com.angellane.juggle.comparator;
+package com.angellane.juggle.comparator.member;
 
 import com.angellane.juggle.Accessibility;
 

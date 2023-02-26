@@ -1,4 +1,4 @@
-package com.angellane.juggle.comparator;
+package com.angellane.juggle.comparator.member;
 
 import java.lang.reflect.Member;
 import java.util.Comparator;

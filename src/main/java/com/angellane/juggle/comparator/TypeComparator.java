@@ -5,7 +5,7 @@ import java.util.Comparator;
 /**
  * Compares types by specificity, with the most specific ordered first.
  */
-class TypeComparator implements Comparator<Class<?>> {
+public class TypeComparator implements Comparator<Class<?>> {
     @Override
     public int compare(Class<?> o1, Class<?> o2) {
         // TODO: consider numeric promotions (boxing/unboxing should be irrelevant)

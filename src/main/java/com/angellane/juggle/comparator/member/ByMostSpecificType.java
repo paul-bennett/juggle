@@ -1,8 +1,9 @@
-package com.angellane.juggle.comparator;
+package com.angellane.juggle.comparator.member;
 
 import com.angellane.juggle.CartesianProduct;
 import com.angellane.juggle.PermutationGenerator;
 import com.angellane.juggle.TypeSignature;
+import com.angellane.juggle.comparator.TypeComparator;
 
 import java.lang.reflect.*;
 import java.util.Comparator;

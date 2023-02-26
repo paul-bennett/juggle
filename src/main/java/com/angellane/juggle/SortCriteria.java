@@ -1,6 +1,6 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.comparator.*;
+import com.angellane.juggle.comparator.member.*;
 
 import java.lang.reflect.Member;
 import java.util.Comparator;
