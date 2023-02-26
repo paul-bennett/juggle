@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 /**
  * This POJO contains the details of the candidate member (field, constructor or method).
  * <p>
- * The 'member' field is the member itself.  More interesting are the paramTypes and returnType fields,
- * which represent the type the member would have if considered as a static function.  For static
+ * The 'member' field is the member itself.  More interesting are the paramTypes, returnType and throwTypes
+ * fields, which represent the type the member would have if considered as a static function.  For static
  * methods the paramTypes field includes an implicit first entry representing the type of 'this'.
  */
 class CandidateMember {
@@ -52,8 +52,8 @@ class CandidateMember {
     }
 
     public static List<CandidateMember> membersFromField(Field f) {
-        var getter = new CandidateMember(f, paramsWithImplicitThis(f, List.of()), f.getType(), Set.of());
-        var setter = new CandidateMember(f, paramsWithImplicitThis(f, List.of(f.getType())), Void.TYPE, Set.of());
+        var getter = new CandidateMember(f, paramsWithImplicitThis(f, List.of()),            f.getType(), Set.of());
+        var setter = new CandidateMember(f, paramsWithImplicitThis(f, List.of(f.getType())), Void.TYPE,   Set.of());
 
         return List.of(getter, setter);
     }
