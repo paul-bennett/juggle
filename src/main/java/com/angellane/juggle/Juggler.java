@@ -103,7 +103,6 @@ public class Juggler {
             loader.linkClass(cls);
             return Optional.of(cls);
         } catch (ClassNotFoundException ex) {
-            System.err.println("Warning: class " + className + " not found");
             return Optional.empty();
         } catch (NoClassDefFoundError e) {
             // This might be thrown if the class file references other classes that can't be loaded.
