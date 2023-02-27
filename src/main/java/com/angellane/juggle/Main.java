@@ -20,7 +20,7 @@ public class Main {
     public void addJar(String jarName) { jarPaths.add(jarName); }
     final List<String> jarPaths = new ArrayList<>();
 
-    @Option(name="-m", aliases="--module", usage="Module to include in search", metaVar="moduleName")
+    @Option(name="-m", aliases="--module", usage="Modules to search", metaVar="moduleName")
     public void addModule(String moduleName) { moduleNames.add(moduleName); }
     final List<String> moduleNames = new ArrayList<>();
 

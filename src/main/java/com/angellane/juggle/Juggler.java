@@ -6,7 +6,6 @@ import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +33,7 @@ public class Juggler {
         URL[] urls = jars.stream()
                 .flatMap(path -> {
                     try {
-                        return Stream.of(Paths.get(path).toUri().toURL());
+                        return Stream.of(Path.of(path).toUri().toURL());
                     } catch (MalformedURLException ex) {
                         return Stream.empty();
                     }
@@ -43,13 +42,15 @@ public class Juggler {
 
         this.loader = new ResolvingURLClassLoader(urls);
 
+        if (mods == null || mods.isEmpty())
+            mods = List.of(BASE_MODULE);
+
         this.modConf = ModuleLayer.boot().configuration().resolve(
                 ModuleFinder.ofSystem(),
                 ModuleFinder.of(Path.of(".")),
                 mods);
 
-        classesToSearch = Stream.of( moduleClassStream(BASE_MODULE)
-                                   , mods.stream().flatMap(this::moduleClassStream)
+        classesToSearch = Stream.of( mods.stream().flatMap(this::moduleClassStream)
                                    , jars.stream().flatMap(this::jarClassStream)
                                    )
                 .flatMap(Function.identity())
