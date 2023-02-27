@@ -9,8 +9,7 @@ import java.util.Comparator;
 import java.util.stream.IntStream;
 
 /**
- * Compares two class Members based on their package's position in a list.
- * Members that aren't in a package on the list are sorted last.
+ * Compares two class Members based on how close their types match the query types.
  */
 public class ByClosestType implements Comparator<Member> {
     private final TypeComparator typeComparator = new TypeComparator();
@@ -43,9 +42,12 @@ public class ByClosestType implements Comparator<Member> {
      * zero.
      */
     private int computeMemberScore(Member m) {
-        return TypeSignature.of(m).stream()                                             // Two for fields (get/set)
-                  .filter(sig -> query.paramTypes == null                               // Toss out if #params !=
-                          || sig.paramTypes.size() == query.paramTypes.size())
+        if (query.paramTypes == null)
+            // If there were no parameters in the query, all members score the same
+            return 0;
+        else
+            return TypeSignature.of(m).stream()                                             // Two for fields (get/set)
+                  .filter(sig -> sig.paramTypes.size() == query.paramTypes.size())      // Toss out if #params !=
                   .flatMap(sig -> sig.paramTypes.stream()                               // Permute parameters
                           .collect(PermutationGenerator.collector())
                           .stream()
