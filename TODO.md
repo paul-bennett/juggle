@@ -8,6 +8,15 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
   1. "I have a `Foo`. What can I do with it?" <-- Not yet
   2. "How do I get a `Bar`?" <-- Yes
 
+* Does Juggle replace _Part V: API Cross-References_ of the first edition of O'Reilly's _Java in a Nutshell_?
+  27. _Class Defined-In Index_:   no; but Java API search does this (lookup package by class name)
+  28. _Method Defined-In Index_:  no; but Java API search does this (lookup class by method name)
+  29. _Subclass Index_:           no; but Java API docs do this
+  30. _Implemented-By Index_:     no; but Java API docs do this
+  31. _Returned-By Index_:        yes, `-r type`
+  32. _Passed-To Index_:          yes, `-p type`
+  33. _Thrown-By Index_:          yes, `-t type`
+
 * Add support for module path (`-M`?)
  
 * Add support for directories of class files
@@ -18,6 +27,10 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
   Do their modifiers imply they're static?
   If they do, we shouldn't treat as if there is an implicit 'this'.
 
+* Add option that allows unknown extra args; perhaps `-x` i.e. `-x -p int` shows all methods that take at least
+  one `int` but may also take further arguments
+
+* Add option that disables argument permutation.  (Perhaps make this the default, with the arg disabling permutation.)
       
 ## Code Quality & Refactoring
 
@@ -38,12 +51,9 @@ Not necessarily in any meaningful order. Some things here are big (e.g. Generics
   - does it work with system modules?
   - does it work with user-provided modules?
 
-* The `TypeComparator` seems to have a bug which is demonstrated
-  when listing all methods (`juggle -s type`)
+* Test suite should incorportate behaviour of running `src/test/bin/run-e2e-test.sh` on `README.md`
 
-* Test suite should extract and verify all examples in `README.md`
-
-* Performance of `-s closest` is lousy
+* Performance of `-s closest` isn't great with a high number of `-p` options
 
 ## Generics
 

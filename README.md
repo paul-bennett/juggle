@@ -130,24 +130,23 @@ by virtue of Juggle treating fields as having zero-arg pseudo-getters.)
 
 The `-t` option allows you to filter by methods that might throw a specific exception type:
 
- ````
- $ juggle -t java.net.URISyntaxException
- public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
- public java.net.URI java.net.URL.toURI() throws java.net.URISyntaxException
- public java.net.URI.<init>(String) throws java.net.URISyntaxException
- public java.net.URI.<init>(String,String,String) throws java.net.URISyntaxException
- public java.net.URI.<init>(String,String,String,int,String,String,String) throws java.net.URISyntaxException
- public java.net.URI.<init>(String,String,String,String) throws java.net.URISyntaxException
- public java.net.URI.<init>(String,String,String,String,String) throws java.net.URISyntaxException
- $
- ````
+````
+$ juggle -t java.net.URISyntaxException
+public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
+public java.net.URI java.net.URL.toURI() throws java.net.URISyntaxException
+public java.net.URI.<init>(String) throws java.net.URISyntaxException
+public java.net.URI.<init>(String,String,String) throws java.net.URISyntaxException
+public java.net.URI.<init>(String,String,String,int,String,String,String) throws java.net.URISyntaxException
+public java.net.URI.<init>(String,String,String,String) throws java.net.URISyntaxException
+public java.net.URI.<init>(String,String,String,String,String) throws java.net.URISyntaxException
+$
+````
 
- Juggle will list all methods that include the named exception (or a subclass of the named type) 
- in their `throws` clause.  Specifying multiple exception types (either comma-separated, or with
- multiple `-t` options) will show only the methods that might throw _all_ the specified exceptions.
+Juggle will list all methods that include the named exception (or a subclass of the named type) 
+in their `throws` clause.  Specifying multiple exception types (either comma-separated, or with
+multiple `-t` options) will show only the methods that might throw _all_ the specified exceptions.
 
- A query for `-t ''` will show all methods that declare no thrown types.
-
+A query for `-t ''` will show all methods that declare no thrown types.
 
 ## Where to look
 
@@ -201,8 +200,8 @@ $ juggle                                                                \
     -i com.angellane.juggle                                             \
     -i java.util                                                        \
     -r CartesianProduct
- public CartesianProduct<T>.<init>(List<T>[])
- public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<T>[])
+public CartesianProduct<T>.<init>(List<T>[])
+public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<T>[])
 $
 ````
 
@@ -262,8 +261,8 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-a`   | `--access`      | `private`, `protected`, `package`, `public`              | `-a public`                               | Minimum accessibility                               |
 | `-i`   | `--import`      | package name                                             |                                           | Packages to import (`java.lang` is always searched) |
 | `-j`   | `--jar`         | file path                                                |                                           | JAR files to search                                 |
-| `-m`   | `--module`      | module name                                              |                                           | JMODs to search (must be in current directory)      |
+| `-m`   | `--module`      | module name(s)                                           | `-m java.base`                            | JMODs to search                                     |
 | `-p`   | `--param`       | type name(s)                                             | (don't match parameters)                  | Type of parameters to search for                    |
 | `-r`   | `--return`      | type name                                                | (don't match return)                      | Return type to search for                           |
-| `-t    | `--throws`      | type name(s)                                             | (don't match throws)                      | Exception types that must be thrown                 |                                             
+| `-t`   | `--throws`      | type name(s)                                             | (don't match throws)                      | Exception types that must be thrown                 |                                             
 | `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria                                       |
