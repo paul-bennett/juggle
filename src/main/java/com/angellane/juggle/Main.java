@@ -16,16 +16,24 @@ public class Main {
     public void addImport(String importName) { importedPackageNames.add(importName); }
     final List<String> importedPackageNames = new ArrayList<>(List.of("java.lang"));
 
+
     @Option(name="-j", aliases="--jar", usage="JAR file to include in search", metaVar="jarFilePath")
     public void addJar(String jarName) { jarPaths.add(jarName); }
     final List<String> jarPaths = new ArrayList<>();
 
+
     @Option(name="-m", aliases="--module", usage="Modules to search", metaVar="moduleName")
-    public void addModule(String moduleName) { moduleNames.add(moduleName); }
+    public void addModule(String arg) {
+        moduleNames.addAll(Arrays.stream(arg.split(","))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList()));
+    }
+
     final List<String> moduleNames = new ArrayList<>();
 
+
     @Option(name="-p", aliases="--param", usage="Parameter type of searched function", metaVar="type,type,...")
-    public void addParam(String paramTypeName) {
+    public void addParamTypes(String paramTypeName) {
         if (paramTypeNames == null) paramTypeNames = new ArrayList<>();
 
         paramTypeNames.addAll(Arrays.stream(paramTypeName.split(","))
@@ -33,14 +41,27 @@ public class Main {
                 .collect(Collectors.toList())
         );
     }
+
     List<String> paramTypeNames = null;     // null = don't match params; empty list = zero params
-    Set<String>  throwTypeNames = null;     // null = don't care; empty set = throws nothing
+
+
+    public List<Class<?>> getParamTypes() {
+        return paramTypeNames == null ? null : paramTypeNames.stream()
+                .map(juggler::classForTypename)
+                .collect(Collectors.toList());
+    }
+
+
+    public Class<?> getReturnType() {
+        return returnTypeName == null ? null : juggler.classForTypename(returnTypeName);
+    }
 
     @Option(name="-r", aliases="--return", usage="Return type of searched function", metaVar="type")
     String returnTypeName;
 
+
     @Option(name="-t", aliases="--throws", usage="Thrown types", metaVar="type,type,...")
-    public void addThrows(String throwTypeName) {
+    public void addThrowTypes(String throwTypeName) {
         if (throwTypeNames == null) throwTypeNames = new HashSet<>();
 
         throwTypeNames.addAll(Arrays.stream(throwTypeName.split(","))
@@ -48,6 +69,14 @@ public class Main {
                 .collect(Collectors.toSet())
         );
     }
+    Set<String>  throwTypeNames = null;     // null = don't care; empty set = throws nothing
+
+    public Set<Class<?>> getThrowTypes() {
+        return throwTypeNames == null ? null : throwTypeNames.stream()
+                .map(juggler::classForTypename)
+                .collect(Collectors.toSet());
+    }
+
 
     @Option(name="-a", aliases="--access", usage="Minimum accessibility of members to return",
             metaVar="private|protected|package|public")
@@ -74,22 +103,6 @@ public class Main {
     // Application logic follows.
 
     public Juggler juggler;
-
-    public List<Class<?>> getParamTypes() {
-        return paramTypeNames == null ? null : paramTypeNames.stream()
-                .map(juggler::classForTypename)
-                .collect(Collectors.toList());
-    }
-
-    public Class<?> getReturnType() {
-        return returnTypeName == null ? null : juggler.classForTypename(returnTypeName);
-    }
-
-    public Set<Class<?>> getThrowTypes() {
-        return throwTypeNames == null ? null : throwTypeNames.stream()
-                .map(juggler::classForTypename)
-                .collect(Collectors.toSet());
-    }
 
     public boolean parseArgs(String[] args) {
         final CmdLineParser parser = new CmdLineParser(this);
