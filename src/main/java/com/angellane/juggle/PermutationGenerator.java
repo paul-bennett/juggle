@@ -152,7 +152,6 @@ public class PermutationGenerator<T> {
 
         /**
          * Note that this split still traverses all elements in the parent spliterator.
-         * TODO: figure out how to split without traversal
          *
          * @return a new Spliterator that will continue some of this Spliterator's work
          */

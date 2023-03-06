@@ -8,8 +8,6 @@ import java.util.Comparator;
 public class TypeComparator implements Comparator<Class<?>> {
     @Override
     public int compare(Class<?> o1, Class<?> o2) {
-        // TODO: consider numeric promotions (boxing/unboxing should be irrelevant)
-
         boolean assignableOneFromTwo = o1.isAssignableFrom(o2);
         boolean assignableTwoFromOne = o2.isAssignableFrom(o1);
 

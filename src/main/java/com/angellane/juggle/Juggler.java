@@ -122,8 +122,6 @@ public class Juggler {
         for (arrayDimension = 0; baseTypename.endsWith(ARRAY_SUFFIX); ++arrayDimension)
             baseTypename = baseTypename.substring(0, baseTypename.length() - ARRAY_SUFFIX.length()).stripTrailing();
 
-        // TODO: think about Generics
-
         // Start with the base type
         Class<?> ret = Object.class;
         switch (typename) {

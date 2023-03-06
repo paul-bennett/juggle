@@ -59,7 +59,6 @@ class CandidateMember {
     }
 
     public boolean matchesParams(List<Class<?>> queryParamTypes, boolean permute) {
-        // TODO: consider moving permutation generation up (main()?)
         List<List<Class<?>>> paramPermutations = permute
                 ? (new PermutationGenerator<>(queryParamTypes)).stream().collect(Collectors.toList())
                 : List.of(queryParamTypes);
@@ -116,7 +115,6 @@ class CandidateMember {
     //    https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html
 
     // Invocation Context: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.3
-    // TODO: check against JLS
     private boolean isTypeCompatibleForInvocation(Class<?> parameterType, Class<?> argumentType) {
         return isTypeInstinctivelyCompatible(parameterType, argumentType);
     }

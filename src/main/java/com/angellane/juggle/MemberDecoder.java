@@ -59,7 +59,7 @@ public class MemberDecoder {
             StringJoiner joiner = new StringJoiner(",");
             for (TypeVariable<?> tv : typeVariables) {
                 joiner.add(tv.getName());
-                // TODO: add bounds and handle wildcards
+                // This would be a good place to add bounds and handle wildcards
             }
             ret.append(joiner);
             ret.append("> ");
