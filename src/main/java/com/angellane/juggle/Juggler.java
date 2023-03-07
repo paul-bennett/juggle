@@ -124,7 +124,7 @@ public class Juggler {
 
         // Start with the base type
         Class<?> ret = Object.class;
-        switch (typename) {
+        switch (baseTypename) {
             case "void":        ret = Void.TYPE;        break;
             case "boolean":     ret = Boolean.TYPE;     break;
             case "char":        ret = Character.TYPE;   break;
