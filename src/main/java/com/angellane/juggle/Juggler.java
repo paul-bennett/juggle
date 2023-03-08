@@ -69,7 +69,9 @@ public class Juggler {
                     .map(s -> s.substring(0, s.length() - CLASS_SUFFIX.length()))
                     .map(s -> s.replace('/', '.'))
                     .map(this::loadClassByName)
-                    .flatMap(Optional::stream);
+                    .flatMap(Optional::stream)
+                    // Collect & create a new stream now so that the JAR file is read before it's closed
+                    .collect(Collectors.toList()).stream();
         } catch (IOException e) {
             System.err.println("Couldn't read JAR file: " + filename + "; ignoring.");
             return Stream.empty();
