@@ -33,21 +33,21 @@ public class AccessibilityTest {
 
     @Test
     public void fromModifiers() {
-        assertEquals(Accessibility.fromModifiers(Modifier.PUBLIC),    Accessibility.PUBLIC);
-        assertEquals(Accessibility.fromModifiers(Modifier.PROTECTED), Accessibility.PROTECTED);
-        assertEquals(Accessibility.fromModifiers(Modifier.PRIVATE),   Accessibility.PRIVATE);
-        assertEquals(Accessibility.fromModifiers(0),                  Accessibility.PACKAGE);
+        assertEquals(Accessibility.PUBLIC,    Accessibility.fromModifiers(Modifier.PUBLIC));
+        assertEquals(Accessibility.PROTECTED, Accessibility.fromModifiers(Modifier.PROTECTED));
+        assertEquals(Accessibility.PRIVATE,   Accessibility.fromModifiers(Modifier.PRIVATE));
+        assertEquals(Accessibility.PACKAGE,   Accessibility.fromModifiers(0));
     }
 
     @Test
     public void fromValidString() {
-        assertEquals(Accessibility.fromString("PUBLIC"), Accessibility.PUBLIC);
+        assertEquals(Accessibility.PUBLIC, Accessibility.fromString("PUBLIC"));
 
         // Lower case variants more likely
-        assertEquals(Accessibility.fromString("public"), Accessibility.PUBLIC);
-        assertEquals(Accessibility.fromString("package"), Accessibility.PACKAGE);
-        assertEquals(Accessibility.fromString("protected"), Accessibility.PROTECTED);
-        assertEquals(Accessibility.fromString("private"), Accessibility.PRIVATE);
+        assertEquals(Accessibility.PUBLIC,    Accessibility.fromString("public"));
+        assertEquals(Accessibility.PACKAGE,   Accessibility.fromString("package"));
+        assertEquals(Accessibility.PROTECTED, Accessibility.fromString("protected"));
+        assertEquals(Accessibility.PRIVATE,   Accessibility.fromString("private"));
     }
 
     @Test(expected = IllegalArgumentException.class)
