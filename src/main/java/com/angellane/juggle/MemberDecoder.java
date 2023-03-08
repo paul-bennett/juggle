@@ -77,12 +77,24 @@ public class MemberDecoder {
     }
 
     public String decodeType(Type t) {
-        if (t instanceof Class<?>)
-            return decodeClass((Class<?>)t);
+        if (t instanceof GenericArrayType) {
+            var ga = (GenericArrayType)t;
+            return decodeType(ga.getGenericComponentType()) + "[]";
+        }
         else if (t instanceof ParameterizedType) {
             ParameterizedType pt = (ParameterizedType)t;
             return decodeType(pt.getRawType());
         }
+        else if (t instanceof TypeVariable<?>) {
+            var tv = (TypeVariable<?>)t;
+            return "TYPE-VARIABLE(" + tv + ")";
+        }
+        else if (t instanceof WildcardType) {
+            var wt = (WildcardType)t;
+            return "WILDCARD(" + wt + ")";
+        }
+        else if (t instanceof Class<?>)
+            return decodeClass((Class<?>)t);
         else
             return t.toString();
     }
