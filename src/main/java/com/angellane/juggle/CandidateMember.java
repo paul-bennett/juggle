@@ -60,7 +60,7 @@ class CandidateMember {
 
     public boolean matchesParams(List<Class<?>> queryParamTypes, boolean permute) {
         List<List<Class<?>>> paramPermutations = permute
-                ? (new PermutationGenerator<>(queryParamTypes)).stream().collect(Collectors.toList())
+                ? (new PermutationGenerator<>(queryParamTypes)).stream().distinct().collect(Collectors.toList())
                 : List.of(queryParamTypes);
 
         for (var permutedParamTypes : paramPermutations) {

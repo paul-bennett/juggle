@@ -181,9 +181,9 @@ public class Juggler {
         return allCandidates()
                 .filter(m -> !m.getMember().getDeclaringClass().isAnonymousClass())     // anon and local classes ...
                 .filter(m -> !m.getMember().getDeclaringClass().isLocalClass())         // ... are unutterable anyway
-                .filter(m -> query.paramTypes == null || m.matchesParams(query.paramTypes, true))
-                .filter(m -> query.returnType == null || m.matchesReturn(query.returnType))
                 .filter(m -> query.throwTypes == null || m.matchesThrows(query.throwTypes))
+                .filter(m -> query.returnType == null || m.matchesReturn(query.returnType))
+                .filter(m -> query.paramTypes == null || m.matchesParams(query.paramTypes, true))
                 .map(CandidateMember::getMember)
                 .filter(m -> Accessibility.fromModifiers(m.getModifiers()).isAtLastAsAccessibleAsOther(minAccess))
                 .distinct()
