@@ -148,6 +148,23 @@ multiple `-t` options) will show only the methods that might throw _all_ the spe
 
 A query for `-t ''` will show all methods that declare no thrown types.
 
+You can also ask Juggle to look for annotations using the `-@` option.  Juggle will list methods that 
+have the named annotations, or whose declaring class is so annotated.  If multiple annotations are
+supplied, they must all be present on the class or method.
+````
+$ juggle -@ FunctionalInterface -r int
+public int java.util.Comparator<T>.compare(T,T)
+public int java.util.function.DoubleToIntFunction.applyAsInt(double)
+public int java.util.function.IntBinaryOperator.applyAsInt(int,int)
+public int java.util.function.IntSupplier.getAsInt()
+public int java.util.function.IntUnaryOperator.applyAsInt(int)
+public int java.util.function.LongToIntFunction.applyAsInt(long)
+public int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
+public int java.util.function.ToIntFunction<T>.applyAsInt(T)
+$
+````
+
+
 ## Where to look
 
 You can tell Juggle which JARs to include in the search by using the `-j`
@@ -200,10 +217,12 @@ $ juggle                                                                \
     -i com.angellane.juggle                                             \
     -i java.util                                                        \
     -r CartesianProduct
-public CartesianProduct<T>.<init>(List<T>[])
-public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<T>[])
+public CartesianProduct<T>.<init>(List<E>[])
+public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<E>[])
 $
 ````
+(Note that in this example, Juggle isn't yet unifying the type arguments;
+ideally it should output `CartesianProduct<T>.of(List<T>[])`.)
 
 Juggle treats constructors as if they were static methods called `<init>`
 returning an instance of the declaring class.  In the following example
@@ -265,4 +284,5 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-p`   | `--param`       | type name(s)                                             | (don't match parameters)                  | Type of parameters to search for                    |
 | `-r`   | `--return`      | type name                                                | (don't match return)                      | Return type to search for                           |
 | `-t`   | `--throws`      | type name(s)                                             | (don't match throws)                      | Exception types that must be thrown                 |                                             
+| `-@`   | `--annotation`  | annotation name(s)                                       | (don't match annotations)                 | Annotations to filter on (class or method)          |
 | `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria                                       |

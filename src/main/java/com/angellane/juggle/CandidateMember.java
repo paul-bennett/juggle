@@ -1,8 +1,10 @@
 package com.angellane.juggle;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This POJO contains the details of the candidate member (field, constructor or method).
@@ -16,28 +18,41 @@ class CandidateMember {
     private final List<Class<?>> paramTypes;
     private final Class<?> returnType;
     private final Set<Class<?>> throwTypes;
+    private final Set<Class<?>> annotationTypes;
 
-    private CandidateMember(Member member, List<Class<?>> paramTypes, Class<?> returnType, Set<Class<?>> throwTypes) {
+    private CandidateMember(Member member, List<Class<?>> paramTypes, Class<?> returnType, Set<Class<?>> throwTypes,
+                            Set<Class<?>> annotationTypes) {
         this.member = member;
         this.paramTypes = paramTypes;
         this.returnType = returnType;
         this.throwTypes = throwTypes;
+        this.annotationTypes = annotationTypes;
     }
 
     public Member getMember() { return member; }
+
+    private static Set<Class<?>> annotationClasses(Annotation[] classAnnotations, Annotation[] memberAnnotations) {
+        return Stream.concat(Arrays.stream(classAnnotations), Arrays.stream(memberAnnotations))
+                .map(Annotation::annotationType)
+                .collect(Collectors.toSet());
+    }
 
     public static CandidateMember memberFromMethod(Method m) {
         return new CandidateMember(m,
                 paramsWithImplicitThis(m, Arrays.asList(m.getParameterTypes())),
                 m.getReturnType(),
-                Set.of(m.getExceptionTypes()));
+                Set.of(m.getExceptionTypes()),
+                annotationClasses(m.getDeclaringClass().getAnnotations(), m.getAnnotations())
+        );
     }
 
     public static CandidateMember memberFromConstructor(Constructor<?> c) {
         return new CandidateMember(c,
                 Arrays.asList(c.getParameterTypes()),
                 c.getDeclaringClass(),
-                Set.of(c.getExceptionTypes()));
+                Set.of(c.getExceptionTypes()),
+                annotationClasses(c.getDeclaringClass().getAnnotations(), c.getAnnotations())
+        );
     }
 
     private static List<Class<?>> paramsWithImplicitThis(Member m, List<Class<?>> paramTypes) {
@@ -52,8 +67,9 @@ class CandidateMember {
     }
 
     public static List<CandidateMember> membersFromField(Field f) {
-        var getter = new CandidateMember(f, paramsWithImplicitThis(f, List.of()),            f.getType(), Set.of());
-        var setter = new CandidateMember(f, paramsWithImplicitThis(f, List.of(f.getType())), Void.TYPE,   Set.of());
+        Set<Class<?>> as = annotationClasses(f.getDeclaringClass().getDeclaredAnnotations(), f.getDeclaredAnnotations());
+        var getter = new CandidateMember(f, paramsWithImplicitThis(f, List.of()),            f.getType(), Set.of(), as);
+        var setter = new CandidateMember(f, paramsWithImplicitThis(f, List.of(f.getType())), Void.TYPE,   Set.of(), as);
 
         return List.of(getter, setter);
     }
@@ -89,6 +105,10 @@ class CandidateMember {
                 return false;
         }
         return true;
+    }
+
+    public boolean matchesAnnotations(Set<Class<?>> queryAnnotationTypes) {
+        return annotationTypes.containsAll(queryAnnotationTypes);
     }
 
     // An instinctive notion of whether two types are compatible.

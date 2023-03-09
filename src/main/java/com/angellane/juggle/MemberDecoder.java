@@ -3,6 +3,7 @@ package com.angellane.juggle;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MemberDecoder {
     private final Set<String> imports;
@@ -87,7 +88,11 @@ public class MemberDecoder {
         }
         else if (t instanceof TypeVariable<?>) {
             var tv = (TypeVariable<?>)t;
-            return "TYPE-VARIABLE(" + tv + ")";
+            var bs = tv.getBounds();
+            if (bs.length == 1 && bs[0] == Object.class) bs = null;
+
+            return tv.getName() + (bs == null || bs.length == 0 ? ""
+                    : " extends " + Stream.of(bs).map(this::decodeType).collect(Collectors.joining(", ")));
         }
         else if (t instanceof WildcardType) {
             var wt = (WildcardType)t;

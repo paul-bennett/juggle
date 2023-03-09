@@ -51,7 +51,7 @@ public class ByClosestType implements Comparator<Member> {
                   .flatMap(sig -> sig.paramTypes.stream()                               // Permute parameters
                           .collect(PermutationGenerator.collector())
                           .stream()
-                          .map(params -> new TypeSignature(params, sig.returnType, sig.throwTypes)))
+                          .map(params -> new TypeSignature(params, sig.returnType, sig.throwTypes, sig.annotations)))
                   .mapToInt(this::computeSignatureScore)                                // Compute the score
                   .reduce(Integer.MAX_VALUE, (a,b) -> Math.abs(a) < Math.abs(b) ? a : b); // Find the best score
     }
@@ -75,6 +75,8 @@ public class ByClosestType implements Comparator<Member> {
         int returnScore = query.returnType == null
                 ? 0
                 : typeComparator.compare(ts.returnType, query.returnType);
+
+        // Should add throws and annotations scores here
 
         return paramScore + returnScore;
     }}

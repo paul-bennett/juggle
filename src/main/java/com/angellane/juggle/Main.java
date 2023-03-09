@@ -78,6 +78,22 @@ public class Main {
     }
 
 
+    @Option(name="-@", aliases="--annotation", usage="Annotations", metaVar="type,type,...")
+    public void addAnnotationTypes(String annotationNames) {
+        annotationTypeNames.addAll(Arrays.stream(annotationNames.split(","))
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toSet())
+        );
+    }
+    List<String>  annotationTypeNames = new ArrayList<>();
+
+    public Set<Class<?>> getAnnotationTypes() {
+        return annotationTypeNames.stream()
+                .map(juggler::classForTypename)
+                .collect(Collectors.toSet());
+    }
+
+
     @Option(name="-a", aliases="--access", usage="Minimum accessibility of members to return",
             metaVar="private|protected|package|public")
     Accessibility minAccess = Accessibility.PUBLIC;
@@ -135,7 +151,7 @@ public class Main {
         MemberDecoder decoder = new MemberDecoder(importedPackageNames);
 
         Arrays.stream(juggler.findMembers(minAccess,
-                        new TypeSignature(getParamTypes(), getReturnType(), getThrowTypes())))
+                        new TypeSignature(getParamTypes(), getReturnType(), getThrowTypes(), getAnnotationTypes())))
                 .sorted(getComparator())
                 .forEach(m -> System.out.println(decoder.decode(m)));
     }

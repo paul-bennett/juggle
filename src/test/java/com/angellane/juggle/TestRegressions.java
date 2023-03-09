@@ -26,6 +26,7 @@ public class TestRegressions {
                         .collect(Collectors.toList()
                         ),
                 juggler.classForTypename("void"),
+                Set.of(),
                 Set.of()
                 );
         var actual = juggler.findMembers(Accessibility.PUBLIC, query);

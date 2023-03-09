@@ -1,5 +1,6 @@
 package com.angellane.juggle;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,14 +14,25 @@ public class TypeSignature {
     public final List<Class<?>> paramTypes;
     public final Class<?> returnType;
     public final Set<Class<?>> throwTypes;
+    public final Set<Class<?>> annotations;
 
-    public TypeSignature(List<Class<?>> paramTypes, Class<?> returnType, Set<Class<?>> throwTypes) {
-        this.paramTypes = paramTypes;
-        this.returnType = returnType;
-        this.throwTypes = throwTypes;
+    public TypeSignature(List<Class<?>> paramTypes, Class<?> returnType, Set<Class<?>> throwTypes,
+                         Set<Class<?>> annotationTypes) {
+        this.paramTypes  = paramTypes;
+        this.returnType  = returnType;
+        this.throwTypes  = throwTypes;
+        this.annotations = annotationTypes;
+    }
+
+    static Set<Class<?>> annotationClasses(Annotation[] classAnnotations, Annotation[] memberAnnotations) {
+        return Stream.concat(Arrays.stream(classAnnotations), Arrays.stream(memberAnnotations))
+                .map(Annotation::getClass)
+                .collect(Collectors.toSet());
     }
 
     public static List<TypeSignature> of(Member m) {
+        Annotation[] classAnnotations = m.getDeclaringClass().getDeclaredAnnotations();
+
         List<Class<?>> implicitParams = new ArrayList<>();
 
         // Handle the 'this' pointer for non-static members.
@@ -34,7 +46,8 @@ public class TypeSignature {
             return List.of(new TypeSignature(
                     List.of(c.getParameterTypes()),
                     c.getDeclaringClass(),
-                    Set.of(c.getExceptionTypes())
+                    Set.of(c.getExceptionTypes()),
+                    annotationClasses(classAnnotations, c.getDeclaredAnnotations())
             ));
         }
         if (m instanceof Method) {
@@ -45,21 +58,24 @@ public class TypeSignature {
                             .flatMap(Function.identity())
                             .collect(Collectors.toList()),
                     e.getReturnType(),
-                    Set.of(e.getExceptionTypes())
+                    Set.of(e.getExceptionTypes()),
+                    annotationClasses(classAnnotations, e.getDeclaredAnnotations())
             ));
         }
         else if (m instanceof Field) {
             Field f = (Field)m;
 
+            Set<Class<?>> annotations = annotationClasses(classAnnotations, f.getDeclaredAnnotations());
+
             return List.of(
-                    new TypeSignature(implicitParams, f.getType(), Set.of()),                   // Getter
+                    new TypeSignature(implicitParams, f.getType(), Set.of(), annotations),      // Getter
                     new TypeSignature(                                                          // Setter
                             Stream.of(implicitParams.stream(), Stream.<Class<?>>of(f.getType()))
                                     .flatMap(Function.identity())
                                     .collect(Collectors.toList()),
                             Void.TYPE,
-                            Set.of()
-                    )
+                            Set.of(),
+                            annotations)
             );
         }
         else
