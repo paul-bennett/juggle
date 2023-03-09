@@ -78,30 +78,59 @@ public class MemberDecoder {
     }
 
     public String decodeType(Type t) {
-        if (t instanceof GenericArrayType) {
-            var ga = (GenericArrayType)t;
-            return decodeType(ga.getGenericComponentType()) + "[]";
-        }
-        else if (t instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType)t;
-            return decodeType(pt.getRawType());
-        }
-        else if (t instanceof TypeVariable<?>) {
-            var tv = (TypeVariable<?>)t;
-            var bs = tv.getBounds();
-            if (bs.length == 1 && bs[0] == Object.class) bs = null;
+        /* In a JDK17 world...
+        return switch (t) {
+            case GenericArrayType   ga  -> decodeGenericArrayType(ga);
+            case ParameterizedType  pt  -> decodeParameterizedType(pt);
+            case TypeVariable<?>    tv  -> decodeTypeVariable(tv);
+            case WildcardType       wt  -> decodeWildcardType(wt);
+            case Class<?>           cl  -> decodeClass(cl);
+            default                     -> t.toString();
+        };
+        */
+             if (t instanceof GenericArrayType)     return decodeGenericArrayType((GenericArrayType)t);
+        else if (t instanceof ParameterizedType)    return decodeParameterizedType((ParameterizedType)t);
+        else if (t instanceof TypeVariable<?>)      return decodeTypeVariable((TypeVariable<?>)t);
+        else if (t instanceof WildcardType)         return decodeWildcardType((WildcardType)t);
+        else if (t instanceof Class<?>)             return decodeClass((Class<?>)t);
+        else                                        return t.toString();
+    }
 
-            return tv.getName() + (bs == null || bs.length == 0 ? ""
-                    : " extends " + Stream.of(bs).map(this::decodeType).collect(Collectors.joining(", ")));
+    public String decodeGenericArrayType(GenericArrayType t) {
+        return decodeType(t.getGenericComponentType()) + "[]";
+    }
+
+    public String decodeParameterizedType(ParameterizedType t) {
+        return decodeType(t.getRawType());
+    }
+
+    public <T extends GenericDeclaration> String decodeTypeVariable(TypeVariable<T> t) {
+        var bs = t.getBounds();
+        if (bs.length == 1 && bs[0] == Object.class) bs = null;
+
+        return t.getName() + (bs == null || bs.length == 0 ? ""
+                : " extends " + Stream.of(bs).map(this::decodeType).collect(Collectors.joining(", ")));
+    }
+
+    public String decodeWildcardType(WildcardType t) {
+        var lb = t.getLowerBounds();
+        var ub = t.getUpperBounds();
+
+        if (ub.length == 1 && ub[0] == Object.class) ub = null;
+
+        StringBuilder sb = new StringBuilder(t.getTypeName());
+
+        if (ub != null && ub.length > 0) {
+            sb.append(" extends ");
+            sb.append(Stream.of(ub).map(this::decodeType).collect(Collectors.joining(", ")));
         }
-        else if (t instanceof WildcardType) {
-            var wt = (WildcardType)t;
-            return "WILDCARD(" + wt + ")";
+
+        if (lb != null && lb.length > 0) {
+            sb.append(" super ");
+            sb.append(Stream.of(lb).map(this::decodeType).collect(Collectors.joining(", ")));
         }
-        else if (t instanceof Class<?>)
-            return decodeClass((Class<?>)t);
-        else
-            return t.toString();
+
+        return sb.toString();
     }
 
     public String decodeClass(Class<?> c) {
