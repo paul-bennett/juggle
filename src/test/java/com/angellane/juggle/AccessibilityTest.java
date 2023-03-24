@@ -1,10 +1,10 @@
 package com.angellane.juggle;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AccessibilityTest {
 
@@ -50,8 +50,8 @@ public class AccessibilityTest {
         assertEquals(Accessibility.PRIVATE,   Accessibility.fromString("private"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void fromInvalidString() {
-        Accessibility.fromString("junk");
+        assertThrows(IllegalArgumentException.class, () -> Accessibility.fromString("junk"));
     }
 }

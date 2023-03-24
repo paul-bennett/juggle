@@ -11,8 +11,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation("junit", "junit", "4.13.2")
     implementation("args4j", "args4j", "2.33")
+
+    testImplementation("org.junit.jupiter", "junit-jupiter-api",    "5.9.2")
+    testImplementation("org.junit.jupiter", "junit-jupiter-engine", "5.9.2")
 }
 
 configure<JavaPluginExtension> {
@@ -42,3 +44,6 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
