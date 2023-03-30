@@ -1,8 +1,8 @@
 plugins {
-    java
     application
 }
 
+val friendlyName = "Juggle"
 group = "com.angellane"
 version = "1.0-SNAPSHOT"
 
@@ -17,10 +17,11 @@ dependencies {
     testImplementation("org.junit.jupiter", "junit-jupiter-engine", "5.9.2")
 }
 
-configure<JavaPluginExtension> {
-    // Java 9+ needed for modules, so may as well go to next major LTS
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+java {
+    toolchain {
+        // Java 12 required for java.lang.Class.arrayType(), supporting passing arrays as -p and -r options
+        languageVersion.set(JavaLanguageVersion.of(12))
+    }
 }
 
 application {
@@ -28,14 +29,19 @@ application {
 }
 
 afterEvaluate {
-    tasks.withType(JavaCompile::class) {
+    tasks.withType<JavaCompile> {
         options.compilerArgs.add("-Xlint:unchecked")
         options.compilerArgs.add("-Xlint:deprecation")
     }
 }
 
 tasks.jar {
-    manifest.attributes["Main-Class"] = application.mainClass
+    manifest {
+        attributes["Main-Class"] = application.mainClass
+        attributes["Implementation-Title"] = friendlyName
+        attributes["Implementation-Version"] = version
+    }
+
     val dependencies = configurations
         .runtimeClasspath
         .get()
@@ -44,6 +50,6 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType<Test> {
+tasks.named<Test>("test") {
     useJUnitPlatform()
 }
