@@ -1,15 +1,15 @@
 package com.angellane.juggle;
 
 import java.io.IOException;
-import java.lang.module.*;
-import java.lang.reflect.*;
+import java.lang.module.Configuration;
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReader;
+import java.lang.module.ResolvedModule;
+import java.lang.reflect.Member;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
@@ -115,6 +115,13 @@ public class Juggler {
         }
     }
 
+    private static final Map<String, Class<?>> primitiveMap = Stream.of(
+                        Void.TYPE, Boolean.TYPE, Character.TYPE,
+                        Byte.TYPE, Short.TYPE, Integer.TYPE, Long.TYPE,
+                        Float.TYPE, Double.TYPE
+                    )
+                    .collect(Collectors.toMap(Class::getTypeName, Function.identity()));
+
     public Class<?> classForTypename(String typename) {
         final String ARRAY_SUFFIX = "[]";
 
@@ -125,35 +132,27 @@ public class Juggler {
             baseTypename = baseTypename.substring(0, baseTypename.length() - ARRAY_SUFFIX.length()).stripTrailing();
 
         // Start with the base type
-        Class<?> ret = Object.class;
-        switch (baseTypename) {
-            case "void":        ret = Void.TYPE;        break;
-            case "boolean":     ret = Boolean.TYPE;     break;
-            case "char":        ret = Character.TYPE;   break;
-            case "byte":        ret = Byte.TYPE;        break;
-            case "short":       ret = Short.TYPE;       break;
-            case "int":         ret = Integer.TYPE;     break;
-            case "long":        ret = Long.TYPE;        break;
-            case "float":       ret = Float.TYPE;       break;
-            case "double":      ret = Double.TYPE;      break;
-            default:
-                // Actually now want to try typename plainly, then prefixed by each import in turn
-                // Default to Object if we can't find any match
-                String finalTypename = baseTypename;
-                Optional<Class<?>> opt =
-                        Stream.of(Stream.of(""), importedPackageNames.stream().map(pkg -> pkg + "."))
-                                .flatMap(Function.identity())
-                                .map(prefix -> prefix + finalTypename)
-                                .map(this::loadClassByName)
-                                .flatMap(Optional::stream)
-                                .findFirst();
+        Class<?> ret = primitiveMap.computeIfAbsent(baseTypename,
+                name -> {
+                    // Actually now want to try typename plainly, then prefixed by each import in turn
+                    // Default to Object if we can't find any match
+                    Optional<Class<?>> opt =
+                            Stream.of(Stream.of(""), importedPackageNames.stream().map(pkg -> pkg + "."))
+                                    .flatMap(Function.identity())
+                                    .map(prefix -> prefix + name)
+                                    .map(this::loadClassByName)
+                                    .flatMap(Optional::stream)
+                                    .findFirst();
 
-                if (opt.isPresent())
-                    ret = opt.get();
-                else
-                    // If we get here, the class wasn't found, either naked or with any imported package prefix
-                    System.err.println("Warning: couldn't find class: " + baseTypename + "; using " + ret + " instead");
-        }
+                    if (opt.isPresent())
+                        return opt.get();
+                    else {
+                        Class<?> def = Object.class;
+                        // If we get here, the class wasn't found, either naked or with any imported package prefix
+                        System.err.println("Warning: couldn't find type: " + name + "; using " + def + " instead");
+                        return def;
+                    }
+                });
 
         // Now add the array dimension
         for ( ; arrayDimension > 0; --arrayDimension)
