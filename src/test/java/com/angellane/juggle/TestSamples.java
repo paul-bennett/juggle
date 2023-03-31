@@ -1,10 +1,13 @@
 package com.angellane.juggle;
 
 import com.angellane.juggle.testsupport.ShellParser;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static com.angellane.juggle.TestSamples.State.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,15 +20,20 @@ public class TestSamples {
                 "public static java.time.LocalTime java.time.LocalTime.now(java.time.Clock)\n");
     }
 
-    @Test
-    public void testReadme() {
-        runTestsFrom(getClass().getClassLoader().getResource("README.md"));
+    @TestFactory
+    public Stream<DynamicNode> testSampleFiles() {
+        ClassLoader cl = getClass().getClassLoader();
+
+        return Stream.of("README.md")   // In lieu of a way of listing *.md resources, name them individually
+                .map(fn -> DynamicContainer.dynamicContainer(fn, sampleTestStreamFrom(cl.getResource(fn))));
     }
 
     enum State { SKIP, CMD, OUT }
 
-    private void runTestsFrom(URL url) {
+    private Stream<DynamicNode> sampleTestStreamFrom(URL url) {
         assertNotNull(url, "Couldn't load test resource");
+
+        List<DynamicNode> ret = new ArrayList<>();
 
         // Within the file, examples of running the command are on lines that start "$ juggle ".  The rest of the
         // line provides the arguments; these may spill onto subsequent lines if the last character before the end
@@ -46,7 +54,7 @@ public class TestSamples {
             State state = SKIP;
 
             StringBuilder command = new StringBuilder();
-            StringBuilder output = new StringBuilder();
+            StringBuilder output  = new StringBuilder();
 
             String line;
             while (null != (line = br.readLine()))
@@ -57,8 +65,8 @@ public class TestSamples {
                           if (!line.startsWith(JUGGLE_CMD))
                             break;
 
-                          output.setLength(0);
-                          command.setLength(0);
+                          output  = new StringBuilder();
+                          command = new StringBuilder();
                           // fall through
                       case CMD:
                           if (line.endsWith(CONTINUE)) {
@@ -77,7 +85,8 @@ public class TestSamples {
                               String cmdStr = command.toString();
                               assertTrue(cmdStr.startsWith(JUGGLE_CMD));
                               String args = command.substring(JUGGLE_CMD.length());
-                              runTest(args, output.toString());
+                              String expected = output.toString();
+                              ret.add(DynamicTest.dynamicTest(args, () -> runTest(args, expected)));
                               state = SKIP;
                           }
                           break;
@@ -85,6 +94,8 @@ public class TestSamples {
         } catch (IOException e) {
             fail(e);
         }
+
+        return ret.stream();
     }
 
 
