@@ -132,7 +132,6 @@ public class Juggler {
             baseTypename = baseTypename.substring(0, baseTypename.length() - ARRAY_SUFFIX.length()).stripTrailing();
 
         // Start with the base type
-        Juggler juggler = this;
         Class<?> ret = primitiveMap.computeIfAbsent(baseTypename,
                 name -> {
                     // Actually now want to try typename plainly, then prefixed by each import in turn
@@ -141,7 +140,7 @@ public class Juggler {
                             Stream.of(Stream.of(""), importedPackageNames.stream().map(pkg -> pkg + "."))
                                     .flatMap(Function.identity())
                                     .map(prefix -> prefix + name)
-                                    .map(n -> juggler.loadClassByName(n))
+                                    .map(this::loadClassByName)
                                     .flatMap(Optional::stream)
                                     .findFirst();
 
