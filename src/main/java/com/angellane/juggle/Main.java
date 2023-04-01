@@ -133,7 +133,8 @@ public class Main {
         } catch (CmdLineException e) {
             System.err.println(e.getMessage());
             parser.printSingleLineUsage(System.out);
-            System.exit(-1);
+            System.out.println();
+            return false;
         }
 
         return true;

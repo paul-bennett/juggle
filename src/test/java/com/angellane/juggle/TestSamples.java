@@ -24,7 +24,7 @@ public class TestSamples {
     public Stream<DynamicNode> testSampleFiles() {
         ClassLoader cl = getClass().getClassLoader();
 
-        return Stream.of("README.md")   // In lieu of a way of listing *.md resources, name them individually
+        return Stream.of("README.md", "REGRESSIONS.md")
                 .map(fn -> DynamicContainer.dynamicContainer(fn, sampleTestStreamFrom(cl.getResource(fn))));
     }
 
