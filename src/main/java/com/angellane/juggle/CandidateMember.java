@@ -74,13 +74,13 @@ class CandidateMember {
         return List.of(getter, setter);
     }
 
-    public boolean matchesParams(List<Class<?>> queryParamTypes, boolean permute) {
-        List<List<Class<?>>> paramPermutations = permute
+    public boolean matchesParams(List<? extends Class<?>> queryParamTypes, boolean permute) {
+        List<List<? extends Class<?>>> paramPermutations = permute
                 ? (new PermutationGenerator<>(queryParamTypes)).stream().distinct().collect(Collectors.toList())
                 : List.of(queryParamTypes);
 
         for (var permutedParamTypes : paramPermutations) {
-            Iterator<Class<?>> queryTypeIter = permutedParamTypes.iterator();
+            Iterator<? extends Class<?>> queryTypeIter = permutedParamTypes.iterator();
 
             if (permutedParamTypes.size() == paramTypes.size()
                     && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next())))
