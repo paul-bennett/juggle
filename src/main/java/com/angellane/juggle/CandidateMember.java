@@ -147,34 +147,35 @@ class CandidateMember {
     // The 19 Widening Primitive Conversions, documented in Java Language Specification (Java SE 14 edn) sect 5.1.2
     // https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.2
     private static final Map<Class<?>, Set<Class<?>>> wideningConversions = Map.ofEntries(
-            Map.entry(Byte.TYPE, Set.of(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Short.TYPE, Set.of(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Character.TYPE, Set.of(Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Integer.TYPE, Set.of(Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Long.TYPE, Set.of(Float.TYPE, Double.TYPE)),
-            Map.entry(Float.TYPE, Set.of(Double.TYPE))
+            Map.entry(Byte      .TYPE, Set.of(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
+            Map.entry(Short     .TYPE, Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
+            Map.entry(Character .TYPE, Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
+            Map.entry(Integer   .TYPE, Set.of(                          Long.TYPE, Float.TYPE, Double.TYPE)),
+            Map.entry(Long      .TYPE, Set.of(                                     Float.TYPE, Double.TYPE)),
+            Map.entry(Float     .TYPE, Set.of(                                                 Double.TYPE))
     );
 
     // The boxing/unboxing conversions
-    private static final Map<Class<?>, Class<?>> boxingConversions = Map.ofEntries(
+    private static final Map<Class<?>, Class<?>> boxingConversions =
+        Map.ofEntries(
             // Boxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.7
-            Map.entry(Boolean.class, Boolean.TYPE),
-            Map.entry(Byte.class, Byte.TYPE),
-            Map.entry(Short.class, Short.TYPE),
-            Map.entry(Character.class, Character.TYPE),
-            Map.entry(Integer.class, Integer.TYPE),
-            Map.entry(Long.class, Long.TYPE),
-            Map.entry(Float.class, Float.TYPE),
-            Map.entry(Double.class, Double.TYPE),
+            Map.entry(Boolean   .class, Boolean     .TYPE),
+            Map.entry(Byte      .class, Byte        .TYPE),
+            Map.entry(Short     .class, Short       .TYPE),
+            Map.entry(Character .class, Character   .TYPE),
+            Map.entry(Integer   .class, Integer     .TYPE),
+            Map.entry(Long      .class, Long        .TYPE),
+            Map.entry(Float     .class, Float       .TYPE),
+            Map.entry(Double    .class, Double      .TYPE),
 
             // Unboxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.8
-            Map.entry(Boolean.TYPE, Boolean.class),
-            Map.entry(Byte.TYPE, Byte.class),
-            Map.entry(Short.TYPE, Short.class),
-            Map.entry(Character.TYPE, Character.class),
-            Map.entry(Integer.TYPE, Integer.class),
-            Map.entry(Long.TYPE, Long.class),
-            Map.entry(Float.TYPE, Float.class),
-            Map.entry(Double.TYPE, Double.class)
+            Map.entry(Boolean   .TYPE,  Boolean     .class),
+            Map.entry(Byte      .TYPE,  Byte        .class),
+            Map.entry(Short     .TYPE,  Short       .class),
+            Map.entry(Character .TYPE,  Character   .class),
+            Map.entry(Integer   .TYPE,  Integer     .class),
+            Map.entry(Long      .TYPE,  Long        .class),
+            Map.entry(Float     .TYPE,  Float       .class),
+            Map.entry(Double    .TYPE,  Double      .class)
     );
 }
