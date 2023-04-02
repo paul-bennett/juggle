@@ -5,7 +5,6 @@ import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReader;
 import java.lang.module.ResolvedModule;
-import java.lang.reflect.Member;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -177,17 +176,22 @@ public class Juggler {
                 );
     }
 
-    public Member[] findMembers(Accessibility minAccess, TypeSignature query) {
-        return allCandidates()
-                .filter(m -> !m.getMember().getDeclaringClass().isAnonymousClass())     // anon and local classes ...
-                .filter(m -> !m.getMember().getDeclaringClass().isLocalClass())         // ... are unutterable anyway
-                .filter(m -> query.annotations == null || m.matchesAnnotations(query.annotations))
-                .filter(m -> query.throwTypes == null || m.matchesThrows(query.throwTypes))
-                .filter(m -> query.returnType == null || m.matchesReturn(query.returnType))
-                .filter(m -> query.paramTypes == null || m.matchesParams(query.paramTypes, true))
-                .map(CandidateMember::getMember)
-                .filter(m -> Accessibility.fromModifiers(m.getModifiers()).isAtLastAsAccessibleAsOther(minAccess))
-                .distinct()
-                .toArray(Member[]::new);
+    private final Deque<Function<CandidateMember, Stream<CandidateMember>>> processors = new LinkedList<>();
+    public void appendProcessor(Function<CandidateMember, Stream<CandidateMember>> processor) {
+        processors.addLast(processor);
+    }
+    public void prependProcessor(Function<CandidateMember, Stream<CandidateMember>> processor) {
+        processors.addFirst(processor);
+    }
+
+    protected Function<CandidateMember, Stream<CandidateMember>> filter(Predicate<CandidateMember> pred) {
+        return m -> pred.test(m) ? Stream.of(m) : Stream.empty();
+    }
+
+    public void appendFilter (Predicate<CandidateMember> pred) { appendProcessor (filter(pred)); }
+    public void prependFilter(Predicate<CandidateMember> pred) { prependProcessor(filter(pred)); }
+
+    public Stream<CandidateMember> chainProcessors(Stream<CandidateMember> s) {
+        return s.flatMap(processors.stream().reduce(Stream::of, (a,b) -> (m -> a.apply(m).flatMap(b))));
     }
 }

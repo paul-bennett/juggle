@@ -8,6 +8,7 @@ import org.kohsuke.args4j.Option;
 import java.lang.reflect.Member;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
     // Command-line options
@@ -149,10 +150,32 @@ public class Main {
     public void goJuggle() {
         juggler = new Juggler(jarPaths, moduleNames, importedPackageNames);
 
+        // Sources
+
+        Stream<CandidateMember> sources = juggler.allCandidates();
+
+        // Processors
+
+        juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
+        juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
+
+        if (getAnnotationTypes() != null) juggler.appendFilter(m -> m.matchesAnnotations(getAnnotationTypes()));
+        if (getThrowTypes()      != null) juggler.appendFilter(m -> m.matchesThrows(getThrowTypes()));
+        if (getReturnType()      != null) juggler.appendFilter(m -> m.matchesReturn(getReturnType()));
+        if (getParamTypes()      != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes(), true));
+
+        juggler.appendFilter(m -> Accessibility.fromModifiers(
+                m.getMember().getModifiers()).isAtLastAsAccessibleAsOther(minAccess));
+
+        // Sinks
+
         MemberDecoder decoder = new MemberDecoder(importedPackageNames);
 
-        Arrays.stream(juggler.findMembers(minAccess,
-                        new TypeSignature(getParamTypes(), getReturnType(), getThrowTypes(), getAnnotationTypes())))
+        // Go!
+
+        juggler.chainProcessors(sources)
+                .map(CandidateMember::getMember)
+                .distinct()
                 .sorted(getComparator())
                 .forEach(m -> System.out.println(decoder.decode(m)));
     }

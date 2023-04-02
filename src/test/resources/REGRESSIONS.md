@@ -36,3 +36,15 @@ $ juggle --help
 $
 ````
 
+## Previously fixed bugs
+
+### [GitHub issue #1](https://github.com/paul-bennett/juggle/issues/1)
+
+Searching (with -p or -r) for an array of a primitive type falls back to Object
+
+
+````
+$ juggle -p double[],int,int,double -r void
+public static void java.util.Arrays.fill(double[],int,int,double)
+$
+````
