@@ -19,17 +19,22 @@ import java.util.stream.Stream;
 public class Juggler {
     private static final String CLASS_SUFFIX = ".class";
     private static final String MODULE_INFO  = "module-info";
-    private static final String BASE_MODULE  = "java.base";
 
-    private final Configuration modConf;
-    private final ResolvingURLClassLoader loader;
-    private final Collection<Class<?>> classesToSearch;
-    private final List<String> importedPackageNames;
+    private Configuration modConf;
+    private ResolvingURLClassLoader loader;
+    private final List<String> importedPackageNames = new ArrayList<>();
 
-    public Juggler(List<String> jars, List<String> mods, List<String> importedPackageNames) {
-        this.importedPackageNames = importedPackageNames;
+    // Sources
+    private final List<String> jarNames = new ArrayList<>();
+    private final List<String> modNames = new ArrayList<>();
 
-        URL[] urls = jars.stream()
+    public Juggler() {
+        importedPackageNames.add(Object.class.getPackageName());    // "java.lang" is always imported
+
+    }
+
+    public Collection<Class<?>> getClassesToSearch() {
+        URL[] urls = jarNames.stream()
                 .flatMap(path -> {
                     try {
                         return Stream.of(Path.of(path).toUri().toURL());
@@ -41,20 +46,27 @@ public class Juggler {
 
         this.loader = new ResolvingURLClassLoader(urls);
 
-        if (mods == null || mods.isEmpty())
-            mods = List.of(BASE_MODULE);
+        if (modNames.isEmpty())
+            modNames.add(Object.class.getModule().getName());       // "java.base"
 
         this.modConf = ModuleLayer.boot().configuration().resolve(
                 ModuleFinder.ofSystem(),
                 ModuleFinder.of(Path.of(".")),
-                mods);
+                modNames);
 
-        classesToSearch = Stream.of( mods.stream().flatMap(this::moduleClassStream)
-                                   , jars.stream().flatMap(this::jarClassStream)
-                                   )
+        return Stream.of( modNames.stream().flatMap(this::moduleClassStream)
+                        , jarNames.stream().flatMap(this::jarClassStream)
+                        )
                 .flatMap(Function.identity())
                 .collect(Collectors.toList());
     }
+
+    public void addJarName(String jarName)          { jarNames.add(jarName); }
+    public List<String> getJarNames()               { return jarNames; }
+    public void addModuleName(String modName)       { modNames.add(modName);}
+    public List<String> getModuleNames()            { return modNames; }
+    public void addImportedPackageName(String name) { importedPackageNames.add(name); }
+    public List<String> getImportedPackageNames()   { return importedPackageNames; }
 
 
     // Returns stream of class names within a JAR.  Note: these class names might not be valid Java identifiers,
@@ -162,7 +174,7 @@ public class Juggler {
     }
 
     public Stream<CandidateMember> allCandidates() {
-        return classesToSearch.stream()
+        return getClassesToSearch().stream()
                 .flatMap(c -> Stream.of(
                                   Arrays.stream(c.getDeclaredFields())
                                         .map(CandidateMember::membersFromField)

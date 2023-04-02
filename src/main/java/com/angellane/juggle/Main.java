@@ -11,26 +11,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
+    public Juggler juggler = new Juggler();
+
     // Command-line options
 
     @Option(name="-i", aliases={"--import"}, usage="Imported package names", metaVar="packageName")
-    public void addImport(String importName) { importedPackageNames.add(importName); }
-    final List<String> importedPackageNames = new ArrayList<>(List.of("java.lang"));
+    public void addImport(String importName) { juggler.addImportedPackageName(importName); }
 
 
     @Option(name="-j", aliases="--jar", usage="JAR file to include in search", metaVar="jarFilePath")
-    public void addJar(String jarName) { jarPaths.add(jarName); }
-    final List<String> jarPaths = new ArrayList<>();
+    public void addJar(String jarName) { juggler.addJarName(jarName); }
 
 
     @Option(name="-m", aliases="--module", usage="Modules to search", metaVar="moduleName")
     public void addModule(String arg) {
-        moduleNames.addAll(Arrays.stream(arg.split(","))
+        Arrays.stream(arg.split(","))
                 .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList()));
+                .forEach(m -> juggler.addModuleName(m));
     }
-
-    final List<String> moduleNames = new ArrayList<>();
 
 
     @Option(name="-p", aliases="--param", usage="Parameter type of searched function", metaVar="type,type,...")
@@ -119,8 +117,6 @@ public class Main {
 
     // Application logic follows.
 
-    public Juggler juggler;
-
     public boolean parseArgs(String[] args) {
         final CmdLineParser parser = new CmdLineParser(this);
         try {
@@ -148,8 +144,6 @@ public class Main {
     }
 
     public void goJuggle() {
-        juggler = new Juggler(jarPaths, moduleNames, importedPackageNames);
-
         // Sources
 
         Stream<CandidateMember> sources = juggler.allCandidates();
@@ -169,7 +163,7 @@ public class Main {
 
         // Sinks
 
-        MemberDecoder decoder = new MemberDecoder(importedPackageNames);
+        MemberDecoder decoder = new MemberDecoder(juggler.getImportedPackageNames());
 
         // Go!
 

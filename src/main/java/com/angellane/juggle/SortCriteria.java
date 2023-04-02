@@ -24,7 +24,7 @@ enum SortCriteria {
     TYPE    (m -> new ByMostSpecificType()),
     CLOSEST (m -> new ByClosestType(
             new TypeSignature(m.getParamTypes(), m.getReturnType(), m.getThrowTypes(), m.getAnnotationTypes()))),
-    PACKAGE (m -> new ByPackage(m.importedPackageNames)),
+    PACKAGE (m -> new ByPackage(m.juggler.getImportedPackageNames())),
     NAME    (m -> new ByCanonicalName());
 
     private final Function<Main, Comparator<Member>> comparatorGenerator;
