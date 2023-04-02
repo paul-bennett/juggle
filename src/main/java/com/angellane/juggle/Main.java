@@ -1,6 +1,7 @@
 package com.angellane.juggle;
 
 import com.angellane.juggle.comparator.MultiComparator;
+import com.angellane.juggle.processor.PermuteParams;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -111,6 +112,12 @@ public class Main {
                 : List.of(SortCriteria.CLOSEST, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
     }
 
+    @Option(name="-x", aliases="--permute", usage="Also match permutations of parameters")
+    public void addPermutationProcessor(boolean permute) {
+        if (permute)
+            juggler.prependProcessor(new PermuteParams());
+    }
+
     @Option(name="-h", aliases="--help", help=true)
     boolean helpRequested;
 
@@ -153,13 +160,18 @@ public class Main {
         juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
         juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
 
-        if (getAnnotationTypes() != null) juggler.appendFilter(m -> m.matchesAnnotations(getAnnotationTypes()));
-        if (getThrowTypes()      != null) juggler.appendFilter(m -> m.matchesThrows(getThrowTypes()));
-        if (getReturnType()      != null) juggler.appendFilter(m -> m.matchesReturn(getReturnType()));
-        if (getParamTypes()      != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes(), true));
+        if (getAnnotationTypes() != null) juggler.prependFilter(m -> m.matchesAnnotations(getAnnotationTypes()));
+        if (getThrowTypes()      != null) juggler.prependFilter(m -> m.matchesThrows(getThrowTypes()));
+        if (getReturnType()      != null) juggler.prependFilter(m -> m.matchesReturn(getReturnType()));
+        if (getParamTypes()      != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes()));
 
-        juggler.appendFilter(m -> Accessibility.fromModifiers(
+        juggler.prependFilter(m -> Accessibility.fromModifiers(
                 m.getMember().getModifiers()).isAtLastAsAccessibleAsOther(minAccess));
+
+        if (getParamTypes() != null)
+            // Optimisation: filter out anything that hasn't got the right number of params
+            // Useful because permutation of every candidate member's params takes forever.
+            juggler.prependFilter(m -> m.getParamTypes().size() == getParamTypes().size());
 
         // Sinks
 

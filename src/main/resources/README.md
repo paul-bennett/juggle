@@ -270,6 +270,30 @@ specification. That can result in some pseudo-private members or classes
 (such as `sun.security.util.DerOutputStream` above) leaking into output.
 Just because you _can_ call a method doesn't mean you _should_.
 
+Sometimes you might not know the order of parameters.  The `-x` option causes
+Juggle to also match methods whose parameter types match the supplied ones, but
+not necessarily in the order you specified.
+
+For example, there are no methods that take a `double[]`, an `int`, a
+`double` and then an `int`:
+
+````
+$ juggle -p double[],int,double,int -r void
+$ 
+````
+
+However, if we allos Juggle to permute parmeters, it locates a match:
+
+````
+$ juggle -p double[],int,double,int -r void
+public static void java.util.Arrays.fill(double[],int,int,double)
+$ 
+````
+
+Note that parameter permutation can significantly increase runtime,
+so it's not enabled by default.
+
+
 ## Command-line summary
 
 Each command-line option has a long name equivalent. This table summarises all options.
@@ -285,3 +309,4 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-t`   | `--throws`      | type name(s)                                             | (don't match throws)                      | Exception types that must be thrown                 |                                             
 | `-@`   | `--annotation`  | annotation name(s)                                       | (don't match annotations)                 | Annotations to filter on (class or method)          |
 | `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria                                       |
+| `-x`   | `--permute`     | (none)                                                   | (don't permute)                           | Match permutations of supplied parameters           |    

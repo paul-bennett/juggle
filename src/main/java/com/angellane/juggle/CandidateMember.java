@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  * fields, which represent the type the member would have if considered as a static function.  For static
  * methods the paramTypes field includes an implicit first entry representing the type of 'this'.
  */
-class CandidateMember {
+public class CandidateMember {
     private final Member member;
     private final List<Class<?>> paramTypes;
     private final Class<?> returnType;
@@ -29,7 +29,18 @@ class CandidateMember {
         this.annotationTypes = annotationTypes;
     }
 
+    public CandidateMember(CandidateMember other, List<Class<?>> params) {
+        this.member = other.member;
+        this.returnType = other.returnType;
+        this.throwTypes = other.throwTypes;
+        this.annotationTypes = other.annotationTypes;
+
+        this.paramTypes = params;
+    }
+
     public Member getMember() { return member; }
+
+    public List<Class<?>> getParamTypes() { return paramTypes; }
 
     private static Set<Class<?>> annotationClasses(Annotation[] classAnnotations, Annotation[] memberAnnotations) {
         return Stream.concat(Arrays.stream(classAnnotations), Arrays.stream(memberAnnotations))
@@ -74,19 +85,11 @@ class CandidateMember {
         return List.of(getter, setter);
     }
 
-    public boolean matchesParams(List<? extends Class<?>> queryParamTypes, boolean permute) {
-        List<List<? extends Class<?>>> paramPermutations = permute
-                ? (new PermutationGenerator<>(queryParamTypes)).stream().distinct().collect(Collectors.toList())
-                : List.of(queryParamTypes);
+    public boolean matchesParams(List<? extends Class<?>> queryParamTypes) {
+        Iterator<? extends Class<?>> queryTypeIter = queryParamTypes.iterator();
 
-        for (var permutedParamTypes : paramPermutations) {
-            Iterator<? extends Class<?>> queryTypeIter = permutedParamTypes.iterator();
-
-            if (permutedParamTypes.size() == paramTypes.size()
-                    && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next())))
-                return true;
-        }
-        return false;
+        return queryParamTypes.size() == paramTypes.size()
+                && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
     }
 
     public boolean matchesReturn(Class<?> queryReturnType) {
