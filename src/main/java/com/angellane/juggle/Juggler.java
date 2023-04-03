@@ -100,7 +100,7 @@ public class Juggler {
                     else {
                         Class<?> def = Object.class;
                         // If we get here, the class wasn't found, either naked or with any imported package prefix
-                        System.err.println("Warning: couldn't find type: " + name + "; using " + def + " instead");
+                        System.err.println("*** Couldn't find type: " + name + "; using " + def + " instead");
                         return def;
                     }
                 });

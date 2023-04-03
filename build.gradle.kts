@@ -53,6 +53,7 @@ tasks.jar {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    dependsOn(tasks.jar)    // One of the tests in README.md uses the built JAR file
 }
 
 tasks.test {

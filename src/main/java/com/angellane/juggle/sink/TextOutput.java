@@ -161,7 +161,7 @@ public class TextOutput implements Sink {
             String packageName = c.getPackageName();
 
             if (canonicalName == null)
-                out.println("/// " + c);
+                out.println("/// " + c);    // Should never get here because we filter out Voldemort candidates earlier
             else if (imports.contains(packageName))
                 // Knock off the "packageName." prefix
                 ret.append(canonicalName.substring(packageName.length()+1));
