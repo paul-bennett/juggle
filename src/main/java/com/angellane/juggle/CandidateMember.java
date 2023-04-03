@@ -38,6 +38,18 @@ public class CandidateMember {
         this.paramTypes = params;
     }
 
+    // For the purposes of equality and hashing, defer to the wrapped Member
+    @Override
+    public int hashCode() {
+        return this.getMember().hashCode();
+    }
+    @Override
+    public boolean equals(Object other) {
+        return this == other
+                || other instanceof CandidateMember && this.getMember().equals(((CandidateMember)other).getMember());
+    }
+
+
     public Member getMember() { return member; }
 
     public List<Class<?>> getParamTypes() { return paramTypes; }

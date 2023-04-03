@@ -50,3 +50,13 @@ $ juggle -p double[],int,int,double -r void
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
+
+### [GitHub issue #32](https://github.com/paul-bennett/juggle/issues/32)
+
+Results aren't deduplicated
+
+````
+$ juggle -n asSubclass -m java.base,java.base
+public <U> Class<T> Class<T>.asSubclass(Class<T>)
+$
+````
