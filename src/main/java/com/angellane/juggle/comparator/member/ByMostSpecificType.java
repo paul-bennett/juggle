@@ -1,11 +1,11 @@
 package com.angellane.juggle.comparator.member;
 
+import com.angellane.juggle.CandidateMember;
 import com.angellane.juggle.CartesianProduct;
 import com.angellane.juggle.PermutationGenerator;
 import com.angellane.juggle.TypeSignature;
 import com.angellane.juggle.comparator.TypeComparator;
 
-import java.lang.reflect.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -14,11 +14,11 @@ import java.util.stream.IntStream;
 /**
  * Compares two class Members based on their type specificity.  More specific types before less specific ones.
  */
-public class ByMostSpecificType implements Comparator<Member> {
+public class ByMostSpecificType implements Comparator<CandidateMember> {
     private final TypeComparator typeComparator = new TypeComparator();
 
     @Override
-    public int compare(Member m1, Member m2) {
+    public int compare(CandidateMember m1, CandidateMember m2) {
         // Which member is more specific (and therefore should be sorted first), m1 or m2?
 
         // Strategy is to convert the member into a list of type signatures.  (For Methods and Constructors such a
@@ -39,7 +39,7 @@ public class ByMostSpecificType implements Comparator<Member> {
         //
         // Annotations, and exceptions thrown by the candidate members are ignored in this process
 
-        int winningScore = CartesianProduct.of(TypeSignature.of(m1), TypeSignature.of(m2)).stream()
+        int winningScore = CartesianProduct.of(TypeSignature.of(m1.getMember()), TypeSignature.of(m2.getMember())).stream()
                 .peek(ts -> { assert(ts.size() == 2); })                        // Sanity check: elements are pairs
 
                 .filter(ts -> ts.get(0).paramTypes.size() == ts.get(1).paramTypes.size())   // Param list len must ==

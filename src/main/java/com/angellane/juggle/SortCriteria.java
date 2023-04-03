@@ -2,8 +2,8 @@ package com.angellane.juggle;
 
 import com.angellane.juggle.comparator.member.*;
 
-import java.lang.reflect.Member;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -20,20 +20,21 @@ import java.util.function.Function;
  *       - constructor arg is a Function<Main, Comparator<Member>>
  */
 enum SortCriteria {
-    ACCESS  (m -> new ByAccessibility()),
-    TYPE    (m -> new ByMostSpecificType()),
-    CLOSEST (m -> new ByClosestType(
-            new TypeSignature(m.getParamTypes(), m.getReturnType(), m.getThrowTypes(), m.getAnnotationTypes()))),
-    PACKAGE (m -> new ByPackage(m.juggler.getImportedPackageNames())),
-    NAME    (m -> new ByCanonicalName());
+    ACCESS  (j -> new ByAccessibility()),
+    TYPE    (j -> new ByMostSpecificType()),
+    CLOSEST (j -> new ByClosestType(
+            new TypeSignature(j.getParamTypes(), j.getReturnType(),
+                    Set.of(), Set.of()))),                  // This comparator doesn't inspect Throws or annotations
+    PACKAGE (j -> new ByPackage(j.getImportedPackageNames())),
+    NAME    (j -> new ByCanonicalName());
 
-    private final Function<Main, Comparator<Member>> comparatorGenerator;
+    private final Function<Juggler, Comparator<CandidateMember>> comparatorGenerator;
 
-    SortCriteria(Function<Main, Comparator<Member>> comparatorGenerator) {
+    SortCriteria(Function<Juggler, Comparator<CandidateMember>> comparatorGenerator) {
         this.comparatorGenerator = comparatorGenerator;
     }
 
-    Comparator<Member> getComparator(Main m) {
-        return comparatorGenerator.apply(m);
+    Comparator<CandidateMember> getComparator(Juggler j) {
+        return comparatorGenerator.apply(j);
     }
 }

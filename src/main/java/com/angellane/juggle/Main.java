@@ -1,15 +1,15 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.comparator.MultiComparator;
 import com.angellane.juggle.processor.PermuteParams;
+import com.angellane.juggle.sink.TextOutput;
+import com.angellane.juggle.source.JarFile;
+import com.angellane.juggle.source.Module;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
-import java.lang.reflect.Member;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
     public Juggler juggler = new Juggler();
@@ -21,14 +21,14 @@ public class Main {
 
 
     @Option(name="-j", aliases="--jar", usage="JAR file to include in search", metaVar="jarFilePath")
-    public void addJar(String jarName) { juggler.addJarName(jarName); }
+    public void addJar(String jarName) { juggler.addSource(new JarFile(jarName)); }
 
 
     @Option(name="-m", aliases="--module", usage="Modules to search", metaVar="moduleName")
     public void addModule(String arg) {
         Arrays.stream(arg.split(","))
                 .filter(s -> !s.isEmpty())
-                .forEach(m -> juggler.addModuleName(m));
+                .forEach(m -> juggler.addSource(new Module(m)));
     }
 
 
@@ -100,16 +100,7 @@ public class Main {
 
     @Option(name="-s", aliases="--sort", usage="Sort criteria")
     public void addSortCriteria(SortCriteria criteria) {
-        if (sortCriteria == null)
-            sortCriteria = new ArrayList<>();
-        sortCriteria.add(criteria);
-    }
-    List<SortCriteria> sortCriteria = null;
-    public List<SortCriteria> getSortCriteria() {
-        // Return default criteria of none were set.
-        return sortCriteria != null
-                ? sortCriteria
-                : List.of(SortCriteria.CLOSEST, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
+        juggler.addSortCriteria(criteria);
     }
 
     @Option(name="-x", aliases="--permute", usage="Also match permutations of parameters")
@@ -144,16 +135,10 @@ public class Main {
         return true;
     }
 
-    public Comparator<Member> getComparator() {
-        return MultiComparator.of(getSortCriteria().stream()
-                .map(g -> g.getComparator(this))
-                .collect(Collectors.toList()));
-    }
-
     public void goJuggle() {
         // Sources
 
-        Stream<CandidateMember> sources = juggler.allCandidates();
+        juggler.configureAllSources();      // Essential that sources are configured before getting param/return types
 
         // Processors
 
@@ -173,17 +158,17 @@ public class Main {
             // Useful because permutation of every candidate member's params takes forever.
             juggler.prependFilter(m -> m.getParamTypes().size() == getParamTypes().size());
 
+        // These assist the CLOSEST sort.
+        juggler.setParamTypes(getParamTypes());
+        juggler.setReturnType(getReturnType());
+
         // Sinks
 
-        MemberDecoder decoder = new MemberDecoder(juggler.getImportedPackageNames());
+        juggler.setSink(new TextOutput(juggler.getImportedPackageNames(), System.out));
 
         // Go!
 
-        juggler.chainProcessors(sources)
-                .map(CandidateMember::getMember)
-                .distinct()
-                .sorted(getComparator())
-                .forEach(m -> System.out.println(decoder.decode(m)));
+        juggler.goJuggle();
     }
 
     public static void main(String[] args) {

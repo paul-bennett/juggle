@@ -1,15 +1,15 @@
 package com.angellane.juggle.comparator.member;
 
 import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.CandidateMember;
 
-import java.lang.reflect.Member;
 import java.util.Comparator;
 
-public class ByAccessibility implements Comparator<Member> {
+public class ByAccessibility implements Comparator<CandidateMember> {
     @Override
-    public int compare(Member o1, Member o2) {
-        return Math.negateExact(Accessibility.fromModifiers(o1.getModifiers())
-                .compareTo(Accessibility.fromModifiers(o2.getModifiers())));
+    public int compare(CandidateMember o1, CandidateMember o2) {
+        return Math.negateExact(Accessibility.fromModifiers(o1.getMember().getModifiers())
+                .compareTo(Accessibility.fromModifiers(o2.getMember().getModifiers())));
     }
 }
 

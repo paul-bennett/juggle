@@ -18,9 +18,8 @@ public class CmdLineTest {
         assertFalse(app.helpRequested);
         assertEquals(1, app.juggler.getImportedPackageNames().size());   // java.lang
         assertNull(app.returnTypeName);
-        assertEquals(0, app.juggler.getJarNames().size());
         assertEquals(Accessibility.PUBLIC, app.minAccess);
-        assertEquals(0, app.juggler.getModuleNames().size());
+        assertEquals(1, app.juggler.getSources().size());   // just the default source, java.base
     }
 
     @Test

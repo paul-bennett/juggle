@@ -1,16 +1,30 @@
-package com.angellane.juggle;
+package com.angellane.juggle.sink;
 
+import com.angellane.juggle.CandidateMember;
+
+import java.io.PrintStream;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MemberDecoder {
+public class TextOutput implements Sink {
+    PrintStream out;
     private final Set<String> imports;
 
-    public MemberDecoder(List<String> importedPackageNames) {
+    public TextOutput(List<String> importedPackageNames, PrintStream out) {
         this.imports = Set.copyOf(importedPackageNames);
+        this.out = out;
     }
+
+    @Override
+    public void accept(CandidateMember candidateMember) {
+        out.println(decode(candidateMember.getMember()));
+    }
+
 
     public String decode(Member m) {
         StringBuilder ret = new StringBuilder();
@@ -147,7 +161,7 @@ public class MemberDecoder {
             String packageName = c.getPackageName();
 
             if (canonicalName == null)
-                System.out.println("/// " + c);
+                out.println("/// " + c);
             else if (imports.contains(packageName))
                 // Knock off the "packageName." prefix
                 ret.append(canonicalName.substring(packageName.length()+1));
@@ -189,5 +203,4 @@ public class MemberDecoder {
                             .map(this::decodeType)
                             .collect(Collectors.joining(","));
     }
-
 }
