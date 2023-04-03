@@ -8,6 +8,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import java.lang.module.FindException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -138,7 +139,13 @@ public class Main {
     public void goJuggle() {
         // Sources
 
-        juggler.configureAllSources();      // Essential that sources are configured before getting param/return types
+        try {
+            juggler.configureAllSources();      // Essential that sources are configured before getting param/return types
+        }
+        catch (FindException ex) {
+            System.err.println("*** " + ex.getLocalizedMessage());
+            return;
+        }
 
         // Processors
 

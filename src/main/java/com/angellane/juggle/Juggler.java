@@ -190,6 +190,5 @@ public class Juggler {
                 .distinct()
                 .sorted(getComparator())
                 .forEach(m -> sink.accept(m));
-
     }
 }

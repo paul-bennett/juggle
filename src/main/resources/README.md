@@ -178,6 +178,14 @@ The `-m` flag can be used to specify JMODs to search.
 (Caveats: modules must be in the current working directory;
 this feature hasn't been thoroughly tested yet.)
 
+````
+$ juggle -m java.sql -r java.sql.CallableStatement
+public java.sql.CallableStatement java.sql.Connection.prepareCall(String) throws java.sql.SQLException
+public java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int) throws java.sql.SQLException
+public java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int,int) throws java.sql.SQLException
+$
+````
+
 At present there's no support for scanning an unpacked JAR, or a directory of
 class files.
 
@@ -279,15 +287,15 @@ For example, there are no methods that take a `double[]`, an `int`, a
 
 ````
 $ juggle -p double[],int,double,int -r void
-$ 
+$
 ````
 
 However, if we allos Juggle to permute parmeters, it locates a match:
 
 ````
-$ juggle -p double[],int,double,int -r void
+$ juggle -p double[],int,double,int -r void -x
 public static void java.util.Arrays.fill(double[],int,int,double)
-$ 
+$
 ````
 
 Note that parameter permutation can significantly increase runtime,
