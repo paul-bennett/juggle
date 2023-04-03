@@ -94,6 +94,11 @@ public class Main {
                 .collect(Collectors.toSet());
     }
 
+    @Option(name="-n", aliases="--name", usage="Filter by member name", metaVar="methodName")
+    public void addNameFilter(String name) {
+        juggler.prependFilter(m -> m.getMember().getName().toLowerCase().contains(name.toLowerCase()));
+    }
+
 
     @Option(name="-a", aliases="--access", usage="Minimum accessibility of members to return",
             metaVar="private|protected|package|public")

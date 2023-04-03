@@ -14,7 +14,7 @@ If we pass an invalid argument, we should get one line of help:
 ````
 $ juggle --fiddle-de-dee
 "--fiddle-de-dee" is not a valid option
- [-@ (--annotation) type,type,...] [-a (--access) [PRIVATE | PROTECTED | PACKAGE | PUBLIC]] [-h (--help)] [-i (--import) packageName] [-j (--jar) jarFilePath] [-m (--module) moduleName] [-p (--param) type,type,...] [-r (--return) type] [-s (--sort) [ACCESS | TYPE | CLOSEST | PACKAGE | NAME]] [-t (--throws) type,type,...] [-x (--permute)]
+ [-@ (--annotation) type,type,...] [-a (--access) [PRIVATE | PROTECTED | PACKAGE | PUBLIC]] [-h (--help)] [-i (--import) packageName] [-j (--jar) jarFilePath] [-m (--module) moduleName] [-n (--name) methodName] [-p (--param) type,type,...] [-r (--return) type] [-s (--sort) [ACCESS | TYPE | CLOSEST | PACKAGE | NAME]] [-t (--throws) type,type,...] [-x (--permute)]
 $
 ````
 
@@ -28,6 +28,7 @@ $ juggle --help
  -i (--import) packageName              : Imported package names
  -j (--jar) jarFilePath                 : JAR file to include in search
  -m (--module) moduleName               : Modules to search
+ -n (--name) methodName                 : Filter by member name
  -p (--param) type,type,...             : Parameter type of searched function
  -r (--return) type                     : Return type of searched function
  -s (--sort) [ACCESS | TYPE | CLOSEST   : Sort criteria

@@ -163,6 +163,21 @@ public int java.util.function.ToIntFunction<T>.applyAsInt(T)
 $
 ````
 
+If you want to find a method whose name includes a specific sequence of characters, use `-n`.
+Method names are compared without regards to case, and by substring only.
+
+````
+$ juggle -n substring
+public String AbstractStringBuilder.substring(int)
+public String AbstractStringBuilder.substring(int,int)
+public String String.substring(int)
+public String String.substring(int,int)
+public String StringBuilder.substring(int)
+public String StringBuilder.substring(int,int)
+public String StringBuffer.substring(int)
+public String StringBuffer.substring(int,int)
+$
+````
 
 ## Where to look
 
@@ -312,6 +327,7 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-i`   | `--import`      | package name                                             |                                           | Packages to import (`java.lang` is always searched) |
 | `-j`   | `--jar`         | file path                                                |                                           | JAR files to search                                 |
 | `-m`   | `--module`      | module name(s)                                           | `-m java.base`                            | JMODs to search                                     |
+| `-n`   | `--name`        | method name                                              | (don't match method names)                | Filter results by method name (case insensitive)    |
 | `-p`   | `--param`       | type name(s)                                             | (don't match parameters)                  | Type of parameters to search for                    |
 | `-r`   | `--return`      | type name                                                | (don't match return)                      | Return type to search for                           |
 | `-t`   | `--throws`      | type name(s)                                             | (don't match throws)                      | Exception types that must be thrown                 |                                             
