@@ -12,7 +12,7 @@ public abstract class Source {
     public void setJuggler(Juggler juggler) { this.juggler = new WeakReference<>(juggler); }
     public Juggler getJuggler() { return juggler.get(); }
 
-    public Optional<URL> configure() { return Optional.empty(); }
+    public abstract Optional<URL> configure();
 
     public abstract Stream<Class<?>> classStream();
 }
