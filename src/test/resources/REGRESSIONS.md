@@ -51,6 +51,34 @@ public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
 
+### [GitHub issue #16](https://github.com/paul-bennett/juggle/issues/32)
+
+Support module "implied readability"
+
+Prior to fixing this issue, specifying a module using `-m` would examine the classes
+directly defined within the module, but not any classes from modules which it requires
+transitively.
+
+For example, the `java.se` module requires 20 modules transitively, including `java.sql`.
+So the following two executions should return the same results.  (Prior to the fix,
+the second -- `-m java.se` -- showed no results.)
+
+````
+$ juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
+public ResultSet PreparedStatement.executeQuery() throws SQLException
+public ResultSet Statement.getGeneratedKeys() throws SQLException
+public ResultSet Statement.getResultSet() throws SQLException
+$
+````
+
+````
+$ juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
+public ResultSet PreparedStatement.executeQuery() throws SQLException
+public ResultSet Statement.getGeneratedKeys() throws SQLException
+public ResultSet Statement.getResultSet() throws SQLException
+$
+````
+
 ### [GitHub issue #32](https://github.com/paul-bennett/juggle/issues/32)
 
 Results aren't deduplicated
@@ -60,3 +88,4 @@ $ juggle -n asSubclass -m java.base,java.base
 public <U> Class<T> Class<T>.asSubclass(Class<T>)
 $
 ````
+

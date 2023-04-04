@@ -84,7 +84,6 @@ hundreds of methods that return `Object` in every result.)
 
 Omitting `-p` and omitting `-r` will list all methods in the JDK.
 While marginally interesting, the output is rather too long to be helpful!
-(This is also very slow unless you tweak the sort options; see below.)
 
 If Juggle can't find classes that you mention in `-p` or `-r` arguments, it
 emits a warning and treats them as if you specified `Object` instead.  This
@@ -104,6 +103,8 @@ In the above note how the first argument to `Objects.toString` is an `Object`,
 not a `String` (as specified with `-p`). Juggle includes this method in the
 result set because Java allows instances of a subclass to be passed to
 a function that is expecting a parent class (Widening Reference Conversion).
+This particular method is listed last in the results, because Juggle tries
+to list closer matches (i.e. where fewer conversions are neccessary) first.
 
 Juggle treats data fields as a pair of methods: a setter (which takes an
 argument of the field's type and returns `void`), and a getter (which takes
@@ -189,9 +190,9 @@ option:
 ...
 ````
 
-The `-m` flag can be used to specify JMODs to search.
-(Caveats: modules must be in the current working directory;
-this feature hasn't been thoroughly tested yet.)
+The `-m` flag can be used to specify JMODs to search.  Juggle will also search
+any modules that this module requires transitively (sometimes refferd to as
+"implied reads").
 
 ````
 $ juggle -m java.sql -r java.sql.CallableStatement
