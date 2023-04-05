@@ -36,37 +36,34 @@ public class Module extends Source {
     private void addTransitiveModules(Configuration modConf, String moduleName) {
         ResolvedModule mod = modConf.findModule(moduleName).orElse(null);
 
-        if (mod == null)
-            System.err.println("Warning: couldn't find module " + moduleName);
-        else {
-            mods.add(mod);
+        assert mod != null;
 
-            // Find transitively required modules ("implied read")
+        mods.add(mod);
 
-            mod.reference().descriptor().requires().stream()
-                    .filter(rm -> rm.modifiers().contains(ModuleDescriptor.Requires.Modifier.TRANSITIVE))
-                    .map(ModuleDescriptor.Requires::name)
-                    .forEach(name -> addTransitiveModules(modConf, name));
-        }
+        // Find transitively required modules ("implied read")
+
+        mod.reference().descriptor().requires().stream()
+                .filter(rm -> rm.modifiers().contains(ModuleDescriptor.Requires.Modifier.TRANSITIVE))
+                .map(ModuleDescriptor.Requires::name)
+                .forEach(name -> addTransitiveModules(modConf, name));
     }
 
     @Override
     public Stream<Class<?>> classStream() {
         return mods.stream()
                 .flatMap(mod -> {
+                    Stream<Class<?>> ret = Stream.empty();
                     try (ModuleReader reader = mod.reference().open()) {
-                        return reader.list()
+                        ret = reader.list()
                                 .filter(s -> s.endsWith(CLASS_SUFFIX))
                                 .map(s -> s.substring(0, s.length() - CLASS_SUFFIX.length()))
                                 .filter(s -> !s.equals(MODULE_INFO))
                                 .map(s -> s.replace('/', '.'))
                                 .map(n -> getJuggler().loadClassByName(n))
-                                .flatMap(Optional<Class<?>>::stream);
+                                .flatMap(Optional::stream);
                     }
-                    catch (IOException e) {
-                        System.err.println("Warning: error opening module " + moduleName);
-                        return Stream.empty();
-                    }
+                    catch (IOException ignored) {}
+                    return ret;
                 });
     }
 }

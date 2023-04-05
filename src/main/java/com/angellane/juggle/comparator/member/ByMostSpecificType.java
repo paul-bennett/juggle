@@ -35,13 +35,11 @@ public class ByMostSpecificType implements Comparator<CandidateMember> {
         //
         // After examining all permutations, find the score with the highest absolute value.  Return the sign of
         // the highest score.  So if we had scores of 0, -5, 4 and -2, we're return -1 because -5 has the largest
-        // absolute value so it wins, and it's a negative value so the return value is -1.
+        // absolute value, so it wins and since it's a negative value the return value is -1.
         //
         // Annotations, and exceptions thrown by the candidate members are ignored in this process
 
         int winningScore = CartesianProduct.of(TypeSignature.of(m1.getMember()), TypeSignature.of(m2.getMember())).stream()
-                .peek(ts -> { assert(ts.size() == 2); })                        // Sanity check: elements are pairs
-
                 .filter(ts -> ts.get(0).paramTypes.size() == ts.get(1).paramTypes.size())   // Param list len must ==
 
                 .flatMap(ts -> {                                                // Permute params of the 1st type sig
@@ -61,11 +59,7 @@ public class ByMostSpecificType implements Comparator<CandidateMember> {
     }
 
     private int computeScore(List<TypeSignature> ts) {
-        assert(ts.size() == 2);
-
         TypeSignature ts1 = ts.get(0), ts2 = ts.get(1);
-
-        assert(ts1.paramTypes.size() == ts2.paramTypes.size());
 
         return IntStream.range(0, ts1.paramTypes.size())
                     .map(i -> typeComparator.compare(ts1.paramTypes.get(i), ts2.paramTypes.get(i)))

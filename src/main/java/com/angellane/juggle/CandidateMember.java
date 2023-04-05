@@ -45,8 +45,7 @@ public class CandidateMember {
     }
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || other instanceof CandidateMember && this.getMember().equals(((CandidateMember)other).getMember());
+        return other instanceof CandidateMember && this.getMember().equals(((CandidateMember)other).getMember());
     }
 
 
@@ -100,8 +99,7 @@ public class CandidateMember {
     public boolean matchesParams(List<? extends Class<?>> queryParamTypes) {
         Iterator<? extends Class<?>> queryTypeIter = queryParamTypes.iterator();
 
-        return queryParamTypes.size() == paramTypes.size()
-                && paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
+        return paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
     }
 
     public boolean matchesReturn(Class<?> queryReturnType) {
@@ -113,7 +111,7 @@ public class CandidateMember {
         if (queryThrowTypes.size() == 0)
             return throwTypes.size() == 0;
 
-        // A candidate's throws clause matches if all of the types it might throw are listed
+        // A candidate's throws clause matches if the types it might throw are listed
         // in the query's set of caught exceptions
         for (var caughtType : queryThrowTypes) {
             if (throwTypes.stream().noneMatch(thrownType -> isTypeCompatibleForAssignment(caughtType, thrownType)))

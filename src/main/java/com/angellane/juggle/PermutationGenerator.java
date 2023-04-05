@@ -159,18 +159,14 @@ public class PermutationGenerator<T> {
         public Spliterator<List<T>> trySplit() {
             long numToDonate = remaining / 2;
 
-            if (numToDonate <= 0)
-                return null;
-            else {
-                // The 'other' spliterator is responsible for the next 'numToDonate' perms
-                Spliterator<List<T>> other = new PermSpliterator<>(contents, permutation, numToDonate);
+            // The 'other' spliterator is responsible for the next 'numToDonate' perms
+            Spliterator<List<T>> other = new PermSpliterator<>(contents, permutation, numToDonate);
 
-                // We'll skip over 'numToDonate' permutations and deliver the rest
-                for ( ; numToDonate-- > 0; --remaining)
-                    permutation = permutationAfter(permutation);
+            // We'll skip over 'numToDonate' permutations and deliver the rest
+            for ( ; numToDonate-- > 0; --remaining)
+                permutation = permutationAfter(permutation);
 
-                return other;
-            }
+            return other;
         }
 
         @Override

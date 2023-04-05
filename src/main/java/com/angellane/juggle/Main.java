@@ -7,6 +7,7 @@ import com.angellane.juggle.source.Module;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
 
 import java.lang.module.FindException;
 import java.util.*;
@@ -109,7 +110,8 @@ public class Main {
         juggler.addSortCriteria(criteria);
     }
 
-    @Option(name="-x", aliases="--permute", usage="Also match permutations of parameters")
+    @Option(name="-x", aliases="--permute", usage="Also match permutations of parameters",
+            handler=ExplicitBooleanOptionHandler.class, metaVar="[TRUE | FALSE]")
     public void addPermutationProcessor(boolean permute) {
         if (permute)
             juggler.prependProcessor(new PermuteParams());
@@ -157,10 +159,10 @@ public class Main {
         juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
         juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
 
-        if (getAnnotationTypes() != null) juggler.prependFilter(m -> m.matchesAnnotations(getAnnotationTypes()));
-        if (getThrowTypes()      != null) juggler.prependFilter(m -> m.matchesThrows(getThrowTypes()));
-        if (getReturnType()      != null) juggler.prependFilter(m -> m.matchesReturn(getReturnType()));
-        if (getParamTypes()      != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes()));
+        juggler.prependFilter(m -> m.matchesAnnotations(getAnnotationTypes()));
+        if (getThrowTypes() != null) juggler.prependFilter(m -> m.matchesThrows(getThrowTypes()));
+        if (getReturnType() != null) juggler.prependFilter(m -> m.matchesReturn(getReturnType()));
+        if (getParamTypes() != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes()));
 
         juggler.prependFilter(m -> Accessibility.fromModifiers(
                 m.getMember().getModifiers()).isAtLastAsAccessibleAsOther(minAccess));

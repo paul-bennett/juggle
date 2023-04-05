@@ -102,16 +102,12 @@ public class CartesianProduct<T> {
         public Spliterator<List<T>> trySplit() {
             int numToDonate = numRemaining / 2;
 
-            if (numToDonate <= 0)
-                return null;
-            else {
-                var other = new CartesianProductSpliterator<>(lists, pos, numToDonate);
+            var other = new CartesianProductSpliterator<>(lists, pos, numToDonate);
 
-                pos += numToDonate;
-                numRemaining -= numToDonate;
+            pos += numToDonate;
+            numRemaining -= numToDonate;
 
-                return other;
-            }
+            return other;
         }
 
         @Override

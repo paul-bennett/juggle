@@ -61,11 +61,8 @@ public class ByClosestType implements Comparator<CandidateMember> {
      * whether ts is more specific (-ve) or less specific (+ve) overall than this.query.
      */
     private int computeSignatureScore(TypeSignature ts) {
-        assert(query.paramTypes == null || ts.paramTypes.size() == query.paramTypes.size());
-
-        int paramScore = query.paramTypes == null
-                ? 0
-                : IntStream.range(0, ts.paramTypes.size())
+        int paramScore =
+                IntStream.range(0, ts.paramTypes.size())
                     .map(i -> typeComparator.compare(ts.paramTypes.get(i), query.paramTypes.get(i)))
                     .sum();
         int returnScore = query.returnType == null

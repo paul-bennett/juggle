@@ -1,6 +1,8 @@
 # Coverage Tests
 
-This file contains invocations designed to increase code coverage of the test suite
+This file contains invocations designed to increase code coverage of the test suite.  Many of the samples here
+don't actually do anything useful, but instead the combination of command-line parameters have been carefully
+selected in order to drive up the JaCoCo coverage metrics.
 
 ## No parameters in the query
 
@@ -80,3 +82,58 @@ The `Class.asSubclass` method is declared to return `Class<? extends U>`. I susp
 at runtime due to type erasure, in which case it may be worth stripping this method from the source altogether.
 
 
+## Empty -m or -@
+
+````
+$ juggle -m '' -@ '' -n getUpperBound"
+public java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
+public java.lang.reflect.Type[] sun.reflect.generics.reflectiveObjects.WildcardTypeImpl.getUpperBounds()
+public sun.reflect.generics.tree.FieldTypeSignature[] sun.reflect.generics.tree.Wildcard.getUpperBounds()
+$
+````
+
+
+## Multiple -t options
+
+````
+$ juggle -t java.io.NotActiveException -t java.io.InvalidObjectException
+public void java.io.ObjectInputStream.registerValidation(java.io.ObjectInputValidation,int) throws java.io.NotActiveException,java.io.InvalidObjectException
+$
+````
+
+## Explicit value of -x
+
+By default, boolean arguments in args4j carry no value.  If you specify them on the command-line, the value `true`
+is passed to the corresponding function.  There's no way to pass `false` to that function from the command-line.
+It feels wrong within the setter function to not use the value of the boolean parameter, even though we know it
+will only ever take the value `true`.  That means JaCoCo will always present one path in an `if` statement as not
+followed.
+
+````
+$ juggle -p String,ClassLoader,boolean
+$
+````
+
+````
+$ juggle -x -p String,ClassLoader,boolean
+public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
+public void ClassLoader.setClassAssertionStatus(String,boolean)
+public void ClassLoader.setPackageAssertionStatus(String,boolean)
+$
+````
+
+But there's a workaround... add `handler=ExplicitBooleanOptionHandler.class` to the `@Option` annotation, and
+suddenly the option can take a `true`/`false` value on the command-line.
+
+````
+$ juggle -x false -p String,ClassLoader,boolean
+$
+````
+
+````
+$ juggle -x true -p String,ClassLoader,boolean
+public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
+public void ClassLoader.setClassAssertionStatus(String,boolean)
+public void ClassLoader.setPackageAssertionStatus(String,boolean)
+$
+````

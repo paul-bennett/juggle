@@ -14,7 +14,7 @@ If we pass an invalid argument, we should get one line of help:
 ````
 $ juggle --fiddle-de-dee
 "--fiddle-de-dee" is not a valid option
- [-@ (--annotation) type,type,...] [-a (--access) [PRIVATE | PROTECTED | PACKAGE | PUBLIC]] [-h (--help)] [-i (--import) packageName] [-j (--jar) jarFilePath] [-m (--module) moduleName] [-n (--name) methodName] [-p (--param) type,type,...] [-r (--return) type] [-s (--sort) [ACCESS | TYPE | CLOSEST | PACKAGE | NAME]] [-t (--throws) type,type,...] [-x (--permute)]
+ [-@ (--annotation) type,type,...] [-a (--access) [PRIVATE | PROTECTED | PACKAGE | PUBLIC]] [-h (--help)] [-i (--import) packageName] [-j (--jar) jarFilePath] [-m (--module) moduleName] [-n (--name) methodName] [-p (--param) type,type,...] [-r (--return) type] [-s (--sort) [ACCESS | TYPE | CLOSEST | PACKAGE | NAME]] [-t (--throws) type,type,...] [-x (--permute) [TRUE | FALSE]]
 $
 ````
 
@@ -34,7 +34,7 @@ $ juggle --help
  -s (--sort) [ACCESS | TYPE | CLOSEST   : Sort criteria
  | PACKAGE | NAME]                         
  -t (--throws) type,type,...            : Thrown types
- -x (--permute)                         : Also match permutations of parameters
+ -x (--permute) [TRUE | FALSE]          : Also match permutations of parameters
 $
 ````
 

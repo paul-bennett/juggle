@@ -50,7 +50,7 @@ public class TypeSignature {
                     annotationClasses(classAnnotations, c.getDeclaredAnnotations())
             ));
         }
-        if (m instanceof Method) {
+        else if (m instanceof Method) {
             Method e = (Method)m;
 
             return List.of(new TypeSignature(
@@ -62,7 +62,9 @@ public class TypeSignature {
                     annotationClasses(classAnnotations, e.getDeclaredAnnotations())
             ));
         }
-        else if (m instanceof Field) {
+        else {
+            assert (m instanceof Field);
+
             Field f = (Field)m;
 
             Set<Class<?>> annotations = annotationClasses(classAnnotations, f.getDeclaredAnnotations());
@@ -78,7 +80,5 @@ public class TypeSignature {
                             annotations)
             );
         }
-        else
-            return List.of();
     }
 }
