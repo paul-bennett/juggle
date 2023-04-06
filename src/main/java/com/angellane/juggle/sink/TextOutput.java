@@ -67,7 +67,7 @@ public class TextOutput implements Sink {
     }
 
     public String decodeTypeParameters(TypeVariable<?>[] typeVariables) {
-        if (typeVariables == null || typeVariables.length == 0)
+        if (typeVariables.length == 0)
             return "";
         else {
             StringBuilder ret = new StringBuilder("<");
@@ -160,9 +160,7 @@ public class TextOutput implements Sink {
             String canonicalName = c.getCanonicalName();
             String packageName = c.getPackageName();
 
-            if (canonicalName == null)
-                out.println("/// " + c);    // Should never get here because we filter out Voldemort candidates earlier
-            else if (imports.contains(packageName))
+            if (imports.contains(packageName))
                 // Knock off the "packageName." prefix
                 ret.append(canonicalName.substring(packageName.length()+1));
             else
@@ -184,14 +182,11 @@ public class TextOutput implements Sink {
     }
 
     public String decodeParams(Type[] parameterTypes) {
-        if (parameterTypes == null)
-            return "";
-        else
-            return "(" +
-                    Arrays.stream(parameterTypes)
-                            .map(this::decodeType)
-                            .collect(Collectors.joining(",")) +
-                    ")";
+        return "(" +
+                Arrays.stream(parameterTypes)
+                        .map(this::decodeType)
+                        .collect(Collectors.joining(",")) +
+                ")";
     }
 
     public String decodeThrows(Type[] exceptionTypes) {
