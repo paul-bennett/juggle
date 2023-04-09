@@ -185,9 +185,10 @@ $
 You can tell Juggle which JARs to include in the search by using the `-j`
 option:
 ````
-% juggle                                                                \
-    -j mylib.jar                                                        \
-...
+$ juggle -j build/libs/testLib.jar -r com.angellane.juggle.testinput.lib.Lib
+public com.angellane.juggle.testinput.lib.Lib.<init>()
+public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
+$
 ````
 
 The `-m` flag can be used to specify JMODs to search.  Juggle will also search
@@ -268,7 +269,7 @@ set an alternative minimum level of accessibility (`public`, `package`,
 `protected`, or `private`).
 
 ````
-$ juggle -r java.io.OutputStream -p '' -a private
+$ juggle -r java.io.OutputStream -p '' -a protected
 public java.io.OutputStream.<init>()
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static java.io.PrintStream System.err
@@ -278,11 +279,8 @@ public java.io.PipedOutputStream.<init>()
 public sun.net.www.http.PosterOutputStream.<init>()
 public sun.security.util.DerOutputStream.<init>()
 static ProcessBuilder.NullOutputStream ProcessBuilder.NullOutputStream.INSTANCE
-com.sun.java.util.jar.pack.CodingChooser.Sizer.<init>()
 static java.io.PrintStream jdk.internal.logger.SimpleConsoleLogger.outputStream()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
-private ProcessBuilder.NullOutputStream.<init>()
-private static java.io.PrintStream sun.launcher.LauncherHelper.ostream
 $
 ````
 
