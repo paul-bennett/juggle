@@ -1,6 +1,7 @@
 package com.angellane.juggle.sink;
 
 import com.angellane.juggle.CandidateMember;
+import com.angellane.juggle.formatter.Formatter;
 
 import java.io.PrintStream;
 import java.lang.reflect.*;
@@ -12,12 +13,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TextOutput implements Sink {
+    final Formatter f;
+
     PrintStream out;
     private final Set<String> imports;
 
-    public TextOutput(List<String> importedPackageNames, PrintStream out) {
+    public TextOutput(List<String> importedPackageNames, PrintStream out, Formatter f) {
         this.imports = Set.copyOf(importedPackageNames);
         this.out = out;
+        this.f = f;
     }
 
     @Override
@@ -29,18 +33,18 @@ public class TextOutput implements Sink {
     public String decode(Member m) {
         StringBuilder ret = new StringBuilder();
 
-        Executable e = (m instanceof Executable) ? (Executable)m : null;
+        ret.append(f.formatKeyword(decodeModifiers(m.getModifiers())));
 
-        ret.append(decodeModifiers(m.getModifiers()));
+        Executable e = (m instanceof Executable) ? (Executable)m : null;
 
         if (e != null)
             ret.append(decodeTypeParameters(e.getTypeParameters()));
 
         ret.append(decodeDeclType(m));
-        ret.append(decodeType(m.getDeclaringClass()));
+        ret.append(f.formatClassName(decodeType(m.getDeclaringClass())));
 
         ret.append('.');
-        ret.append(m instanceof Constructor ? "<init>" : m.getName());
+        ret.append(f.formatMethodName(m instanceof Constructor ? "<init>" : m.getName()));
 
         if (e != null) {
             ret.append(decodeParams(e.getGenericParameterTypes()));
@@ -160,11 +164,11 @@ public class TextOutput implements Sink {
             String canonicalName = c.getCanonicalName();
             String packageName = c.getPackageName();
 
-            if (imports.contains(packageName))
-                // Knock off the "packageName." prefix
-                ret.append(canonicalName.substring(packageName.length()+1));
-            else
-                ret.append(canonicalName);
+            if (!imports.contains(packageName))
+                ret.append(packageName).append('.');
+
+            // Knock off the "packageName." prefix
+            ret.append(canonicalName.substring(packageName.length()+1));
 
             TypeVariable<?>[] typeVars = c.getTypeParameters();
 

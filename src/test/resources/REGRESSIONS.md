@@ -14,7 +14,7 @@ If we pass an invalid argument, we should get one line of help:
 ````
 $ juggle --fiddle-de-dee
 "--fiddle-de-dee" is not a valid option
- [-@ (--annotation) type,type,...] [-a (--access) [PRIVATE | PROTECTED | PACKAGE | PUBLIC]] [-h (--help)] [-i (--import) packageName] [-j (--jar) jarFilePath] [-m (--module) moduleName] [-n (--name) methodName] [-p (--param) type,type,...] [-r (--return) type] [-s (--sort) [ACCESS | TYPE | CLOSEST | PACKAGE | NAME]] [-t (--throws) type,type,...] [-x (--permute) [TRUE | FALSE]]
+ [-@ (--annotation) type,type,...] [-a (--access) [PRIVATE | PROTECTED | PACKAGE | PUBLIC]] [-f (--format) [PLAIN | COLOUR]] [-h (--help)] [-i (--import) packageName] [-j (--jar) jarFilePath] [-m (--module) moduleName] [-n (--name) methodName] [-p (--param) type,type,...] [-r (--return) type] [-s (--sort) [ACCESS | TYPE | CLOSEST | PACKAGE | NAME]] [-t (--throws) type,type,...] [-x (--permute) [TRUE | FALSE]]
 $
 ````
 
@@ -25,6 +25,7 @@ $ juggle --help
  -@ (--annotation) type,type,...        : Annotations
  -a (--access) [PRIVATE | PROTECTED |   : Minimum accessibility of members to
  PACKAGE | PUBLIC]                        return (default: PUBLIC)
+ -f (--format) [PLAIN | COLOUR]         : Output format (default: PLAIN)
  -i (--import) packageName              : Imported package names
  -j (--jar) jarFilePath                 : JAR file to include in search
  -m (--module) moduleName               : Modules to search

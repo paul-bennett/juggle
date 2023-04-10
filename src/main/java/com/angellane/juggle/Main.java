@@ -1,6 +1,9 @@
 package com.angellane.juggle;
 
 import com.angellane.juggle.processor.PermuteParams;
+import com.angellane.juggle.formatter.Formatter;
+import com.angellane.juggle.formatter.AnsiColourFormatter;
+import com.angellane.juggle.formatter.PlaintextFormatter;
 import com.angellane.juggle.sink.TextOutput;
 import com.angellane.juggle.source.JarFile;
 import com.angellane.juggle.source.Module;
@@ -117,6 +120,21 @@ public class Main {
             juggler.prependProcessor(new PermuteParams());
     }
 
+    @Option(name="-f", aliases="--format", usage="Output format")
+    public FormatterOption formatterOption = FormatterOption.PLAIN;
+
+    public enum FormatterOption {
+        PLAIN(new PlaintextFormatter()),
+        COLOUR(new AnsiColourFormatter());
+
+        private final Formatter f;
+        FormatterOption(Formatter f) { this.f = f; }
+
+        Formatter getFormatter() {
+            return f;
+        }
+    }
+
     @Option(name="-h", aliases="--help", help=true)
     boolean helpRequested;
 
@@ -178,7 +196,7 @@ public class Main {
 
         // Sinks
 
-        juggler.setSink(new TextOutput(juggler.getImportedPackageNames(), System.out));
+        juggler.setSink(new TextOutput(juggler.getImportedPackageNames(), System.out, formatterOption.getFormatter()));
 
         // Go!
 
