@@ -1,35 +1,36 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.processor.PermuteParams;
-import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.AnsiColourFormatter;
+import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.PlaintextFormatter;
+import com.angellane.juggle.processor.PermuteParams;
 import com.angellane.juggle.sink.TextOutput;
 import com.angellane.juggle.source.JarFile;
 import com.angellane.juggle.source.Module;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 import java.lang.module.FindException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Main {
+
+@Command(name="juggle", mixinStandardHelpOptions=true, version="juggle-DEV", description="An API search tool for Java")
+public class Main implements Runnable {
     public Juggler juggler = new Juggler();
 
     // Command-line options
 
-    @Option(name="-i", aliases={"--import"}, usage="Imported package names", metaVar="packageName")
+    @Option(names={"-i", "--import"}, paramLabel="packageName", description="Imported package names")
     public void addImport(String importName) { juggler.addImportedPackageName(importName); }
 
 
-    @Option(name="-j", aliases="--jar", usage="JAR file to include in search", metaVar="jarFilePath")
+    @Option(names={"-j", "--jar"}, paramLabel="jarFilePath", description="JAR file to include in search")
     public void addJar(String jarName) { juggler.addSource(new JarFile(jarName)); }
 
 
-    @Option(name="-m", aliases="--module", usage="Modules to search", metaVar="moduleName")
+    @Option(names={"-m", "--module"}, paramLabel="moduleName", description="Modules to search")
     public void addModule(String arg) {
         Arrays.stream(arg.split(","))
                 .filter(s -> !s.isEmpty())
@@ -37,7 +38,7 @@ public class Main {
     }
 
 
-    @Option(name="-p", aliases="--param", usage="Parameter type of searched function", metaVar="type,type,...")
+    @Option(names={"-p", "--param"}, paramLabel="type,type,...", description="Parameter type of searched function")
     public void addParamTypes(String paramTypeName) {
         if (paramTypeNames == null) paramTypeNames = new ArrayList<>();
 
@@ -61,11 +62,11 @@ public class Main {
         return returnTypeName == null ? null : juggler.classForTypename(returnTypeName);
     }
 
-    @Option(name="-r", aliases="--return", usage="Return type of searched function", metaVar="type")
+    @Option(names={"-r", "--return"}, paramLabel="type", description="Return type of searched function")
     String returnTypeName;
 
 
-    @Option(name="-t", aliases="--throws", usage="Thrown types", metaVar="type,type,...")
+    @Option(names={"-t", "--throws"}, paramLabel="type,type,...", description="Thrown types")
     public void addThrowTypes(String throwTypeName) {
         if (throwTypeNames == null) throwTypeNames = new HashSet<>();
 
@@ -83,7 +84,7 @@ public class Main {
     }
 
 
-    @Option(name="-@", aliases="--annotation", usage="Annotations", metaVar="type,type,...")
+    @Option(names={"-@", "--annotation"}, paramLabel="type,type,...", description="Annotations")
     public void addAnnotationTypes(String annotationNames) {
         annotationTypeNames.addAll(Arrays.stream(annotationNames.split(","))
                 .filter(s -> !s.isEmpty())
@@ -98,29 +99,28 @@ public class Main {
                 .collect(Collectors.toSet());
     }
 
-    @Option(name="-n", aliases="--name", usage="Filter by member name", metaVar="methodName")
+    @Option(names={"-n", "--name"}, paramLabel="methodName", description="Filter by member name")
     public void addNameFilter(String name) {
         juggler.prependFilter(m -> m.getMember().getName().toLowerCase().contains(name.toLowerCase()));
     }
 
 
-    @Option(name="-a", aliases="--access", usage="Minimum accessibility of members to return",
-            metaVar="private|protected|package|public")
+    @Option(names={"-a", "--access"}, paramLabel="private|protected|package|public",
+            description="Minimum accessibility of members to return")
     Accessibility minAccess = Accessibility.PUBLIC;
 
-    @Option(name="-s", aliases="--sort", usage="Sort criteria")
+    @Option(names={"-s", "--sort"}, description="Sort criteria")
     public void addSortCriteria(SortCriteria criteria) {
         juggler.addSortCriteria(criteria);
     }
 
-    @Option(name="-x", aliases="--permute", usage="Also match permutations of parameters",
-            handler=ExplicitBooleanOptionHandler.class, metaVar="[TRUE | FALSE]")
+    @Option(names={"-x", "--permute"}, negatable=true, description="Also match permutations of parameters")
     public void addPermutationProcessor(boolean permute) {
         if (permute)
             juggler.prependProcessor(new PermuteParams());
     }
 
-    @Option(name="-f", aliases="--format", usage="Output format")
+    @Option(names={"-f", "--format"}, description="Output format")
     public FormatterOption formatterOption = FormatterOption.PLAIN;
 
     public enum FormatterOption {
@@ -135,33 +135,11 @@ public class Main {
         }
     }
 
-    @Option(name="-h", aliases="--help", help=true)
-    boolean helpRequested;
-
 
     // Application logic follows.
 
-    public boolean parseArgs(String[] args) {
-        final CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-
-            if (helpRequested) {
-                parser.printUsage(System.out);
-                return false;
-            }
-
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            parser.printSingleLineUsage(System.out);
-            System.out.println();
-            return false;
-        }
-
-        return true;
-    }
-
-    public void goJuggle() {
+    @Override
+    public void run() {
         // Sources
 
         try {
@@ -204,8 +182,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Main app = new Main();
-        if (app.parseArgs(args))
-            app.goJuggle();
+        new CommandLine(new Main())
+                .setCaseInsensitiveEnumValuesAllowed(true)
+                .setOverwrittenOptionsAllowed(true)
+                .execute(args);
     }
 }

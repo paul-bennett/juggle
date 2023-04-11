@@ -9,33 +9,64 @@ But in essence, add a test by copying one of the code blocks.
 
 ## Command-line Parsing
 
-If we pass an invalid argument, we should get one line of help:
+If we pass an invalid argument, we should get an error and the help text:
 
 ````
 $ juggle --fiddle-de-dee
-"--fiddle-de-dee" is not a valid option
- [-@ (--annotation) type,type,...] [-a (--access) [PRIVATE | PROTECTED | PACKAGE | PUBLIC]] [-f (--format) [PLAIN | COLOUR]] [-h (--help)] [-i (--import) packageName] [-j (--jar) jarFilePath] [-m (--module) moduleName] [-n (--name) methodName] [-p (--param) type,type,...] [-r (--return) type] [-s (--sort) [ACCESS | TYPE | CLOSEST | PACKAGE | NAME]] [-t (--throws) type,type,...] [-x (--permute) [TRUE | FALSE]]
+Unknown option: '--fiddle-de-dee'
+Usage: juggle [-hVx] [-@=type,type,...] [-a=private|protected|package|public]
+              [-f=<formatterOption>] [-i=packageName] [-j=jarFilePath]
+              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
+              [-s=<addSortCriteria>] [-t=type,type,...]
+An API search tool for Java
+  -@, --annotation=type,type,...
+                             Annotations
+  -a, --access=private|protected|package|public
+                             Minimum accessibility of members to return
+  -f, --format=<formatterOption>
+                             Output format
+  -h, --help                 Show this help message and exit.
+  -i, --import=packageName   Imported package names
+  -j, --jar=jarFilePath      JAR file to include in search
+  -m, --module=moduleName    Modules to search
+  -n, --name=methodName      Filter by member name
+  -p, --param=type,type,...  Parameter type of searched function
+  -r, --return=type          Return type of searched function
+  -s, --sort=<addSortCriteria>
+                             Sort criteria
+  -t, --throws=type,type,... Thrown types
+  -V, --version              Print version information and exit.
+  -x, --[no-]permute         Also match permutations of parameters
 $
 ````
 
-Of course we can get full command-line help:
+Of course we can explicitly ask for help:
 
 ````
 $ juggle --help
- -@ (--annotation) type,type,...        : Annotations
- -a (--access) [PRIVATE | PROTECTED |   : Minimum accessibility of members to
- PACKAGE | PUBLIC]                        return (default: PUBLIC)
- -f (--format) [PLAIN | COLOUR]         : Output format (default: PLAIN)
- -i (--import) packageName              : Imported package names
- -j (--jar) jarFilePath                 : JAR file to include in search
- -m (--module) moduleName               : Modules to search
- -n (--name) methodName                 : Filter by member name
- -p (--param) type,type,...             : Parameter type of searched function
- -r (--return) type                     : Return type of searched function
- -s (--sort) [ACCESS | TYPE | CLOSEST   : Sort criteria
- | PACKAGE | NAME]                         
- -t (--throws) type,type,...            : Thrown types
- -x (--permute) [TRUE | FALSE]          : Also match permutations of parameters
+Usage: juggle [-hVx] [-@=type,type,...] [-a=private|protected|package|public]
+              [-f=<formatterOption>] [-i=packageName] [-j=jarFilePath]
+              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
+              [-s=<addSortCriteria>] [-t=type,type,...]
+An API search tool for Java
+  -@, --annotation=type,type,...
+                             Annotations
+  -a, --access=private|protected|package|public
+                             Minimum accessibility of members to return
+  -f, --format=<formatterOption>
+                             Output format
+  -h, --help                 Show this help message and exit.
+  -i, --import=packageName   Imported package names
+  -j, --jar=jarFilePath      JAR file to include in search
+  -m, --module=moduleName    Modules to search
+  -n, --name=methodName      Filter by member name
+  -p, --param=type,type,...  Parameter type of searched function
+  -r, --return=type          Return type of searched function
+  -s, --sort=<addSortCriteria>
+                             Sort criteria
+  -t, --throws=type,type,... Thrown types
+  -V, --version              Print version information and exit.
+  -x, --[no-]permute         Also match permutations of parameters
 $
 ````
 

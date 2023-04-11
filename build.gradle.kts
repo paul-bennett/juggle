@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("args4j", "args4j", "2.33")
+    implementation("info.picocli", "picocli", "4.7.2")
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api",    "5.9.2")
     testImplementation("org.junit.jupiter", "junit-jupiter-engine", "5.9.2")

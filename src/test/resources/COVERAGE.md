@@ -105,8 +105,9 @@ $
 
 ## Explicit value of -x
 
-By default, boolean arguments in args4j carry no value.  If you specify them on the command-line, the value `true`
-is passed to the corresponding function.  There's no way to pass `false` to that function from the command-line.
+By default, boolean arguments in picocli carry no value.  If you specify them on the command-line, the value `true`
+is passed to the corresponding function.  
+
 It feels wrong within the setter function to not use the value of the boolean parameter, even though we know it
 will only ever take the value `true`.  That means JaCoCo will always present one path in an `if` statement as not
 followed.
@@ -124,19 +125,19 @@ public void ClassLoader.setPackageAssertionStatus(String,boolean)
 $
 ````
 
-But there's a workaround... add `handler=ExplicitBooleanOptionHandler.class` to the `@Option` annotation, and
-suddenly the option can take a `true`/`false` value on the command-line.
+But there's a workaround... add `negatable=true` to the `@Option` annotation, and 
+suddenly the long option name can be prefixed with `no-` on the command-line.
 
 ````
-$ juggle -x false -p String,ClassLoader,boolean
+$ juggle --permute -p String,ClassLoader,boolean
+public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
+public void ClassLoader.setClassAssertionStatus(String,boolean)
+public void ClassLoader.setPackageAssertionStatus(String,boolean)
 $
 ````
 
 ````
-$ juggle -x true -p String,ClassLoader,boolean
-public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
-public void ClassLoader.setClassAssertionStatus(String,boolean)
-public void ClassLoader.setPackageAssertionStatus(String,boolean)
+$ juggle --no-permute -p String,ClassLoader,boolean
 $
 ````
 
@@ -152,3 +153,14 @@ $ juggle -j build/libs/testApp.jar -r com.angellane.juggle.testinput.app.App -p 
 *** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 $
 ````
+
+## Methods with no modifiers
+
+Curiously this test fails here, but works in README.md.  See GitHub issue #39.
+````
+% juggle -j build/libs/testLib.jar -r com.angellane.juggle.testinput.lib.Lib -a package
+public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
+com.angellane.juggle.testinput.lib.Lib.<init>()
+%
+````
+

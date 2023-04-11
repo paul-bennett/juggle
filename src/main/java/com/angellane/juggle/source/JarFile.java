@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 public class JarFile extends Source {
     private final static String CLASS_SUFFIX = ".class";
+    private final static String MODULE_INFO = "module-info.class";
 
     private final String jarName;
     private URL jarURL;
@@ -40,6 +41,7 @@ public class JarFile extends Source {
                     .filter(Predicate.not(JarEntry::isDirectory))
                     .map(JarEntry::getName)
                     .filter(s -> s.endsWith(CLASS_SUFFIX))
+                    .filter(s -> !s.endsWith(MODULE_INFO))
                     .map(s -> s.substring(0, s.length() - CLASS_SUFFIX.length()))
                     .map(s -> s.replace('/', '.'))
                     .map(n -> getJuggler().loadClassByName(n))
