@@ -22,7 +22,6 @@ public class AnsiColourFormatter implements Formatter {
         EscapeSequence(String code) { this.code = code; }
 
         public String toString() { return CSI + code + "m"; }
-        public String toString(String s) { return this + s + NORMAL; }
     }
 
     String format(String s, EscapeSequence... formats) {

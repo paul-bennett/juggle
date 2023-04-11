@@ -185,9 +185,9 @@ $
 You can tell Juggle which JARs to include in the search by using the `-j`
 option:
 ````
-$ juggle -j build/libs/testLib.jar -r com.angellane.juggle.testinput.lib.Lib
-public com.angellane.juggle.testinput.lib.Lib.<init>()
+$ juggle -j build/libs/testLib.jar -r com.angellane.juggle.testinput.lib.Lib -a package
 public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
+com.angellane.juggle.testinput.lib.Lib.<init>()
 $
 ````
 
