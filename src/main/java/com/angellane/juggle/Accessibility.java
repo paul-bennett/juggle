@@ -17,7 +17,16 @@ public enum Accessibility implements Comparable<Accessibility> {
         return valueOf(s.toUpperCase());
     }
 
-    boolean isAtLastAsAccessibleAsOther(Accessibility other) {
+    /**
+     * Compares two Accessibility objects for permissiveness.
+     * <p>
+     * Does this Accessibility object represent an access level that is more permissive than other?
+     * For example, if this is PROTECTED and OTHER is PRIVATE then this is more accessible than other.
+     * </p>
+     * @param other
+     * @return
+     */
+    public boolean isAtLeastAsAccessibleAsOther(Accessibility other) {
         // Note: relies on enumerands being declared in order of increasing visibility.
         return this.compareTo(other) >= 0;
     }
