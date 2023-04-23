@@ -17,8 +17,9 @@ Unknown option: '--fiddle-de-dee'
 Usage: juggle [-hVx] [-@=type,type,...] [-a=private|protected|package|public]
               [-f=<formatterOption>] [-i=packageName] [-j=jarFilePath]
               [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
-              [-s=<addSortCriteria>] [-t=type,type,...]
+              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
 An API search tool for Java
+      [declaration...]       A Java-style declaration to match against
   -@, --annotation=type,type,...
                              Annotations
   -a, --access=private|protected|package|public
@@ -47,8 +48,9 @@ $ juggle --help
 Usage: juggle [-hVx] [-@=type,type,...] [-a=private|protected|package|public]
               [-f=<formatterOption>] [-i=packageName] [-j=jarFilePath]
               [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
-              [-s=<addSortCriteria>] [-t=type,type,...]
+              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
 An API search tool for Java
+      [declaration...]       A Java-style declaration to match against
   -@, --annotation=type,type,...
                              Annotations
   -a, --access=private|protected|package|public

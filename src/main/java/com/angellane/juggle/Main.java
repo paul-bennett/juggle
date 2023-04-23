@@ -3,6 +3,7 @@ package com.angellane.juggle;
 import com.angellane.juggle.formatter.AnsiColourFormatter;
 import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.PlaintextFormatter;
+import com.angellane.juggle.processor.DeclQuery;
 import com.angellane.juggle.processor.PermuteParams;
 import com.angellane.juggle.sink.TextOutput;
 import com.angellane.juggle.source.JarFile;
@@ -10,6 +11,7 @@ import com.angellane.juggle.source.Module;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.lang.module.FindException;
 import java.util.*;
@@ -135,6 +137,12 @@ public class Main implements Runnable {
         }
     }
 
+    @Parameters(paramLabel="declaration", description="A Java-style declaration to match against")
+    List<String> queryParams = new ArrayList<>();
+
+    public String getQueryString() {
+        return String.join(" ", queryParams);
+    }
 
     // Application logic follows.
 
@@ -161,7 +169,7 @@ public class Main implements Runnable {
         if (getParamTypes() != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes()));
 
         juggler.prependFilter(m -> Accessibility.fromModifiers(
-                m.getMember().getModifiers()).isAtLastAsAccessibleAsOther(minAccess));
+                m.getMember().getModifiers()).isAtLeastAsAccessibleAsOther(minAccess));
 
         if (getParamTypes() != null)
             // Optimisation: filter out anything that hasn't got the right number of params
@@ -171,6 +179,12 @@ public class Main implements Runnable {
         // These assist the CLOSEST sort.
         juggler.setParamTypes(getParamTypes());
         juggler.setReturnType(getReturnType());
+
+        // Parameter String
+
+        String queryString = getQueryString();
+        DeclQuery decl = new DeclQuery(queryString);
+        juggler.appendFilter(decl::matchesCandidate);
 
         // Sinks
 

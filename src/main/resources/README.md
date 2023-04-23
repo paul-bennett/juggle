@@ -236,14 +236,14 @@ class names don't have to be written out each time. As you would expect,
 `java.lang` is always implicitly imported.  Juggle omits imported package 
 names in its output.
 ````
-$ juggle                                                                \
+% juggle                                                                \
     -j build/libs/juggle-1.0-SNAPSHOT.jar                               \
     -i com.angellane.juggle                                             \
     -i java.util                                                        \
     -r CartesianProduct
 public CartesianProduct<T>.<init>(List<E>[])
 public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<E>[])
-$
+%
 ````
 (Note that in this example, Juggle isn't yet unifying the type arguments;
 ideally it should output `CartesianProduct<T>.of(List<T>[])`.)
@@ -315,6 +315,12 @@ $
 Note that parameter permutation can significantly increase runtime,
 so it's not enabled by default.
 
+## Declaration syntax (under development)
+
+It will soon be possible to express a query using a more natural syntax
+akin to a Java method or field declaration.  The beginnings of code to
+implement this is present in this build, but not yet fully functional.
+
 
 ## Command-line summary
 
@@ -333,3 +339,5 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-@`   | `--annotation`  | annotation name(s)                                       | (don't match annotations)                 | Annotations to filter on (class or method)          |
 | `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria                                       |
 | `-x`   | `--permute`     | (none)                                                   | (don't permute)                           | Match permutations of supplied parameters           |    
+
+A declaration-style query can follow all arguments.

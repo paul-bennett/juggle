@@ -1,6 +1,7 @@
 plugins {
     application
     jacoco
+    antlr
 }
 
 val friendlyName = "Juggle"
@@ -12,6 +13,9 @@ repositories {
 }
 
 dependencies {
+    antlr("org.antlr", "antlr4", "4.12.0")
+    implementation("org.antlr", "antlr4-runtime", "4.12.0")
+
     implementation("info.picocli", "picocli", "4.7.2")
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api",    "5.9.2")
@@ -32,8 +36,8 @@ dependencies {
 //}
 
 tasks.withType<JavaCompile> {
-    targetCompatibility = "12"
-    sourceCompatibility = "12"
+    targetCompatibility = "17"
+    sourceCompatibility = "17"
 }
 
 application {
@@ -45,6 +49,10 @@ afterEvaluate {
         options.compilerArgs.add("-Xlint:unchecked")
         options.compilerArgs.add("-Xlint:deprecation")
     }
+}
+
+tasks.generateGrammarSource {
+    arguments = arguments + listOf("-package", "com.angellane.juggle.parser")
 }
 
 tasks.jar {
@@ -64,7 +72,7 @@ tasks.jar {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
-    dependsOn(tasks.jar)    // One of the tests in README.md uses the built JAR file
+//    dependsOn(tasks.jar)    // One of the tests in README.md uses the built JAR file
 }
 
 tasks.test {
