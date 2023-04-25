@@ -10,6 +10,7 @@ import com.angellane.juggle.source.JarFile;
 import com.angellane.juggle.source.Module;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
@@ -18,9 +19,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-@Command(name="juggle", mixinStandardHelpOptions=true, version="juggle-DEV", description="An API search tool for Java")
+@Command( name="juggle"
+        , description="An API search tool for Java"
+        , mixinStandardHelpOptions=true
+        , versionProvider=Main.Version.class
+        )
 public class Main implements Runnable {
+    public static class Version implements IVersionProvider {
+        @Override
+        public String[] getVersion() {
+            return new String[] {
+                    Optional.ofNullable(
+                            getClass().getPackage().getImplementationVersion()
+                    )
+                            .orElse("Unknown")
+            };
+        }
+    }
+
     public Juggler juggler = new Juggler();
+
 
     // Command-line options
 

@@ -72,6 +72,14 @@ An API search tool for Java
 $
 ````
 
+We can ask for the version of the application, but when run from an unpacked
+source tree it doesn't show anything useful: 
+````
+$ juggle --version
+Unknown
+$
+````
+
 ## Previously fixed bugs
 
 ### [GitHub issue #1](https://github.com/paul-bennett/juggle/issues/1)
