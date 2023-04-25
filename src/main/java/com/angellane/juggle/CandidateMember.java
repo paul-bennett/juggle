@@ -85,11 +85,13 @@ public record CandidateMember(
 
 
     public boolean matchesAccessibility(Accessibility queryAccessibility) {
-        return this.accessibility.isAtLeastAsAccessibleAsOther(queryAccessibility);
+        return queryAccessibility == null
+                || this.accessibility.isAtLeastAsAccessibleAsOther(queryAccessibility);
     }
 
     public boolean matchesAnnotations(Set<Class<?>> queryAnnotationTypes) {
-        return annotationTypes.containsAll(queryAnnotationTypes);
+        return queryAnnotationTypes == null
+                || annotationTypes.containsAll(queryAnnotationTypes);
     }
 
 
@@ -99,25 +101,32 @@ public record CandidateMember(
     }
 
     public boolean matchesReturn(Class<?> queryReturnType) {
-        return isTypeCompatibleForAssignment(queryReturnType, returnType);
+        return queryReturnType == null
+                || isTypeCompatibleForAssignment(queryReturnType, returnType);
     }
 
     public boolean matchesParams(List<? extends Class<?>> queryParamTypes) {
-        Iterator<? extends Class<?>> queryTypeIter = queryParamTypes.iterator();
+        if (queryParamTypes == null)
+            return true;
+        else {
+            Iterator<? extends Class<?>> queryTypeIter = queryParamTypes.iterator();
 
-        return paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
+            return paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
+        }
     }
 
     public boolean matchesThrows(Set<Class<?>> queryThrowTypes) {
-        // Special case for a query for methods that throw nothing
-        if (queryThrowTypes.size() == 0)
-            return throwTypes.size() == 0;
+        if (queryThrowTypes != null) {
+            // Special case for a query for methods that throw nothing
+            if (queryThrowTypes.size() == 0)
+                return throwTypes.size() == 0;
 
-        // A candidate's throws clause matches if the types it might throw are listed
-        // in the query's set of caught exceptions
-        for (var caughtType : queryThrowTypes) {
-            if (throwTypes.stream().noneMatch(thrownType -> isTypeCompatibleForAssignment(caughtType, thrownType)))
-                return false;
+            // A candidate's throws clause matches if the types it might throw are listed
+            // in the query's set of caught exceptions
+            for (var caughtType : queryThrowTypes) {
+                if (throwTypes.stream().noneMatch(thrownType -> isTypeCompatibleForAssignment(caughtType, thrownType)))
+                    return false;
+            }
         }
         return true;
     }
