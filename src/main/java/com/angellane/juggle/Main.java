@@ -103,7 +103,7 @@ public class Main implements Runnable {
 
     @Option(names={"-n", "--name"}, paramLabel="methodName", description="Filter by member name")
     public void addNameFilter(String name) {
-        juggler.prependFilter(m -> m.getMember().getName().toLowerCase().contains(name.toLowerCase()));
+        juggler.prependFilter(m -> m.member().getName().toLowerCase().contains(name.toLowerCase()));
     }
 
 
@@ -160,8 +160,8 @@ public class Main implements Runnable {
 
         // Processors
 
-        juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
-        juggler.appendFilter(m -> !m.getMember().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
+        juggler.appendFilter(m -> !m.member().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
+        juggler.appendFilter(m -> !m.member().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
 
         juggler.prependFilter(m -> m.matchesAnnotations(getAnnotationTypes()));
         if (getThrowTypes() != null) juggler.prependFilter(m -> m.matchesThrows(getThrowTypes()));
@@ -169,12 +169,12 @@ public class Main implements Runnable {
         if (getParamTypes() != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes()));
 
         juggler.prependFilter(m -> Accessibility.fromModifiers(
-                m.getMember().getModifiers()).isAtLeastAsAccessibleAsOther(minAccess));
+                m.member().getModifiers()).isAtLeastAsAccessibleAsOther(minAccess));
 
         if (getParamTypes() != null)
             // Optimisation: filter out anything that hasn't got the right number of params
             // Useful because permutation of every candidate member's params takes forever.
-            juggler.prependFilter(m -> m.getParamTypes().size() == getParamTypes().size());
+            juggler.prependFilter(m -> m.paramTypes().size() == getParamTypes().size());
 
         // These assist the CLOSEST sort.
         juggler.setParamTypes(getParamTypes());
@@ -183,8 +183,10 @@ public class Main implements Runnable {
         // Parameter String
 
         String queryString = getQueryString();
-        DeclQuery decl = new DeclQuery(queryString);
-        juggler.appendFilter(decl::matchesCandidate);
+        if (!queryString.isEmpty()) {
+            DeclQuery decl = new DeclQuery(queryString);
+            juggler.appendFilter(decl::isMatchForCandidate);
+        }
 
         // Sinks
 

@@ -26,7 +26,7 @@ public class TextOutput implements Sink {
 
     @Override
     public void accept(CandidateMember candidateMember) {
-        out.println(decode(candidateMember.getMember()));
+        out.println(decode(candidateMember.member()));
     }
 
 

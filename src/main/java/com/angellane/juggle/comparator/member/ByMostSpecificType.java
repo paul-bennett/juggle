@@ -39,7 +39,7 @@ public class ByMostSpecificType implements Comparator<CandidateMember> {
         //
         // Annotations, and exceptions thrown by the candidate members are ignored in this process
 
-        int winningScore = CartesianProduct.of(TypeSignature.of(m1.getMember()), TypeSignature.of(m2.getMember())).stream()
+        int winningScore = CartesianProduct.of(TypeSignature.of(m1.member()), TypeSignature.of(m2.member())).stream()
                 .filter(ts -> ts.get(0).paramTypes.size() == ts.get(1).paramTypes.size())   // Param list len must ==
 
                 .flatMap(ts -> {                                                // Permute params of the 1st type sig

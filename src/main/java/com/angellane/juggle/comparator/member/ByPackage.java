@@ -22,8 +22,8 @@ public class ByPackage implements Comparator<CandidateMember> {
 
     @Override
     public int compare(CandidateMember m1, CandidateMember m2) {
-        int o1Pri = getPriorityOrDefault(m1.getMember().getDeclaringClass().getPackageName(), Integer.MAX_VALUE);
-        int o2Pri = getPriorityOrDefault(m2.getMember().getDeclaringClass().getPackageName(), Integer.MAX_VALUE);
+        int o1Pri = getPriorityOrDefault(m1.member().getDeclaringClass().getPackageName(), Integer.MAX_VALUE);
+        int o2Pri = getPriorityOrDefault(m2.member().getDeclaringClass().getPackageName(), Integer.MAX_VALUE);
 
         return Integer.compare(o1Pri, o2Pri);
     }

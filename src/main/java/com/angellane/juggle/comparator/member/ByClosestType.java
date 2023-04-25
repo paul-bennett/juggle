@@ -26,8 +26,8 @@ public class ByClosestType implements Comparator<CandidateMember> {
         // Uses the same strategy as ByMostSpecificType, but instead of computing a score between m1 and m2 it
         // computes a score between m1 and this.query, and between m2 and this.query.
 
-        int m1score = computeMemberScore(m1.getMember());
-        int m2score = computeMemberScore(m2.getMember());
+        int m1score = computeMemberScore(m1.member());
+        int m2score = computeMemberScore(m2.member());
 
         return Integer.compare(Math.abs(m1score), Math.abs(m2score));
     }

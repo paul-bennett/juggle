@@ -13,68 +13,62 @@ import java.util.stream.Stream;
  * fields, which represent the type the member would have if considered as a static function.  For static
  * methods the paramTypes field includes an implicit first entry representing the type of 'this'.
  */
-public class CandidateMember {
-    private final Member member;
-    private final List<Class<?>> paramTypes;
-    private final Class<?> returnType;
-    private final Set<Class<?>> throwTypes;
-    private final Set<Class<?>> annotationTypes;
+public record CandidateMember(
+        Member member,
+        Accessibility accessibility,
+        int otherModifiers,
+        Set<Class<?>> annotationTypes,
+        Class<?> returnType,
+        List<Class<?>> paramTypes,
+        Set<Class<?>> throwTypes
+) {
+    private static final int ACCESS_MODIFIERS_MASK = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE;
+    private static final int OTHER_MODIFIERS_MASK  = ~ACCESS_MODIFIERS_MASK;
 
-    private CandidateMember(Member member, List<Class<?>> paramTypes, Class<?> returnType, Set<Class<?>> throwTypes,
-                            Set<Class<?>> annotationTypes) {
-        this.member = member;
-        this.paramTypes = paramTypes;
-        this.returnType = returnType;
-        this.throwTypes = throwTypes;
-        this.annotationTypes = annotationTypes;
+    // Constructor used by factory methods
+    private CandidateMember(Member member, Set<Class<?>> annotationTypes,
+                             Class<?> returnType, List<Class<?>> paramTypes, Set<Class<?>> throwTypes) {
+        this(member, Accessibility.fromModifiers(member.getModifiers()), member.getModifiers() & OTHER_MODIFIERS_MASK,
+                annotationTypes, returnType, paramTypes, throwTypes);
     }
 
+    // This constructor is used by parameter permutation generator
     public CandidateMember(CandidateMember other, List<Class<?>> params) {
-        this.member = other.member;
-        this.returnType = other.returnType;
-        this.throwTypes = other.throwTypes;
-        this.annotationTypes = other.annotationTypes;
-
-        this.paramTypes = params;
-    }
-
-    // For the purposes of equality and hashing, defer to the wrapped Member
-    @Override
-    public int hashCode() {
-        return this.getMember().hashCode();
-    }
-    @Override
-    public boolean equals(Object other) {
-        return other instanceof CandidateMember && this.getMember().equals(((CandidateMember)other).getMember());
-    }
-
-
-    public Member getMember() { return member; }
-
-    public List<Class<?>> getParamTypes() { return paramTypes; }
-
-    private static Set<Class<?>> annotationClasses(Annotation[] classAnnotations, Annotation[] memberAnnotations) {
-        return Stream.concat(Arrays.stream(classAnnotations), Arrays.stream(memberAnnotations))
-                .map(Annotation::annotationType)
-                .collect(Collectors.toSet());
+        this(other.member, other.accessibility, other.otherModifiers,
+                other.annotationTypes, other.returnType, params, other.throwTypes);
     }
 
     public static CandidateMember memberFromMethod(Method m) {
         return new CandidateMember(m,
-                paramsWithImplicitThis(m, Arrays.asList(m.getParameterTypes())),
+                annotationClasses(m.getDeclaringClass().getAnnotations(), m.getAnnotations()),
                 m.getReturnType(),
-                Set.of(m.getExceptionTypes()),
-                annotationClasses(m.getDeclaringClass().getAnnotations(), m.getAnnotations())
+                paramsWithImplicitThis(m, Arrays.asList(m.getParameterTypes())),
+                Set.of(m.getExceptionTypes())
         );
     }
 
     public static CandidateMember memberFromConstructor(Constructor<?> c) {
         return new CandidateMember(c,
-                Arrays.asList(c.getParameterTypes()),
+                annotationClasses(c.getDeclaringClass().getAnnotations(), c.getAnnotations()),
                 c.getDeclaringClass(),
-                Set.of(c.getExceptionTypes()),
-                annotationClasses(c.getDeclaringClass().getAnnotations(), c.getAnnotations())
+                Arrays.asList(c.getParameterTypes()),
+                Set.of(c.getExceptionTypes())
         );
+    }
+
+    public static List<CandidateMember> membersFromField(Field f) {
+        Set<Class<?>> as = annotationClasses(f.getDeclaringClass().getDeclaredAnnotations(), f.getDeclaredAnnotations());
+
+        var getter = new CandidateMember(f, as, f.getType(), paramsWithImplicitThis(f, List.of()),            Set.of());
+        var setter = new CandidateMember(f, as, Void.TYPE,   paramsWithImplicitThis(f, List.of(f.getType())), Set.of());
+
+        return List.of(getter, setter);
+    }
+
+    private static Set<Class<?>> annotationClasses(Annotation[] classAnnotations, Annotation[] memberAnnotations) {
+        return Stream.concat(Arrays.stream(classAnnotations), Arrays.stream(memberAnnotations))
+                .map(Annotation::annotationType)
+                .collect(Collectors.toSet());
     }
 
     private static List<Class<?>> paramsWithImplicitThis(Member m, List<Class<?>> paramTypes) {
@@ -88,22 +82,30 @@ public class CandidateMember {
         }
     }
 
-    public static List<CandidateMember> membersFromField(Field f) {
-        Set<Class<?>> as = annotationClasses(f.getDeclaringClass().getDeclaredAnnotations(), f.getDeclaredAnnotations());
-        var getter = new CandidateMember(f, paramsWithImplicitThis(f, List.of()),            f.getType(), Set.of(), as);
-        var setter = new CandidateMember(f, paramsWithImplicitThis(f, List.of(f.getType())), Void.TYPE,   Set.of(), as);
 
-        return List.of(getter, setter);
+
+    public boolean matchesAccessibility(Accessibility queryAccessibility) {
+        return this.accessibility.isAtLeastAsAccessibleAsOther(queryAccessibility);
+    }
+
+    public boolean matchesAnnotations(Set<Class<?>> queryAnnotationTypes) {
+        return annotationTypes.containsAll(queryAnnotationTypes);
+    }
+
+
+    public boolean matchesModifiers(int queryMask, int queryModifiers) {
+        final int mask = queryMask | OTHER_MODIFIERS_MASK;
+        return (mask & queryModifiers) == (mask & this.otherModifiers);
+    }
+
+    public boolean matchesReturn(Class<?> queryReturnType) {
+        return isTypeCompatibleForAssignment(queryReturnType, returnType);
     }
 
     public boolean matchesParams(List<? extends Class<?>> queryParamTypes) {
         Iterator<? extends Class<?>> queryTypeIter = queryParamTypes.iterator();
 
         return paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
-    }
-
-    public boolean matchesReturn(Class<?> queryReturnType) {
-        return isTypeCompatibleForAssignment(queryReturnType, returnType);
     }
 
     public boolean matchesThrows(Set<Class<?>> queryThrowTypes) {
@@ -118,10 +120,6 @@ public class CandidateMember {
                 return false;
         }
         return true;
-    }
-
-    public boolean matchesAnnotations(Set<Class<?>> queryAnnotationTypes) {
-        return annotationTypes.containsAll(queryAnnotationTypes);
     }
 
     // An instinctive notion of whether two types are compatible.
@@ -170,25 +168,25 @@ public class CandidateMember {
 
     // The boxing/unboxing conversions
     private static final Map<Class<?>, Class<?>> boxingConversions =
-        Map.ofEntries(
-            // Boxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.7
-            Map.entry(Boolean   .class, Boolean     .TYPE),
-            Map.entry(Byte      .class, Byte        .TYPE),
-            Map.entry(Short     .class, Short       .TYPE),
-            Map.entry(Character .class, Character   .TYPE),
-            Map.entry(Integer   .class, Integer     .TYPE),
-            Map.entry(Long      .class, Long        .TYPE),
-            Map.entry(Float     .class, Float       .TYPE),
-            Map.entry(Double    .class, Double      .TYPE),
+            Map.ofEntries(
+                    // Boxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.7
+                    Map.entry(Boolean   .class, Boolean     .TYPE),
+                    Map.entry(Byte      .class, Byte        .TYPE),
+                    Map.entry(Short     .class, Short       .TYPE),
+                    Map.entry(Character .class, Character   .TYPE),
+                    Map.entry(Integer   .class, Integer     .TYPE),
+                    Map.entry(Long      .class, Long        .TYPE),
+                    Map.entry(Float     .class, Float       .TYPE),
+                    Map.entry(Double    .class, Double      .TYPE),
 
-            // Unboxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.8
-            Map.entry(Boolean   .TYPE,  Boolean     .class),
-            Map.entry(Byte      .TYPE,  Byte        .class),
-            Map.entry(Short     .TYPE,  Short       .class),
-            Map.entry(Character .TYPE,  Character   .class),
-            Map.entry(Integer   .TYPE,  Integer     .class),
-            Map.entry(Long      .TYPE,  Long        .class),
-            Map.entry(Float     .TYPE,  Float       .class),
-            Map.entry(Double    .TYPE,  Double      .class)
-    );
+                    // Unboxing: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.8
+                    Map.entry(Boolean   .TYPE,  Boolean     .class),
+                    Map.entry(Byte      .TYPE,  Byte        .class),
+                    Map.entry(Short     .TYPE,  Short       .class),
+                    Map.entry(Character .TYPE,  Character   .class),
+                    Map.entry(Integer   .TYPE,  Integer     .class),
+                    Map.entry(Long      .TYPE,  Long        .class),
+                    Map.entry(Float     .TYPE,  Float       .class),
+                    Map.entry(Double    .TYPE,  Double      .class)
+            );
 }
