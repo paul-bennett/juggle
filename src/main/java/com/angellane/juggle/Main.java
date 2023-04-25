@@ -64,7 +64,7 @@ public class Main implements Runnable {
 
         paramTypeNames.addAll(Arrays.stream(paramTypeName.split(","))
                 .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList())
+                .toList()
         );
     }
 

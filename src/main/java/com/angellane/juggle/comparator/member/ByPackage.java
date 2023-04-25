@@ -15,7 +15,7 @@ public class ByPackage implements Comparator<CandidateMember> {
 
     public ByPackage(List<String> packageNames) { packageList = packageNames; }
 
-    private int getPriorityOrDefault(String packageName, int defaultPriority) {
+    private int getPriorityOrDefault(String packageName, @SuppressWarnings("SameParameterValue") int defaultPriority) {
         int index = packageList.indexOf(packageName);
         return index == -1 ? defaultPriority : index;
     }
