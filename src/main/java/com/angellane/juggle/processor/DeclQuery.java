@@ -30,8 +30,8 @@ public class DeclQuery {
 
         public boolean matchesClass(Class<?> candidate) {
             // TODO: consider what to do about conversions here (esp boxing/unboxing)
-            return (lowerBound == null || lowerBound.isAssignableFrom(candidate)) &&
-                    (upperBound == null || upperBound.stream().allMatch(candidate::isAssignableFrom));
+            return (lowerBound  == null || candidate.isAssignableFrom(lowerBound)) &&
+                    (upperBound == null || upperBound.stream().allMatch(b -> b.isAssignableFrom(candidate)));
         }
     }
 

@@ -40,19 +40,15 @@ public class TypeSignature {
         if (!Modifier.isStatic(m.getModifiers()) && !(m instanceof Constructor<?>))
             implicitParams.add(m.getDeclaringClass());
 
-        if (m instanceof Constructor<?>) {
-            Constructor<?> c = (Constructor<?>)m;
-
+        // TODO: replace with switch expression when pattern-matching supported
+        if (m instanceof Constructor<?> c)
             return List.of(new TypeSignature(
                     List.of(c.getParameterTypes()),
                     c.getDeclaringClass(),
                     Set.of(c.getExceptionTypes()),
                     annotationClasses(classAnnotations, c.getDeclaredAnnotations())
             ));
-        }
-        else if (m instanceof Method) {
-            Method e = (Method)m;
-
+        else if (m instanceof Method e)
             return List.of(new TypeSignature(
                     Stream.of(implicitParams.stream(), Arrays.stream(e.getParameterTypes()))
                             .flatMap(Function.identity())
@@ -61,12 +57,7 @@ public class TypeSignature {
                     Set.of(e.getExceptionTypes()),
                     annotationClasses(classAnnotations, e.getDeclaredAnnotations())
             ));
-        }
-        else {
-            assert (m instanceof Field);
-
-            Field f = (Field)m;
-
+        else if (m instanceof Field f) {
             Set<Class<?>> annotations = annotationClasses(classAnnotations, f.getDeclaredAnnotations());
 
             return List.of(
@@ -80,5 +71,7 @@ public class TypeSignature {
                             annotations)
             );
         }
+        else
+            return List.of();
     }
 }

@@ -90,8 +90,7 @@ public record CandidateMember(
     }
 
     public boolean matchesAnnotations(Set<Class<?>> queryAnnotationTypes) {
-        return queryAnnotationTypes == null
-                || annotationTypes.containsAll(queryAnnotationTypes);
+        return annotationTypes.containsAll(queryAnnotationTypes);
     }
 
 
@@ -101,32 +100,24 @@ public record CandidateMember(
     }
 
     public boolean matchesReturn(Class<?> queryReturnType) {
-        return queryReturnType == null
-                || isTypeCompatibleForAssignment(queryReturnType, returnType);
+        return isTypeCompatibleForAssignment(queryReturnType, returnType);
     }
 
     public boolean matchesParams(List<? extends Class<?>> queryParamTypes) {
-        if (queryParamTypes == null)
-            return true;
-        else {
-            Iterator<? extends Class<?>> queryTypeIter = queryParamTypes.iterator();
-
-            return paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
-        }
+        Iterator<? extends Class<?>> queryTypeIter = queryParamTypes.iterator();
+        return paramTypes.stream().allMatch(mpt -> isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
     }
 
     public boolean matchesThrows(Set<Class<?>> queryThrowTypes) {
-        if (queryThrowTypes != null) {
-            // Special case for a query for methods that throw nothing
-            if (queryThrowTypes.size() == 0)
-                return throwTypes.size() == 0;
+        // Special case for a query for methods that throw nothing
+        if (queryThrowTypes.size() == 0)
+            return throwTypes.size() == 0;
 
-            // A candidate's throws clause matches if the types it might throw are listed
-            // in the query's set of caught exceptions
-            for (var caughtType : queryThrowTypes) {
-                if (throwTypes.stream().noneMatch(thrownType -> isTypeCompatibleForAssignment(caughtType, thrownType)))
-                    return false;
-            }
+        // A candidate's throws clause matches if the types it might throw are listed
+        // in the query's set of caught exceptions
+        for (var caughtType : queryThrowTypes) {
+            if (throwTypes.stream().noneMatch(thrownType -> isTypeCompatibleForAssignment(caughtType, thrownType)))
+                return false;
         }
         return true;
     }
