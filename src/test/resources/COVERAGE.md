@@ -48,6 +48,7 @@ public static boolean Thread.holdsLock(Object)
 public static boolean java.lang.invoke.MethodHandleProxies.isWrapperInstance(Object)
 public static boolean java.util.Objects.isNull(Object)
 public static boolean java.util.Objects.nonNull(Object)
+public static boolean jdk.internal.vm.vector.VectorSupport.isNonCapturingLambda(Object)
 $
 ````
 
@@ -146,9 +147,9 @@ dependent classes in the JAR (it's not an uberjar).  This means trying to load t
 
 ````
 $ juggle -j build/libs/testApp.jar -r com.angellane.juggle.testinput.app.App -p void            
-*** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: Lcom/angellane/juggle/testinput/lib/Lib;
+*** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 *** Couldn't find type: com.angellane.juggle.testinput.app.App; using class java.lang.Object instead
-*** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: Lcom/angellane/juggle/testinput/lib/Lib;
+*** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 $
 ````
 

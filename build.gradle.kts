@@ -25,8 +25,8 @@ dependencies {
 }
 
 java.toolchain {
-    // Java 12 required for java.lang.Class.arrayType(), supporting passing arrays as -p and -r options
-    languageVersion.set(JavaLanguageVersion.of(12))
+    // We use a lot of Java 17 features: records, pattern matching, etc.
+    languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 application {

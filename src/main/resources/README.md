@@ -279,7 +279,6 @@ public java.io.PipedOutputStream.<init>()
 public sun.net.www.http.PosterOutputStream.<init>()
 public sun.security.util.DerOutputStream.<init>()
 static ProcessBuilder.NullOutputStream ProcessBuilder.NullOutputStream.INSTANCE
-com.sun.java.util.jar.pack.CodingChooser.Sizer.<init>()
 static java.io.PrintStream jdk.internal.logger.SimpleConsoleLogger.outputStream()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
 $
