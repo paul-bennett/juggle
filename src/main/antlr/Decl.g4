@@ -50,7 +50,7 @@ decl
         modifier*
         type?
         IDENT?
-        ( '(' params? ')' )?
+        ( '(' params ')' )?
     ;
 
 annotation
@@ -68,7 +68,7 @@ qname
     ;
 
 type
-    :   qname dims? DOTDOTDOT?
+    :   qname dims? ELLIPSIS?
     // TODO: add type parameters, e.g. "List<Foo>"
     // TODO: add wildcard, upper & lower bounds: "?", "? extends Foo" or "? super Bar"
     ;
@@ -85,13 +85,13 @@ param
     :   type IDENT?     // potentially unnamed type
     |   type? IDENT     // potentially untyped name
     // TODO: add parameter @Attributes
-    |   DOTDOTDOT       // an unknown number of params      (extension to Java)
+    |   ELLIPSIS        // an unknown number of params      (extension to Java)
     |                   // unnamed, untyped (i.e. wildcard)
     ;
 
 WS      : [\r\n\t ]+  -> skip;
 
-DOTDOTDOT   : '...' ;
+ELLIPSIS    : '...' ;
 DOT         : '.'   ;
 
 IDENT   : ID_START ID_PART* ;
