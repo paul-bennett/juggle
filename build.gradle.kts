@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+
 plugins {
     application
     jacoco
@@ -18,22 +20,9 @@ dependencies {
     testImplementation("org.junit.jupiter", "junit-jupiter-engine", "5.9.2")
 }
 
-// I would ideally like to specify the Java version using Gradle's toolchain
-// feature, but it's a bit tangled up with respect to my testInput projects
-// -- they don't seem to pick up the toolchain settings.
-//
-// Using the old method of setting target & source compatibility instead.
-
-//java {
-//    toolchain {
-//        // Java 12 required for java.lang.Class.arrayType(), supporting passing arrays as -p and -r options
-//        languageVersion.set(JavaLanguageVersion.of(12))
-//    }
-//}
-
-tasks.withType<JavaCompile> {
-    targetCompatibility = "12"
-    sourceCompatibility = "12"
+java.toolchain {
+    // Java 12 required for java.lang.Class.arrayType(), supporting passing arrays as -p and -r options
+    languageVersion.set(JavaLanguageVersion.of(12))
 }
 
 application {
@@ -67,66 +56,66 @@ tasks.named<Test>("test") {
     dependsOn(tasks.jar)    // One of the tests in README.md uses the built JAR file
 }
 
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
 tasks.jacocoTestReport {
-    dependsOn(tasks.test) // tests are required to run before generating the report
+    dependsOn(tasks.test)   // tests are required to run before generating the report
+}
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.9".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
 
 
 // This next section configures a couple of tasks to generate JAR files that are used as input to some
 // of the tests.  There's no need to invoke the tasks explicitly -- we hook them into test task too.
 //
-// I'm not a Gradle expert, so this looks/feels clumsier than strictly necessary.
-// I'm sure there's a better way of doing this.
+// This still feels a bit more complex than I'd have expected. Is there a better way?
 
-sourceSets {
-    create("testLib").java.setSrcDirs(listOf("src/test-input/java"))
-    create("testApp").java.setSrcDirs(listOf("src/test-input/java"))
+var testLib = "testLib"
+var testApp = "testApp"
+
+var testLibSrc: SourceSet = sourceSets.create(testLib)
+var testAppSrc: SourceSet = sourceSets.create(testApp)
+
+var jarTestLibTaskName = "jar${testLib.uppercaseFirstChar()}"
+var jarTestAppTaskName = "jar${testApp.uppercaseFirstChar()}"
+
+tasks.named<JavaCompile>(testAppSrc.compileJavaTaskName) {
+    dependsOn(tasks[testLibSrc.compileJavaTaskName])
+    classpath = testLibSrc.runtimeClasspath
 }
 
-tasks.register<JavaCompile>("testLibCompile") {
-    val srcName = name.removeSuffix("Compile")
-    classpath = sourceSets.named(srcName).get().runtimeClasspath
-    destinationDirectory.set(File(project.buildDir.toString() + "/classes/" + srcName))
-    include("**/" + srcName.removePrefix("test") + ".java")
-    source = sourceSets.named(srcName).get().java
-}
+tasks.create<Jar>(jarTestLibTaskName) {
+    group = "build"
+    description = "Assembles a jar archive containing the $testLib classes"
+    dependsOn(tasks[testLibSrc.compileJavaTaskName])
 
-tasks.register<JavaCompile>("testAppCompile") {
-    val srcName = name.removeSuffix("Compile")
-    classpath = sourceSets.named(srcName.removeSuffix("App") + "Lib").get().runtimeClasspath
-    destinationDirectory.set(File(project.buildDir.toString() + "/classes/" + srcName))
-    include("**/" + srcName.removePrefix("test") + ".java")
-    source = sourceSets.named(srcName).get().java
-}
-
-tasks.register<Jar>("testLibJar") {
-    val srcName = name.removeSuffix("Jar")
-    val compileTaskName = srcName + "Compile"
-
-    dependsOn(compileTaskName)
-
-    from(tasks.named(compileTaskName).get().outputs)
-
-    archiveBaseName.set(srcName)
+    from(tasks[testLibSrc.compileJavaTaskName].outputs)
+    archiveBaseName.set(testLib)
     archiveVersion.set("")
 }
 
-tasks.register<Jar>("testAppJar") {
+tasks.create<Jar>(jarTestAppTaskName) {
+    group = "build"
+    description = "Assembles a jar archive containing the $testApp classes"
 
-    val srcName = name.removeSuffix("Jar")
-    val compileTaskName = srcName + "Compile"
+    dependsOn(tasks[testAppSrc.compileJavaTaskName])
 
-    dependsOn(compileTaskName)
-
-    from(tasks.named(compileTaskName).get().outputs)
-
-    archiveBaseName.set(srcName)
+    from(tasks[testAppSrc.compileJavaTaskName].outputs)
+    archiveBaseName.set(testApp)
     archiveVersion.set("")
 }
 
 tasks.named("test") {
-    dependsOn("testAppJar", "testLibJar")
+    dependsOn(jarTestLibTaskName, jarTestAppTaskName)
 }
