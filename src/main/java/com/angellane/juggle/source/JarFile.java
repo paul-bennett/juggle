@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JarFile extends Source {
@@ -47,7 +46,7 @@ public class JarFile extends Source {
                     .map(n -> getJuggler().loadClassByName(n))
                     .flatMap(Optional::stream)
                     // Collect & create a new stream now so that the JAR file is read before it's closed
-                    .collect(Collectors.toList()).stream();
+                    .toList().stream();
         } catch (IOException ignored) {}
 
         return ret;

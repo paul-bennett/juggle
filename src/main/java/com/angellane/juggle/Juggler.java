@@ -90,8 +90,7 @@ public class Juggler {
                     Optional<Class<?>> opt =
                             Stream.of(Stream.of(""), importedPackageNames.stream().map(pkg -> pkg + "."))
                                     .flatMap(Function.identity())
-                                    .map(prefix -> prefix + name)
-                                    .map(n -> juggler.loadClassByName(n))
+                                    .map(prefix -> juggler.loadClassByName(prefix + name))
                                     .flatMap(Optional::stream)
                                     .findFirst();
 

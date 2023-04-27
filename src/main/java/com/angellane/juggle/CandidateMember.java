@@ -126,10 +126,14 @@ public record CandidateMember(
     // May or may not be correct.  Written from memory, not the JLS
     //
     // Are the types of writtenType and readType compatible, as if:
+    // <pre>
     //    WrittenType w; ReadType r; w = r;
+    // </pre>
     // or
+    // <pre>
     //    ReadType r() {}
     //    WrittenType w = r();
+    // </pre>
     private boolean isTypeInstinctivelyCompatible(Class<?> writtenType, Class<?> readType) {
         // Three cases:
         // 1. Primitive widening conversions

@@ -34,29 +34,33 @@ public class ShellParser {
 
     private State step(State state, char ch) {
         switch (state) {
-            case NORM:
+            case NORM -> {
                 if (Character.isWhitespace(ch))
                     return WS;
                 else {
                     startArg(); // starts an arg if one not already being built
-                    switch(ch) {
-                        case '\\':  return ESC;
-                        case '\'':  return SGLQ;
-                        case '"':   return DBLQ;
-                        default:    addChar(ch);  return state;
-                    }
+                    return switch (ch) {
+                        case '\\' -> ESC;
+                        case '\'' -> SQ;
+                        case '"' -> DQ;
+                        default -> {
+                            addChar(ch);
+                            yield state;
+                        }
+                    };
                 }
+            }
 
-            case SGLQ: if (ch == '\'') return NORM; else { addChar(ch); return state; }
-            case DBLQ: if (ch == '"')  return NORM; else { addChar(ch); return state; }
-            case ESC:  addChar(ch); return NORM;
-            case WS:   if (Character.isWhitespace(ch)) return state; else { finishArg(); return step(NORM, ch); }
+            case SQ  -> { if (ch == '\'') return NORM; else { addChar(ch); return state; } }
+            case DQ  -> { if (ch == '"')  return NORM; else { addChar(ch); return state; } }
+            case ESC -> { addChar(ch); return NORM; }
+            case WS  -> { if (Character.isWhitespace(ch)) return state; else { finishArg(); return step(NORM, ch); } }
 
-            default:   throw new IllegalStateException("Unknown parser state");
+            default  -> throw new IllegalStateException("Unknown parser state");
         }
     }
 
-    enum State {NORM, SGLQ, DBLQ, ESC, WS}
+    enum State {NORM, SQ, DQ, ESC, WS}
     private StringBuilder nextArg;
     private List<String> args;
 }
