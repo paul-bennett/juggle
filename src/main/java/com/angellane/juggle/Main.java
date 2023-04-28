@@ -17,6 +17,7 @@ import picocli.CommandLine.Parameters;
 import java.lang.module.FindException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Command( name="juggle"
@@ -42,14 +43,17 @@ public class Main implements Runnable {
 
     // Command-line options
 
+    @SuppressWarnings("unused")
     @Option(names={"-i", "--import"}, paramLabel="packageName", description="Imported package names")
     public void addImport(String importName) { juggler.addImportedPackageName(importName); }
 
 
+    @SuppressWarnings("unused")
     @Option(names={"-j", "--jar"}, paramLabel="jarFilePath", description="JAR file to include in search")
     public void addJar(String jarName) { juggler.addSource(new JarFile(jarName)); }
 
 
+    @SuppressWarnings("unused")
     @Option(names={"-m", "--module"}, paramLabel="moduleName", description="Modules to search")
     public void addModule(String arg) {
         Arrays.stream(arg.split(","))
@@ -58,6 +62,7 @@ public class Main implements Runnable {
     }
 
 
+    @SuppressWarnings("unused")
     @Option(names={"-p", "--param"}, paramLabel="type,type,...", description="Parameter type of searched function")
     public void addParamTypes(String paramTypeName) {
         if (paramTypeNames == null) paramTypeNames = new ArrayList<>();
@@ -72,9 +77,13 @@ public class Main implements Runnable {
 
 
     public List<Class<?>> getParamTypes() {
-        return paramTypeNames == null ? null : paramTypeNames.stream()
-                .map(juggler::classForTypename)
-                .collect(Collectors.toList());
+        if (paramTypeNames == null)
+            return null;
+        else {
+            // Do this in two steps because to properly capture the type wildcard
+            Stream<Class<?>> str = paramTypeNames.stream().map(juggler::classForTypename);
+            return str.toList();
+        }
     }
 
 
@@ -86,6 +95,7 @@ public class Main implements Runnable {
     String returnTypeName;
 
 
+    @SuppressWarnings("unused")
     @Option(names={"-t", "--throws"}, paramLabel="type,type,...", description="Thrown types")
     public void addThrowTypes(String throwTypeName) {
         if (throwTypeNames == null) throwTypeNames = new HashSet<>();
@@ -104,6 +114,7 @@ public class Main implements Runnable {
     }
 
 
+    @SuppressWarnings("unused")
     @Option(names={"-@", "--annotation"}, paramLabel="type,type,...", description="Annotations")
     public void addAnnotationTypes(String annotationNames) {
         annotationTypeNames.addAll(Arrays.stream(annotationNames.split(","))
@@ -119,6 +130,7 @@ public class Main implements Runnable {
                 .collect(Collectors.toSet());
     }
 
+    @SuppressWarnings("unused")
     @Option(names={"-n", "--name"}, paramLabel="methodName", description="Filter by member name")
     public void addNameFilter(String name) {
         juggler.prependFilter(m -> m.member().getName().toLowerCase().contains(name.toLowerCase()));
@@ -129,11 +141,13 @@ public class Main implements Runnable {
             description="Minimum accessibility of members to return")
     Accessibility minAccess = Accessibility.PUBLIC;
 
+    @SuppressWarnings("unused")
     @Option(names={"-s", "--sort"}, description="Sort criteria")
     public void addSortCriteria(SortCriteria criteria) {
         juggler.addSortCriteria(criteria);
     }
 
+    @SuppressWarnings("unused")
     @Option(names={"-x", "--permute"}, negatable=true, description="Also match permutations of parameters")
     public void addPermutationProcessor(boolean permute) {
         if (permute)

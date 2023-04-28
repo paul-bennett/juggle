@@ -52,7 +52,7 @@ public class TypeSignature {
             return List.of(new TypeSignature(
                     Stream.of(implicitParams.stream(), Arrays.stream(e.getParameterTypes()))
                             .flatMap(Function.identity())
-                            .collect(Collectors.toList()),
+                            .toList(),
                     e.getReturnType(),
                     Set.of(e.getExceptionTypes()),
                     annotationClasses(classAnnotations, e.getDeclaredAnnotations())
@@ -65,7 +65,7 @@ public class TypeSignature {
                     new TypeSignature(                                                          // Setter
                             Stream.of(implicitParams.stream(), Stream.<Class<?>>of(f.getType()))
                                     .flatMap(Function.identity())
-                                    .collect(Collectors.toList()),
+                                    .toList(),
                             Void.TYPE,
                             Set.of(),
                             annotations)

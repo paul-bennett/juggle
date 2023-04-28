@@ -42,7 +42,7 @@ public class Juggler {
     public Collection<Class<?>> getClassesToSearch() {
         return getSources().stream()
                 .flatMap(Source::classStream)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void addImportedPackageName(String name) { importedPackageNames.add(name); }
@@ -171,7 +171,7 @@ public class Juggler {
     public Comparator<CandidateMember> getComparator() {
         return MultiComparator.of(getSortCriteria().stream()
                         .map(g -> g.getComparator(this))
-                        .collect(Collectors.toList()));
+                        .toList());
     }
 
 

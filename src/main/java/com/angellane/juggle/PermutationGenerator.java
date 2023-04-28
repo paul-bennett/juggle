@@ -141,7 +141,7 @@ public class PermutationGenerator<T> {
                 int[] next = permutationAfter(permutation);
                 action.accept(IntStream.of(permutation)
                         .mapToObj(contents::get)
-                        .collect(Collectors.toList()));
+                        .toList());
                 permutation = next;
                 --remaining;
                 return true;
