@@ -56,11 +56,48 @@ public class TestMatch_ClassLoader_findResource {
         q.accessibility = Accessibility.PROTECTED;
         q.returnType = BoundedType.exactType(java.net.URL.class);
         q.declarationName = Pattern.compile("^findResource$");
-        q.params = List.of(ParamSpec.param("name", String.class));
+        q.params = List.of(
+                ParamSpec.param(null, ClassLoader.class),
+                ParamSpec.param("name", String.class));
         q.exceptions = Set.of();
 
         matchQueryAndCandidate(q, cm);
     }
+
+    @Test
+    public void testEllipsis() {
+        DeclQuery q = new DeclQuery();
+
+        q.declarationName = Pattern.compile("^findResource$");
+        q.params = List.of(ParamSpec.ellipsis());
+
+        matchQueryAndCandidate(q, cm);
+    }
+
+    @Test
+    public void testTooManyArgs() {
+        DeclQuery q = new DeclQuery();
+
+        q.declarationName = Pattern.compile("^findResource$");
+        q.params = List.of(
+                ParamSpec.param(null, ClassLoader.class),
+                ParamSpec.param("name", String.class),
+                ParamSpec.param("name", String.class),
+                ParamSpec.ellipsis());
+
+        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+    }
+
+    @Test
+    public void testTooFewArgs() {
+        DeclQuery q = new DeclQuery();
+
+        q.declarationName = Pattern.compile("^findResource$");
+        q.params = List.of(ParamSpec.param(null, ClassLoader.class));
+
+        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+    }
+
 
     @Test
     public void testNoAttributes() {

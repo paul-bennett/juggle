@@ -3,9 +3,9 @@ package com.angellane.juggle.processor;
 import com.angellane.juggle.Accessibility;
 import com.angellane.juggle.CandidateMember;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -86,8 +86,41 @@ public class DeclQuery {
     }
 
     boolean matchesParams(CandidateMember cm) {
-        return this.params == null
-                || true;            // TODO: implement
+        if (params == null)
+            return true;
+
+        // params :: [ParamSpec]
+        // type ParamSpec = Ellipsis | SingleParam name type
+        // "Ellipsis" stands for zero or more actual parameters
+
+        // Right now, we'll just do the simplest: check that the candidate has
+        // at least as many actual parameters as we have SingleParams.
+
+        boolean hasEllipsis =
+                params.stream().anyMatch(p -> p instanceof Ellipsis);
+        long numParamSpecs =
+                params.stream().filter(p -> p instanceof SingleParam).count();
+
+        long numActualParams = cm.paramTypes().size();
+
+        if (!hasEllipsis) {
+            if (numActualParams != numParamSpecs)
+                return false;
+            else {
+                Iterator<? extends Class<?>> actualParamIter =
+                        cm.paramTypes().iterator();
+                return params.stream().allMatch(ps -> {
+                    // TODO: check parameter names as well
+                    // Cast is OK because we tested hasEllipsis
+                    BoundedType bounds = ((SingleParam) ps).paramType();
+                    Class<?> actualType = actualParamIter.next();
+                    return bounds.matchesClass(actualType);
+                });
+            }
+        }
+        else
+            // TODO: handle ellipsis properly; should check all actual params
+            return numActualParams >= numParamSpecs;
     }
 
     boolean matchesExceptions(CandidateMember cm) {
