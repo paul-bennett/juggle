@@ -4,7 +4,7 @@ import java.lang.reflect.Modifier;
 
 public enum Accessibility implements Comparable<Accessibility> {
     // The enumerands are arranged in order of increasing visibility.
-    PRIVATE, PROTECTED, PACKAGE, PUBLIC;
+    PRIVATE, PACKAGE, PROTECTED, PUBLIC;
 
     public static Accessibility fromModifiers(int modifiers) {
              if (Modifier.PRIVATE   == (modifiers & Modifier.PRIVATE))      return PRIVATE;

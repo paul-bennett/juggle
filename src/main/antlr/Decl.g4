@@ -48,8 +48,8 @@ decl
     :   annotation*
         // TODO: add generic_introducer <T>
         modifier*
-        type?
-        IDENT?
+        returnType?
+        methodName?
         ( '(' params ')' )?
     ;
 
@@ -59,8 +59,19 @@ annotation
 
 modifier
     : 'private' | 'protected' | 'package' | 'public'
-    | 'static'
-    // TODO: add further modifiers
+    | 'abstract' | 'static' | 'final' | 'native' | 'strictfp' | 'synchronized'
+    ;
+
+returnType
+    : type
+    ;
+
+methodName
+    : uname
+    ;
+
+uname
+    :   IDENT
     ;
 
 qname
@@ -82,11 +93,11 @@ params
     ;
 
 param
-    :   type IDENT?     // potentially unnamed type
-    |   type? IDENT     // potentially untyped name
-    // TODO: add parameter @Attributes
-    |   ELLIPSIS        // an unknown number of params      (extension to Java)
-    |                   // unnamed, untyped (i.e. wildcard)
+    :   type uname?     #unnamedParam   // potentially unnamed type
+    |   type? uname     #untypedParam   // potentially untyped name
+    // TODO: add parameter @annotations and modifiers (`final`)
+    |   ELLIPSIS        #ellipsisParam  // an unknown number of params      (extension to Java)
+    |                   #unknownParam   // unnamed, untyped (i.e. wildcard)
     ;
 
 WS      : [\r\n\t ]+  -> skip;
@@ -94,6 +105,7 @@ WS      : [\r\n\t ]+  -> skip;
 ELLIPSIS    : '...' ;
 DOT         : '.'   ;
 
+// TODO: add support for regular expressions
 IDENT   : ID_START ID_PART* ;
 
 // Java allows a much wider selection of chars in an identifier, but we're being lazy for now.

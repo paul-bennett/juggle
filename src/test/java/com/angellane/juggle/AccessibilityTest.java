@@ -11,23 +11,23 @@ public class AccessibilityTest {
     @Test
     public void isAtLastAsAccessibleAsOther() {
         assertTrue (Accessibility.PUBLIC.isAtLeastAsAccessibleAsOther(Accessibility.PUBLIC));
-        assertTrue (Accessibility.PUBLIC.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
         assertTrue (Accessibility.PUBLIC.isAtLeastAsAccessibleAsOther(Accessibility.PROTECTED));
+        assertTrue (Accessibility.PUBLIC.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
         assertTrue (Accessibility.PUBLIC.isAtLeastAsAccessibleAsOther(Accessibility.PRIVATE));
 
-        assertFalse(Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PUBLIC));
-        assertTrue (Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
-        assertTrue (Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PROTECTED));
-        assertTrue (Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PRIVATE));
-
         assertFalse(Accessibility.PROTECTED.isAtLeastAsAccessibleAsOther(Accessibility.PUBLIC));
-        assertFalse(Accessibility.PROTECTED.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
         assertTrue (Accessibility.PROTECTED.isAtLeastAsAccessibleAsOther(Accessibility.PROTECTED));
+        assertTrue (Accessibility.PROTECTED.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
         assertTrue (Accessibility.PROTECTED.isAtLeastAsAccessibleAsOther(Accessibility.PRIVATE));
 
+        assertFalse(Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PUBLIC));
+        assertFalse(Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PROTECTED));
+        assertTrue (Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
+        assertTrue (Accessibility.PACKAGE.isAtLeastAsAccessibleAsOther(Accessibility.PRIVATE));
+
         assertFalse(Accessibility.PRIVATE.isAtLeastAsAccessibleAsOther(Accessibility.PUBLIC));
-        assertFalse(Accessibility.PRIVATE.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
         assertFalse(Accessibility.PRIVATE.isAtLeastAsAccessibleAsOther(Accessibility.PROTECTED));
+        assertFalse(Accessibility.PRIVATE.isAtLeastAsAccessibleAsOther(Accessibility.PACKAGE));
         assertTrue (Accessibility.PRIVATE.isAtLeastAsAccessibleAsOther(Accessibility.PRIVATE));
     }
 

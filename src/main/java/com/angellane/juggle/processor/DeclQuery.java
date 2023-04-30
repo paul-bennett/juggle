@@ -2,11 +2,21 @@ package com.angellane.juggle.processor;
 
 import com.angellane.juggle.Accessibility;
 import com.angellane.juggle.CandidateMember;
+import com.angellane.juggle.parser.DeclBaseListener;
+import com.angellane.juggle.parser.DeclLexer;
+import com.angellane.juggle.parser.DeclParser;
+import com.angellane.juggle.parser.DeclParser.DeclContext;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a declaration query -- the result of parsing a pseudo-Java declaration that's
@@ -49,6 +59,12 @@ public class DeclQuery {
             BoundedType paramType
     ) implements ParamSpec {}
 
+    public ClassLoader loader = getClass().getClassLoader();
+
+    public DeclQuery(ClassLoader loader) {
+        this.loader = loader;
+    }
+
     public Set<Class<?>> annotationTypes = null;    // TODO: consider Set<Class<? extends Annotation>>
     public Accessibility accessibility = null;
     public int modifierMask = 0, modifiers = 0;
@@ -58,6 +74,54 @@ public class DeclQuery {
 
     public List<ParamSpec> params = null;
     public Set<BoundedType> exceptions = null;
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
+        else if (!(other instanceof DeclQuery declQuery)) {
+            return false;
+        } else {
+            return modifierMask == declQuery.modifierMask
+                    && modifiers == declQuery.modifiers
+                    && Objects.equals(annotationTypes, declQuery.annotationTypes)
+                    && accessibility == declQuery.accessibility
+                    && Objects.equals(returnType, declQuery.returnType)
+                    && Objects.equals(declarationName, declQuery.declarationName)
+                    && Objects.equals(params, declQuery.params)
+                    && Objects.equals(exceptions, declQuery.exceptions);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                annotationTypes,
+                accessibility,
+                modifierMask, modifiers,
+                returnType,
+                declarationName,
+                params,
+                exceptions);
+    }
+
+    public void addAnnotationType(Class<?> annotationType) {
+        if (annotationTypes == null)
+            annotationTypes = new HashSet<>();
+        annotationTypes.add(annotationType);
+    }
+
+    public void addModifier(int modifier, boolean val) {
+        // First clear this modifier bit, then add it if necessary
+        this.modifiers = (this.modifiers & ~modifier) | (val ? modifier : 0);
+        this.modifierMask |= modifier;
+    }
+
+    public void addModifier(int modifier) { addModifier(modifier, true); }
+
+    public void setAccessibility(Accessibility accessibility) {
+        this.accessibility = accessibility;
+    }
 
     public boolean isMatchForCandidate(CandidateMember cm) {
         return cm.matchesAccessibility(accessibility)
@@ -128,12 +192,62 @@ public class DeclQuery {
                 || this.exceptions.stream().allMatch(ex -> cm.throwTypes().stream().anyMatch(ex::matchesClass));
     }
 
-    DeclQuery() {}
+    public DeclQuery() {}
 
     public DeclQuery(final String declString) {
-        if (!declString.isEmpty())
-            System.err.println("QUERY STRING: `" + declString + "'");
+        CharStream inputStream = CharStreams.fromString(declString);
 
-        // TODO: parse declString and fill out fields of this
+        DeclLexer lexer = new DeclLexer(inputStream);
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+        DeclParser parser = new DeclParser(tokenStream);
+
+        DeclContext tree = parser.decl();
+
+        ParseTreeWalker walker = new ParseTreeWalker();
+        Listener listener = new Listener();
+
+        walker.walk(listener, tree);    // Fills out the fields of this
+    }
+
+    class Listener extends DeclBaseListener {
+        // Add methods here that attach elements to this
+
+        @Override
+        public void enterAnnotation(DeclParser.AnnotationContext ctx) {
+            String typeName = ctx.qname().IDENT().stream()
+                    .map(TerminalNode::getSymbol)
+                    .map(Token::getText)
+                    .collect(Collectors.joining("."));
+
+            try {
+                // TODO: resolve imported package names (maybe lookup via Juggler?)
+                Class<?> annotationType = loader.loadClass(typeName);
+                addAnnotationType(annotationType);
+            }
+            catch (ClassNotFoundException ex) {
+                System.err.println("*** Couldn't load annotation `" + typeName + "'; ignoring");
+            }
+        }
+
+        @Override
+        public void enterModifier(DeclParser.ModifierContext ctx) {
+            String text = ctx.getText();
+
+            switch (text) {
+                case "private", "package", "protected", "public" ->
+                        setAccessibility(Accessibility.fromString(text));
+
+                case "abstract"     -> addModifier(Modifier.ABSTRACT);
+                case "static"       -> addModifier(Modifier.STATIC);
+                case "final"        -> addModifier(Modifier.FINAL);
+                case "native"       -> addModifier(Modifier.NATIVE);
+                case "strictfp"     -> addModifier(Modifier.STRICT);
+                case "synchronized" -> addModifier(Modifier.SYNCHRONIZED);
+
+                default ->
+                        System.err.println("*** Unknown modifier `" + ctx.getText() + "'; ignoring");
+            }
+        }
     }
 }
+

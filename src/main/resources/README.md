@@ -104,7 +104,7 @@ not a `String` (as specified with `-p`). Juggle includes this method in the
 result set because Java allows instances of a subclass to be passed to
 a function that is expecting a parent class (Widening Reference Conversion).
 This particular method is listed last in the results, because Juggle tries
-to list closer matches (i.e. where fewer conversions are neccessary) first.
+to list closer matches (i.e. where fewer conversions are necessary) first.
 
 Juggle treats data fields as a pair of methods: a setter (which takes an
 argument of the field's type and returns `void`), and a getter (which takes
@@ -192,7 +192,7 @@ $
 ````
 
 The `-m` flag can be used to specify JMODs to search.  Juggle will also search
-any modules that this module requires transitively (sometimes refferd to as
+any modules that this module requires transitively (sometimes referred to as
 "implied reads").
 
 ````
@@ -278,8 +278,6 @@ public java.io.ByteArrayOutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
 public sun.net.www.http.PosterOutputStream.<init>()
 public sun.security.util.DerOutputStream.<init>()
-static ProcessBuilder.NullOutputStream ProcessBuilder.NullOutputStream.INSTANCE
-static java.io.PrintStream jdk.internal.logger.SimpleConsoleLogger.outputStream()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
 $
 ````
@@ -304,7 +302,7 @@ $ juggle -p double[],int,double,int -r void
 $
 ````
 
-However, if we allos Juggle to permute parmeters, it locates a match:
+However, if we allow Juggle to permute parameters, it locates a match:
 
 ````
 $ juggle -p double[],int,double,int -r void -x
