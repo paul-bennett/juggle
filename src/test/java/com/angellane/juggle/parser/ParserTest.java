@@ -1,6 +1,7 @@
 package com.angellane.juggle.parser;
 
 import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.Juggler;
 import com.angellane.juggle.parser.DeclLexer;
 import com.angellane.juggle.parser.DeclParser;
 import com.angellane.juggle.parser.DeclParser.DeclContext;
@@ -12,6 +13,7 @@ import org.antlr.v4.runtime.Token;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,8 +50,10 @@ public class ParserTest {
 
     @Test
     public void testModifiers() {
-        DeclQuery actualQuery =
-                new DeclQuery("@java.lang.SafeVarargs @java.lang.Deprecated protected static");
+        Juggler juggler = new Juggler();
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                        "@java.lang.SafeVarargs @java.lang.Deprecated"
+                                + " protected static");
 
         DeclQuery expectedQuery = new DeclQuery();
         expectedQuery.addAnnotationType(SafeVarargs.class);
@@ -59,4 +63,31 @@ public class ParserTest {
 
         assertEquals(expectedQuery, actualQuery);
     }
+
+    @Test
+    public void testNameExact() {
+        Juggler juggler = new Juggler();
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "? memberName");
+
+        DeclQuery expectedQuery = new DeclQuery();
+
+        expectedQuery.setNameExact("memberName");
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testNamePattern() {
+        Juggler juggler = new Juggler();
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "? /pattern/i");
+
+        DeclQuery expectedQuery = new DeclQuery();
+
+        expectedQuery.setNamePattern(Pattern.compile("pattern", Pattern.CASE_INSENSITIVE));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
 }

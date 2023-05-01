@@ -216,7 +216,7 @@ public class Main implements Runnable {
 
         String queryString = getQueryString();
         if (!queryString.isEmpty()) {
-            DeclQuery decl = new DeclQuery(queryString);
+            DeclQuery decl = new DeclQuery(juggler, queryString);
             juggler.appendFilter(decl::isMatchForCandidate);
         }
 

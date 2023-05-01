@@ -95,7 +95,7 @@ public record CandidateMember(
 
 
     public boolean matchesModifiers(int queryMask, int queryModifiers) {
-        final int mask = queryMask | OTHER_MODIFIERS_MASK;
+        final int mask = queryMask & OTHER_MODIFIERS_MASK;
         return (mask & queryModifiers) == (mask & this.otherModifiers);
     }
 

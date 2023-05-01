@@ -2,6 +2,7 @@ package com.angellane.juggle.processor;
 
 import com.angellane.juggle.Accessibility;
 import com.angellane.juggle.CandidateMember;
+import com.angellane.juggle.Juggler;
 import com.angellane.juggle.parser.DeclBaseListener;
 import com.angellane.juggle.parser.DeclLexer;
 import com.angellane.juggle.parser.DeclParser;
@@ -59,18 +60,14 @@ public class DeclQuery {
             BoundedType paramType
     ) implements ParamSpec {}
 
-    public ClassLoader loader = getClass().getClassLoader();
-
-    public DeclQuery(ClassLoader loader) {
-        this.loader = loader;
-    }
+    public Juggler juggler;
 
     public Set<Class<?>> annotationTypes = null;    // TODO: consider Set<Class<? extends Annotation>>
     public Accessibility accessibility = null;
     public int modifierMask = 0, modifiers = 0;
     public BoundedType returnType = null;
 
-    public Pattern declarationName = null;
+    public Pattern declarationPattern = null;
 
     public List<ParamSpec> params = null;
     public Set<BoundedType> exceptions = null;
@@ -87,10 +84,23 @@ public class DeclQuery {
                     && Objects.equals(annotationTypes, declQuery.annotationTypes)
                     && accessibility == declQuery.accessibility
                     && Objects.equals(returnType, declQuery.returnType)
-                    && Objects.equals(declarationName, declQuery.declarationName)
+                    && patternsMatch(declQuery)
                     && Objects.equals(params, declQuery.params)
                     && Objects.equals(exceptions, declQuery.exceptions);
         }
+    }
+
+    /*
+     * java.util.regex.Pattern doesn't provide a meaningful equality
+     * test so we convert both sides to Strings and hope for the best
+     */
+    private boolean patternsMatch(DeclQuery other) {
+        return (declarationPattern != null && other.declarationPattern != null)
+                ? (Objects.equals(declarationPattern.pattern(),
+                        other.declarationPattern.pattern())
+                    && (declarationPattern.flags() ==
+                        other.declarationPattern.flags()))
+                : (declarationPattern == other.declarationPattern);
     }
 
     @Override
@@ -100,9 +110,13 @@ public class DeclQuery {
                 accessibility,
                 modifierMask, modifiers,
                 returnType,
-                declarationName,
+                declarationPattern,
                 params,
                 exceptions);
+    }
+
+    Class<?> classForTypename(String className) {
+        return juggler.classForTypename(className);
     }
 
     public void addAnnotationType(Class<?> annotationType) {
@@ -121,6 +135,14 @@ public class DeclQuery {
 
     public void setAccessibility(Accessibility accessibility) {
         this.accessibility = accessibility;
+    }
+
+    public void setNameExact(final String name) {
+        setNamePattern(Pattern.compile(name, Pattern.LITERAL));
+    }
+
+    public void setNamePattern(Pattern pattern) {
+        this.declarationPattern = pattern;
     }
 
     public boolean isMatchForCandidate(CandidateMember cm) {
@@ -145,8 +167,8 @@ public class DeclQuery {
     }
 
     boolean matchesName(CandidateMember cm) {
-        return this.declarationName == null
-                || this.declarationName.matcher(cm.member().getName()).matches();
+        return this.declarationPattern == null
+                || this.declarationPattern.matcher(cm.member().getName()).find();
     }
 
     boolean matchesParams(CandidateMember cm) {
@@ -194,7 +216,13 @@ public class DeclQuery {
 
     public DeclQuery() {}
 
-    public DeclQuery(final String declString) {
+    public DeclQuery(final Juggler juggler) {
+        this.juggler = juggler;
+    }
+
+    public DeclQuery(final Juggler juggler, final String declString) {
+        this(juggler);
+
         CharStream inputStream = CharStreams.fromString(declString);
 
         DeclLexer lexer = new DeclLexer(inputStream);
@@ -219,14 +247,9 @@ public class DeclQuery {
                     .map(Token::getText)
                     .collect(Collectors.joining("."));
 
-            try {
-                // TODO: resolve imported package names (maybe lookup via Juggler?)
-                Class<?> annotationType = loader.loadClass(typeName);
-                addAnnotationType(annotationType);
-            }
-            catch (ClassNotFoundException ex) {
-                System.err.println("*** Couldn't load annotation `" + typeName + "'; ignoring");
-            }
+            Class<?> c = classForTypename(typeName);
+            if (c != null)
+                addAnnotationType(c);
         }
 
         @Override
@@ -247,6 +270,31 @@ public class DeclQuery {
                 default ->
                         System.err.println("*** Unknown modifier `" + ctx.getText() + "'; ignoring");
             }
+        }
+
+        @Override
+        public void enterMethodName(DeclParser.MethodNameContext ctx) {
+            DeclParser.UnameContext uname = ctx.uname();
+
+            if (uname.IDENT() != null)
+                setNameExact(uname.IDENT().getText());
+            else if (uname.REGEX() != null)
+                setNamePattern(patternFromRegex(uname.REGEX().getText()));
+        }
+
+        private Pattern patternFromRegex(String re) {
+            boolean caseInsensitive = re.endsWith("i");
+
+            if (caseInsensitive)
+                re = re.substring(0, re.length() - 1);
+
+            assert(re.startsWith("/"));
+            assert(re.endsWith("/"));
+
+            re = re.substring(1, re.length() - 1);
+
+            return Pattern.compile(re,
+                    caseInsensitive ? Pattern.CASE_INSENSITIVE : 0);
         }
     }
 }

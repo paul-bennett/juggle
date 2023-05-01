@@ -55,7 +55,7 @@ public class TestMatch_ClassLoader_findResource {
         q.modifierMask = Modifier.STATIC;
         q.accessibility = Accessibility.PROTECTED;
         q.returnType = BoundedType.exactType(java.net.URL.class);
-        q.declarationName = Pattern.compile("^findResource$");
+        q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(
                 ParamSpec.param(null, ClassLoader.class),
                 ParamSpec.param("name", String.class));
@@ -68,7 +68,7 @@ public class TestMatch_ClassLoader_findResource {
     public void testEllipsis() {
         DeclQuery q = new DeclQuery();
 
-        q.declarationName = Pattern.compile("^findResource$");
+        q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(ParamSpec.ellipsis());
 
         matchQueryAndCandidate(q, cm);
@@ -78,7 +78,7 @@ public class TestMatch_ClassLoader_findResource {
     public void testTooManyArgs() {
         DeclQuery q = new DeclQuery();
 
-        q.declarationName = Pattern.compile("^findResource$");
+        q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(
                 ParamSpec.param(null, ClassLoader.class),
                 ParamSpec.param("name", String.class),
@@ -92,7 +92,7 @@ public class TestMatch_ClassLoader_findResource {
     public void testTooFewArgs() {
         DeclQuery q = new DeclQuery();
 
-        q.declarationName = Pattern.compile("^findResource$");
+        q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(ParamSpec.param(null, ClassLoader.class));
 
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
@@ -136,7 +136,7 @@ public class TestMatch_ClassLoader_findResource {
     @Test
     public void testCorrectDeclarationName() {
         DeclQuery q = new DeclQuery();
-        q.declarationName = Pattern.compile("^findResource$");
+        q.declarationPattern = Pattern.compile("^findResource$");
         matchQueryAndCandidate(q, cm);
     }
 
@@ -195,13 +195,12 @@ public class TestMatch_ClassLoader_findResource {
     @Test
     public void testWrongDeclarationName() {
         DeclQuery q = new DeclQuery();
-        q.declarationName = Pattern.compile("^barf$");
+        q.declarationPattern = Pattern.compile("^barf$");
         assertFalse(q.matchesName(cm), "Match name");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 
     @Test
-    @Disabled("Param matching not implemented yet")
     public void testWrongParamName() {
         DeclQuery q = new DeclQuery();
         q.params = List.of(ParamSpec.param("foo", String.class));
@@ -210,7 +209,6 @@ public class TestMatch_ClassLoader_findResource {
     }
 
     @Test
-    @Disabled("Param matching not implemented yet")
     public void testWrongParamType() {
         DeclQuery q = new DeclQuery();
         q.params = List.of(ParamSpec.param("name", Integer.class));
@@ -219,7 +217,6 @@ public class TestMatch_ClassLoader_findResource {
     }
 
     @Test
-    @Disabled("Param matching not implemented yet")
     public void testWrongParamArity() {
         DeclQuery q = new DeclQuery();
         q.params = List.of(

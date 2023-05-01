@@ -27,7 +27,7 @@ public class Juggler {
     public void addSource(Source source) { sources.add(source); source.setJuggler(this); }
     public List<Source> getSources() { return sources; }
 
-    ResolvingURLClassLoader loader;
+    ResolvingURLClassLoader loader = new ResolvingURLClassLoader(new URL[] {});
 
     public void configureAllSources() {
         URL[] urls = getSources().stream()

@@ -43,6 +43,9 @@ grammar Decl;
 //    package com.angellane.juggle.parser;
 //}
 
+oneDecl
+    :   decl EOF
+    ;
 
 decl
     :   annotation*
@@ -50,7 +53,7 @@ decl
         modifier*
         returnType?
         methodName?
-        ( '(' params ')' )?
+        params?
     ;
 
 annotation
@@ -71,7 +74,8 @@ methodName
     ;
 
 uname
-    :   IDENT
+    :   REGEX
+    |   IDENT
     ;
 
 qname
@@ -79,9 +83,11 @@ qname
     ;
 
 type
-    :   qname dims? ELLIPSIS?
+    :   qname dims? ELLIPSIS?       # exactType
+    |   '?'                         # unboundedType
+    |   '?' 'extends' qname         # upperBoundedType  // TODO: consider is qname right here?
+    |   '?' 'super'   qname         # lowerBoundedType  // TODO: consider is qname right here?
     // TODO: add type parameters, e.g. "List<Foo>"
-    // TODO: add wildcard, upper & lower bounds: "?", "? extends Foo" or "? super Bar"
     ;
 
 dims
@@ -89,7 +95,8 @@ dims
     ;
 
 params
-    :   param (',' param)*
+    :   '(' ')'
+    |   '(' param (',' param)* ')'
     ;
 
 param
@@ -105,7 +112,9 @@ WS      : [\r\n\t ]+  -> skip;
 ELLIPSIS    : '...' ;
 DOT         : '.'   ;
 
-// TODO: add support for regular expressions
+REGEX   : '/' (ESC | ~[/\\])* '/' 'i'?;
+fragment ESC : '\\' . ;                 // Allow escape of any char, but only / is meaningful
+
 IDENT   : ID_START ID_PART* ;
 
 // Java allows a much wider selection of chars in an identifier, but we're being lazy for now.
