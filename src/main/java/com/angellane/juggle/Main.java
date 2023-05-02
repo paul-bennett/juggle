@@ -99,8 +99,15 @@ public class Main implements Runnable {
                 .collect(Collectors.toSet());
     }
 
-    @Option(names={"-n", "--name"}, paramLabel="methodName", description="Filter by member name")
-    public void addNameFilter(String name) {
+    @SuppressWarnings("unused")
+    @Option(names={"-c", "--class-name"}, paramLabel="className", description="Filter by class name")
+    public void addClassNameFilter(String name) {
+        juggler.prependFilter(m -> m.getMember().getDeclaringClass().getName().toLowerCase().contains(name.toLowerCase()));
+    }
+
+    @SuppressWarnings("unused")
+    @Option(names={"-n", "--member-name"}, paramLabel="methodName", description="Filter by member name")
+    public void addMemberNameFilter(String name) {
         juggler.prependFilter(m -> m.getMember().getName().toLowerCase().contains(name.toLowerCase()));
     }
 

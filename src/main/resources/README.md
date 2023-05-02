@@ -180,6 +180,21 @@ public String StringBuffer.substring(int,int)
 $
 ````
 
+Similarly you can use `-c` to restrict the search to classes that match a
+particular name.  Perhaps you can't remember the package that the
+`URLEncoder` class is in:
+````
+$ juggle -c URLEncoder
+public static String java.net.URLEncoder.encode(String)
+public static String java.net.URLEncoder.encode(String,String) throws java.io.UnsupportedEncodingException
+public static String java.net.URLEncoder.encode(String,java.nio.charset.Charset)
+$
+````
+In the current implementation `-c` searches are case-insensitive partial
+matches of the fully qualified class name, so in addition to matching class 
+names you can match package names too.
+
+
 ## Where to look
 
 You can tell Juggle which JARs to include in the search by using the `-j`
