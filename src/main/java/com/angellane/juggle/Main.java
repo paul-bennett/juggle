@@ -131,8 +131,14 @@ public class Main implements Runnable {
     }
 
     @SuppressWarnings("unused")
-    @Option(names={"-n", "--name"}, paramLabel="methodName", description="Filter by member name")
-    public void addNameFilter(String name) {
+    @Option(names={"-c", "--class-name"}, paramLabel="className", description="Filter by class name")
+    public void addClassNameFilter(String name) {
+        juggler.prependFilter(m -> m.member().getDeclaringClass().getName().toLowerCase().contains(name.toLowerCase()));
+    }
+
+    @SuppressWarnings("unused")
+    @Option(names={"-n", "--member-name"}, paramLabel="methodName", description="Filter by member name")
+    public void addMemberNameFilter(String name) {
         juggler.prependFilter(m -> m.member().getName().toLowerCase().contains(name.toLowerCase()));
     }
 
