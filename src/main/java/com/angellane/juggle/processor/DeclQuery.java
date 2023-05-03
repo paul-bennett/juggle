@@ -34,9 +34,16 @@ public class DeclQuery {
         public static BoundedType subtypeOf(Class<?> c) {
             return new BoundedType(Set.of(c), null);
         }
+        public static BoundedType subtypeOf(Set<Class<?>> cs) {
+            return new BoundedType(cs, null);
+        }
 
         public static BoundedType supertypeOf(Class<?> c) {
             return new BoundedType(null, c);
+        }
+
+        public static BoundedType wildcardType() {
+            return new BoundedType(null, null);
         }
 
         public boolean matchesClass(Class<?> candidate) {
@@ -90,9 +97,24 @@ public class DeclQuery {
         }
     }
 
+    @Override
+    public String toString() {
+        // TODO: improve this!
+        return "DeclQuery{" +
+                "annotationTypes=" + annotationTypes +
+                ", accessibility=" + accessibility +
+                ", modifierMask=" + modifierMask +
+                ", modifiers=" + modifiers +
+                ", returnType=" + returnType +
+                ", declarationPattern=" + declarationPattern +
+                ", params=" + params +
+                ", exceptions=" + exceptions +
+                '}';
+    }
+
     /*
      * java.util.regex.Pattern doesn't provide a meaningful equality
-     * test so we convert both sides to Strings and hope for the best
+     * test, so we convert both sides to Strings and hope for the best
      */
     private boolean patternsMatch(DeclQuery other) {
         return (declarationPattern != null && other.declarationPattern != null)
@@ -281,6 +303,89 @@ public class DeclQuery {
             else if (uname.REGEX() != null)
                 setNamePattern(patternFromRegex(uname.REGEX().getText()));
         }
+
+
+        // TYPE ===============================================================
+
+        // This is populated by the type listeners, gathering information about
+        // a return type, a parameter's type or an exception's type.
+        private BoundedType tempType = null;
+
+        @Override
+        public void exitExactType(DeclParser.ExactTypeContext ctx) {
+            Class<?> cls = juggler.classForTypename(ctx.qname().getText());
+
+            // Now turn it into an array with as many dimensions as []s (dims),
+            // plus one if there was an ellipsis
+
+            for (var dims = ctx.dim().size() + (ctx.ELLIPSIS() != null ? 1 : 0);
+                 dims > 0; --dims) {
+                cls = cls.arrayType();
+            }
+
+            tempType = BoundedType.exactType(cls);
+        }
+
+        @Override
+        public void exitUpperBoundedType(DeclParser.UpperBoundedTypeContext ctx) {
+            tempType = BoundedType.subtypeOf(
+                    ctx.qname().stream()
+                            .map(DeclParser.QnameContext::getText)
+                            .map(juggler::classForTypename)
+                            .collect(Collectors.toSet())
+            );
+        }
+
+        @Override
+        public void exitLowerBoundedType(DeclParser.LowerBoundedTypeContext ctx) {
+            tempType = BoundedType.supertypeOf(
+                    juggler.classForTypename(ctx.qname().getText())
+            );
+        }
+
+        @Override
+        public void exitUnboundedType(DeclParser.UnboundedTypeContext ctx) {
+            tempType = BoundedType.wildcardType();
+        }
+
+
+        // RETURN =============================================================
+
+        @Override
+        public void exitReturnType(DeclParser.ReturnTypeContext ctx) {
+            returnType = tempType;
+        }
+
+
+        // PARAMS =============================================================
+        @Override
+        public void enterParams(DeclParser.ParamsContext ctx) {
+            // We've seen parentheses, so we're matching parameters
+            params = new ArrayList<>();
+        }
+
+        @Override
+        public void enterEllipsisParam(DeclParser.EllipsisParamContext ctx) {
+            params.add(ParamSpec.ellipsis());
+        }
+
+        @Override
+        public void exitUnknownParam(DeclParser.UnknownParamContext ctx) {
+            // TODO: implement
+        }
+
+        @Override
+        public void exitUnnamedParam(DeclParser.UnnamedParamContext ctx) {
+            // TODO: implement
+        }
+
+        @Override
+        public void exitUntypedParam(DeclParser.UntypedParamContext ctx) {
+            // TODO: implement
+        }
+
+
+        // SUPPORT ============================================================
 
         private Pattern patternFromRegex(String re) {
             boolean caseInsensitive = re.endsWith("i");

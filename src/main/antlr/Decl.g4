@@ -82,17 +82,17 @@ qname
     :   (IDENT DOT)* IDENT
     ;
 
+// TODO: consider how to disable ELLIPSIS in return types
+
 type
-    :   qname dims? ELLIPSIS?       # exactType
-    |   '?'                         # unboundedType
-    |   '?' 'extends' qname         # upperBoundedType  // TODO: consider is qname right here?
-    |   '?' 'super'   qname         # lowerBoundedType  // TODO: consider is qname right here?
+    :   qname dim* ELLIPSIS?                # exactType
+    |   '?'                                 # unboundedType
+    |   '?' 'extends' qname ('&' qname)*    # upperBoundedType  // TODO: consider is qname right here?
+    |   '?' 'super'   qname                 # lowerBoundedType  // TODO: consider is qname right here?
     // TODO: add type parameters, e.g. "List<Foo>"
     ;
 
-dims
-    : ('[' ']')+
-    ;
+dim : '[' ']' ;
 
 params
     :   '(' ')'

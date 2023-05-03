@@ -116,14 +116,107 @@ $
 
 The equivalent in the new syntax is:
 ````
-% juggle -i java.net Inet6Address
+$ juggle -i java.net Inet6Address
 public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
 public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
-%
+$
 ````
 (We've just omitted the `-r`.)
 
+The above is an exact type match.
 
+When using the `-r` option, we are implicitly setting an upper bound of the return type. Using the declaration
+syntax we need to be specific if we want to use an upper bound.
+
+For example, here are all the methods named `getByAddress` that return an `InetAddress` or one of its subclasses:
+````
+$ juggle -n getByAddress -i java.net -r InetAddress 
+public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
+public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
+public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
+public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
+$
+````
+
+If we omit the `-r` and specify a return type of `InetAddress`, we only get the methods that return exactly that type: 
+````
+$ juggle -n getByAddress -i java.net InetAddress 
+public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
+public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
+$
+````
+
+We can get back to the full list with the new syntax by explicitly requesting an upper bound:
+````
+$ juggle -n getByAddress -i java.net \? extends InetAddress 
+public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
+public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
+public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
+public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
+$
+````
+
+We can specify lower bounds instead.  For example, which `getByAddress` methods return an `Inet6Address` or one
+of its superclasses?
+````
+$ juggle -n getByAddress -i java.net \? super Inet6Address 
+public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
+public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
+public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
+public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
+$
+````
+
+Because classes can implement multiple interfaces, it's possible to specify multiple lower bounds.
+How do I get hold of an instance of a class that implements both the `List` and `Queue` interfaces?
+````
+$ juggle -i java.util \? extends Queue \& List
+public LinkedList<E>.<init>()
+public LinkedList<E>.<init>(Collection<E>)
+public LinkedList<E> jdk.internal.util.jar.JarIndex.get(String)
+public LinkedList<E> sun.security.provider.PolicyParser.GrantEntry.principals
+$
+````
+
+(Note that multiple lower bounds a separated by a `&` character, just like in Java declarations.  And of course
+being a shell metacharacter this likely needs escaping in your shell.)
+
+Finally, a question mark on its own represents an unbounded wildcard type.  Unlike in Java this also matches the 
+`void` type and is equivalent to omitting an `-r` option.
+
+Here are all the methods called `checkAccess`:
+````
+$ juggle -n checkAccess
+public void Thread.checkAccess()
+public void ThreadGroup.checkAccess()
+public void SecurityManager.checkAccess(Thread)
+public void SecurityManager.checkAccess(ThreadGroup)
+public boolean java.io.FileSystem.checkAccess(java.io.File,int)
+public void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+public void jdk.internal.access.foreign.MemoryAddressProxy.checkAccess(long,long,boolean)
+public void jdk.internal.access.foreign.MemorySegmentProxy.checkAccess(long,long,boolean)
+public boolean java.io.UnixFileSystem.checkAccess(java.io.File,int)
+public void jdk.internal.jrtfs.JrtFileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+public void sun.nio.fs.UnixFileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+$
+````
+
+And here they are again, specifying an unbounded return type:
+````
+$ juggle -n checkAccess \?
+public void Thread.checkAccess()
+public void ThreadGroup.checkAccess()
+public void SecurityManager.checkAccess(Thread)
+public void SecurityManager.checkAccess(ThreadGroup)
+public boolean java.io.FileSystem.checkAccess(java.io.File,int)
+public void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+public void jdk.internal.access.foreign.MemoryAddressProxy.checkAccess(long,long,boolean)
+public void jdk.internal.access.foreign.MemorySegmentProxy.checkAccess(long,long,boolean)
+public boolean java.io.UnixFileSystem.checkAccess(java.io.File,int)
+public void jdk.internal.jrtfs.JrtFileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+public void sun.nio.fs.UnixFileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+$
+````
 
 ## Matching member names
 
