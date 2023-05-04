@@ -76,6 +76,7 @@ methodName
 uname
     :   REGEX
     |   IDENT
+//    |   '_'               // TODO: add underscore=unnamed
     ;
 
 qname
@@ -104,7 +105,7 @@ param
     |   type? uname     #untypedParam   // potentially untyped name
     // TODO: add parameter @annotations and modifiers (`final`)
     |   ELLIPSIS        #ellipsisParam  // an unknown number of params      (extension to Java)
-    |                   #unknownParam   // unnamed, untyped (i.e. wildcard)
+    |                   #wildcardParam  // unnamed, untyped (i.e. wildcard)
     ;
 
 WS      : [\r\n\t ]+  -> skip;

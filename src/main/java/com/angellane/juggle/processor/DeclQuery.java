@@ -55,6 +55,16 @@ public class DeclQuery {
 
     public sealed interface ParamSpec permits Ellipsis, SingleParam {
         static ParamSpec ellipsis() { return new Ellipsis(); }
+        static ParamSpec wildcard() {
+            return new SingleParam(
+                    Pattern.compile(""), BoundedType.wildcardType());
+        }
+        static ParamSpec unnamed(BoundedType bt) {
+            return new SingleParam(Pattern.compile(""), bt);
+        }
+        static ParamSpec untyped(Pattern pat) {
+            return new SingleParam(pat, BoundedType.wildcardType());
+        }
         static ParamSpec param(String name, Class<?> type) {
             return new SingleParam(Pattern.compile("^" + name + "$"),
                     new BoundedType(Set.of(type), type));
@@ -65,7 +75,20 @@ public class DeclQuery {
     public record SingleParam(
             Pattern paramName,
             BoundedType paramType
-    ) implements ParamSpec {}
+    ) implements ParamSpec {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SingleParam that = (SingleParam) o;
+            return patternsEqual(paramName, that.paramName) && Objects.equals(paramType, that.paramType);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(paramName, paramType);
+        }
+    }
 
     public Juggler juggler;
 
@@ -91,7 +114,8 @@ public class DeclQuery {
                     && Objects.equals(annotationTypes, declQuery.annotationTypes)
                     && accessibility == declQuery.accessibility
                     && Objects.equals(returnType, declQuery.returnType)
-                    && patternsMatch(declQuery)
+                    && patternsEqual(this.declarationPattern,
+                            declQuery.declarationPattern)
                     && Objects.equals(params, declQuery.params)
                     && Objects.equals(exceptions, declQuery.exceptions);
         }
@@ -116,13 +140,11 @@ public class DeclQuery {
      * java.util.regex.Pattern doesn't provide a meaningful equality
      * test, so we convert both sides to Strings and hope for the best
      */
-    private boolean patternsMatch(DeclQuery other) {
-        return (declarationPattern != null && other.declarationPattern != null)
-                ? (Objects.equals(declarationPattern.pattern(),
-                        other.declarationPattern.pattern())
-                    && (declarationPattern.flags() ==
-                        other.declarationPattern.flags()))
-                : (declarationPattern == other.declarationPattern);
+    private static boolean patternsEqual(Pattern a, Pattern b) {
+        return (a != null && b != null)
+                ? (Objects.equals(a.pattern(), b.pattern())
+                    && (a.flags() == b.flags()))
+                : (a == b);
     }
 
     @Override
@@ -294,15 +316,44 @@ public class DeclQuery {
             }
         }
 
-        @Override
-        public void enterMethodName(DeclParser.MethodNameContext ctx) {
-            DeclParser.UnameContext uname = ctx.uname();
 
-            if (uname.IDENT() != null)
-                setNameExact(uname.IDENT().getText());
-            else if (uname.REGEX() != null)
-                setNamePattern(patternFromRegex(uname.REGEX().getText()));
+        // NAMES ==============================================================
+
+        // This is populated by other listeners – either as a parameter name
+        // or a method name
+        private Pattern tempName = null;
+
+        @Override
+        public void enterUname(DeclParser.UnameContext ctx) {
+            tempName = ctx.IDENT() != null
+                    ? patternFromLiteral(ctx.IDENT().getText())
+                    : patternFromRegex(ctx.REGEX().getText());
         }
+
+        @Override
+        public void exitMethodName(DeclParser.MethodNameContext ctx) {
+            setNamePattern(tempName);
+        }
+
+        private Pattern patternFromLiteral(String s) {
+            return Pattern.compile(s, Pattern.LITERAL);
+        }
+
+        private Pattern patternFromRegex(String re) {
+            boolean caseInsensitive = re.endsWith("i");
+
+            if (caseInsensitive)
+                re = re.substring(0, re.length() - 1);
+
+            assert(re.startsWith("/"));
+            assert(re.endsWith("/"));
+
+            re = re.substring(1, re.length() - 1);
+
+            return Pattern.compile(re,
+                    caseInsensitive ? Pattern.CASE_INSENSITIVE : 0);
+        }
+
 
 
         // TYPE ===============================================================
@@ -365,41 +416,23 @@ public class DeclQuery {
         }
 
         @Override
-        public void enterEllipsisParam(DeclParser.EllipsisParamContext ctx) {
+        public void exitEllipsisParam(DeclParser.EllipsisParamContext ctx) {
             params.add(ParamSpec.ellipsis());
         }
 
         @Override
-        public void exitUnknownParam(DeclParser.UnknownParamContext ctx) {
-            // TODO: implement
+        public void exitWildcardParam(DeclParser.WildcardParamContext ctx) {
+            params.add(ParamSpec.wildcard());
         }
 
         @Override
         public void exitUnnamedParam(DeclParser.UnnamedParamContext ctx) {
-            // TODO: implement
+            params.add(ParamSpec.unnamed(tempType));
         }
 
         @Override
         public void exitUntypedParam(DeclParser.UntypedParamContext ctx) {
-            // TODO: implement
-        }
-
-
-        // SUPPORT ============================================================
-
-        private Pattern patternFromRegex(String re) {
-            boolean caseInsensitive = re.endsWith("i");
-
-            if (caseInsensitive)
-                re = re.substring(0, re.length() - 1);
-
-            assert(re.startsWith("/"));
-            assert(re.endsWith("/"));
-
-            re = re.substring(1, re.length() - 1);
-
-            return Pattern.compile(re,
-                    caseInsensitive ? Pattern.CASE_INSENSITIVE : 0);
+            params.add(ParamSpec.untyped(tempName));
         }
     }
 }

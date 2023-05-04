@@ -2,11 +2,10 @@ package com.angellane.juggle.parser;
 
 import com.angellane.juggle.Accessibility;
 import com.angellane.juggle.Juggler;
-import com.angellane.juggle.parser.DeclLexer;
-import com.angellane.juggle.parser.DeclParser;
 import com.angellane.juggle.parser.DeclParser.DeclContext;
 import com.angellane.juggle.processor.DeclQuery;
 import com.angellane.juggle.processor.DeclQuery.BoundedType;
+import com.angellane.juggle.processor.DeclQuery.ParamSpec;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -78,7 +78,27 @@ public class ParserTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
-    // TODO: add tests for array types
+    @Test
+    public void testArrayReturnType() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "Integer[][][]");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.returnType = BoundedType.exactType(
+                Integer.class.arrayType().arrayType().arrayType());
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testEllipsisReturnType() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "float[]...");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.returnType = BoundedType.exactType(
+                Float.TYPE.arrayType().arrayType());
+
+        assertEquals(expectedQuery, actualQuery);
+    }
 
     @Test
     public void testWildcardReturnType() {
@@ -149,4 +169,51 @@ public class ParserTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
+    @Test
+    public void testWildcardEllipsisParamType() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "(,?,...)");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.params = List.of(
+                ParamSpec.wildcard(),
+                ParamSpec.wildcard(),
+                ParamSpec.ellipsis());
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testBoundedParamType() {
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "(? extends java.net.InetAddress,"
+                        + "? extends java.util.List & java.util.RandomAccess,"
+                        + "? super Integer)");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.params = List.of(
+                ParamSpec.unnamed(
+                        BoundedType.subtypeOf(java.net.InetAddress.class)),
+                ParamSpec.unnamed(
+                        BoundedType.subtypeOf(
+                                Set.of(java.util.List.class,
+                                        java.util.RandomAccess.class))
+                ),
+                ParamSpec.unnamed(BoundedType.supertypeOf(Integer.class))
+        );
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testExactParamType() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "(Integer)");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.params = List.of(
+                ParamSpec.unnamed(BoundedType.exactType(Integer.class)));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    // TODO: tests for parameters by name
 }

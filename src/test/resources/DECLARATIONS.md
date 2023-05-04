@@ -218,6 +218,26 @@ public void sun.nio.fs.UnixFileSystemProvider.checkAccess(java.nio.file.Path,jav
 $
 ````
 
+### Arrays
+
+Are there any functions that return an array of arrays of `String`s?
+````
+$ juggle 'String[][]'           
+public String[][] java.text.DateFormatSymbols.getZoneStrings()
+public String[][] javax.security.auth.PrivateCredentialPermission.getPrincipals()
+public static String[][] sun.util.locale.provider.TimeZoneNameUtility.getZoneStrings(java.util.Locale)
+$
+````
+
+This can also be expressed using an ellipsis (even though that's not valid Java):
+````
+$ juggle 'String[]...'           
+public String[][] java.text.DateFormatSymbols.getZoneStrings()
+public String[][] javax.security.auth.PrivateCredentialPermission.getPrincipals()
+public static String[][] sun.util.locale.provider.TimeZoneNameUtility.getZoneStrings(java.util.Locale)
+$
+````
+
 ## Matching member names
 
 The new syntax lets us match members by name, either literal match
@@ -276,4 +296,103 @@ $ juggle '/^isjavaletterordigit$/i'
 public static boolean Character.isJavaLetterOrDigit(char)
 $
 ````
+
+## Parameters
+
+Are there any functions that take twenty parameters? Juggle knows (19 commas 
+separate 20 parameters) ...
+````
+$ juggle "(,,,,,,,,,,,,,,,,,,,)"
+public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V,K,V,K,V,K,V,K,V,K,V,K,V,K,V,K,V)
+$
+````
+
+Which methods meet the general contract of the `Comparator` interface?
+````
+$ juggle "int (?,? extends Object, ? extends Object)"
+public int String.CaseInsensitiveComparator.compare(Object,Object)
+public int String.CaseInsensitiveComparator.compare(String,String)
+public int com.sun.crypto.provider.GCM.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int com.sun.crypto.provider.GCM.update(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int java.io.FileSystem.compare(java.io.File,java.io.File)
+public int java.nio.channels.DatagramChannel.send(java.nio.ByteBuffer,java.net.SocketAddress) throws java.io.IOException
+public int java.nio.file.attribute.UserDefinedFileAttributeView.read(String,java.nio.ByteBuffer) throws java.io.IOException
+public int java.nio.file.attribute.UserDefinedFileAttributeView.write(String,java.nio.ByteBuffer) throws java.io.IOException
+public int java.text.Collator.compare(String,String)
+public int java.util.Comparator<T>.compare(T,T)
+public int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
+public int jdk.internal.org.xml.sax.Attributes.getIndex(String,String)
+public int java.util.concurrent.atomic.AtomicIntegerFieldUpdater<T>.getAndUpdate(T,java.util.function.IntUnaryOperator)
+public int java.util.concurrent.atomic.AtomicIntegerFieldUpdater<T>.updateAndGet(T,java.util.function.IntUnaryOperator)
+public int javax.crypto.Cipher.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException,javax.crypto.IllegalBlockSizeException,javax.crypto.BadPaddingException
+public int javax.crypto.Cipher.update(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException
+public int sun.security.util.ByteArrayLexOrder.compare(byte[],byte[])
+public int sun.security.util.ByteArrayTagOrder.compare(byte[],byte[])
+public int com.sun.crypto.provider.GCTR.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int com.sun.crypto.provider.GCTR.update(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int com.sun.crypto.provider.GHASH.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int com.sun.crypto.provider.GHASH.update(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int com.sun.crypto.provider.GaloisCounterMode.GCMDecrypt.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.IllegalBlockSizeException,javax.crypto.AEADBadTagException,javax.crypto.ShortBufferException
+public int com.sun.crypto.provider.GaloisCounterMode.GCMDecrypt.doUpdate(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException
+public int com.sun.crypto.provider.GaloisCounterMode.GCMEncrypt.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.IllegalBlockSizeException,javax.crypto.ShortBufferException
+public int com.sun.crypto.provider.GaloisCounterMode.GCMEncrypt.doUpdate(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException
+public int com.sun.crypto.provider.GaloisCounterMode.GCTRGHASH.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int com.sun.crypto.provider.GaloisCounterMode.GCTRGHASH.update(java.nio.ByteBuffer,java.nio.ByteBuffer)
+public int java.io.UnixFileSystem.compare(java.io.File,java.io.File)
+public int java.net.CookieManager.CookieComparator.compare(Object,Object)
+public int java.net.CookieManager.CookieComparator.compare(java.net.HttpCookie,java.net.HttpCookie)
+public int java.text.Collator.compare(Object,Object)
+public int java.util.Arrays.NaturalOrder.compare(Object,Object)
+public int java.util.Base64.Decoder.decode(byte[],byte[])
+public int java.util.Base64.Encoder.encode(byte[],byte[])
+public int java.util.Collections.ReverseComparator.compare(Comparable<T>,Comparable<T>)
+public int java.util.Collections.ReverseComparator.compare(Object,Object)
+public int java.util.Collections.ReverseComparator2<T>.compare(T,T)
+public int java.util.Comparators.NaturalOrderComparator.compare(Comparable<T>,Comparable<T>)
+public int java.util.Comparators.NaturalOrderComparator.compare(Object,Object)
+public int java.util.Comparators.NullComparator<T>.compare(T,T)
+public int java.util.concurrent.SubmissionPublisher<T>.offer(T,java.util.function.BiPredicate<T,U>)
+public int jdk.internal.icu.text.UnicodeSet.span(CharSequence,jdk.internal.icu.text.UnicodeSet.SpanCondition)
+public int jdk.internal.math.FDBigInteger.addAndCmp(jdk.internal.math.FDBigInteger,jdk.internal.math.FDBigInteger)
+public int jdk.internal.org.objectweb.asm.ClassWriter.newNameType(String,String)
+public int jdk.internal.util.xml.impl.Attrs.getIndex(String,String)
+public int sun.launcher.LauncherHelper.JrtFirstComparator.compare(Object,Object)
+public int sun.launcher.LauncherHelper.JrtFirstComparator.compare(java.lang.module.ModuleReference,java.lang.module.ModuleReference)
+public int sun.nio.ch.DatagramChannelImpl.send(java.nio.ByteBuffer,java.net.SocketAddress) throws java.io.IOException
+public int sun.nio.ch.InheritedChannel.InheritedDatagramChannelImpl.send(java.nio.ByteBuffer,java.net.SocketAddress) throws java.io.IOException
+public int sun.nio.fs.UnixUserDefinedFileAttributeView.read(String,java.nio.ByteBuffer) throws java.io.IOException
+public int sun.nio.fs.UnixUserDefinedFileAttributeView.write(String,java.nio.ByteBuffer) throws java.io.IOException
+public int sun.security.provider.certpath.ForwardBuilder.PKIXCertComparator.compare(Object,Object)
+public int sun.security.provider.certpath.ForwardBuilder.PKIXCertComparator.compare(java.security.cert.X509Certificate,java.security.cert.X509Certificate)
+public int sun.security.provider.certpath.PKIX.CertStoreComparator.compare(Object,Object)
+public int sun.security.provider.certpath.PKIX.CertStoreComparator.compare(java.security.cert.CertStore,java.security.cert.CertStore)
+public int sun.security.util.ByteArrayLexOrder.compare(Object,Object)
+public int sun.security.util.ByteArrayTagOrder.compare(Object,Object)
+public int sun.security.x509.AVAComparator.compare(Object,Object)
+public int sun.security.x509.AVAComparator.compare(sun.security.x509.AVA,sun.security.x509.AVA)
+public int sun.util.locale.provider.CalendarNameProviderImpl.LengthBasedComparator.compare(Object,Object)
+public int sun.util.locale.provider.CalendarNameProviderImpl.LengthBasedComparator.compare(String,String)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
+public static <T> int java.util.Arrays.compare(T[],T[],java.util.Comparator<T>)
+public static <T> int java.util.Arrays.mismatch(T[],T[],java.util.Comparator<T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public static <T> int java.util.Objects.compare(T,T,java.util.Comparator<T>)
+public static int sun.nio.ch.Net.accept(java.io.FileDescriptor,java.io.FileDescriptor,java.net.InetSocketAddress[]) throws java.io.IOException
+public int java.text.RuleBasedCollator.compare(String,String)
+$
+````
+A fair few! Note that not all of these really qualify though, since to qualify
+as a `Comparator` lambda, the method needs to be the only one in its class.
+Juggle can't tell you that.
+
+Lower type bounds come into their own with parameter queries.  Imagine I have a
+`Inet6Address`. What methods can I use to get a `NetworkInterface` from it?
+````
+$ juggle -i java.net NetworkInterface (? super Inet6Address)
+public NetworkInterface Inet6Address.getScopedInterface()
+public static NetworkInterface NetworkInterface.getByInetAddress(InetAddress) throws SocketException
+$
+````
+
+## Exceptions
 
