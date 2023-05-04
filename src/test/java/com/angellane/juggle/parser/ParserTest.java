@@ -215,5 +215,15 @@ public class ParserTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
+    @Test
+    public void testEmptyParams() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "()");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.params = List.of();
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
     // TODO: tests for parameters by name
 }

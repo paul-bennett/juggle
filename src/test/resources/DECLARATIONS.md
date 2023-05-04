@@ -307,6 +307,29 @@ public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V,K,V,K,V,K,V
 $
 ````
 
+If `(,)` shows methods with two unknown parameters, what does `()` show?
+````
+$ juggle 'Thread ()'
+public Thread.<init>()
+public static Thread Thread.currentThread()
+$
+````
+Answer: it shows methods with no parameters.  This feels natural, but does
+raise the question of how to show methods with a single parameter.
+
+The solution is to use an explicit wildcard, `(?)`:
+````
+$ juggle 'Thread (?)'
+public Thread.<init>(Runnable)
+public Thread.<init>(String)
+public Thread jdk.internal.misc.ScopedMemoryAccess.Scope.ownerThread()
+public Thread java.util.concurrent.locks.AbstractQueuedLongSynchronizer.getFirstQueuedThread()
+public Thread java.util.concurrent.locks.AbstractQueuedSynchronizer.getFirstQueuedThread()
+public static Thread jdk.internal.misc.InnocuousThread.newSystemThread(Runnable)
+public static Thread jdk.internal.misc.InnocuousThread.newThread(Runnable)
+$
+````
+
 Which methods meet the general contract of the `Comparator` interface?
 ````
 $ juggle "int (?,? extends Object, ? extends Object)"
