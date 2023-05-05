@@ -419,3 +419,76 @@ $
 
 ## Exceptions
 
+If we don't specify a `throws` clause, Juggle shows members that throw along
+with those that don't:
+````
+$ juggle 'int (String,int)'
+public int String.codePointAt(int)
+public int String.codePointBefore(int)
+public int String.indexOf(int)
+public int String.lastIndexOf(int)
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static int jdk.internal.icu.text.UTF16.charAt(String,int)
+public static int jdk.internal.jimage.ImageStringsReader.hashCode(String,int)
+public static int jdk.internal.jimage.ImageStringsReader.unmaskedHashCode(String,int)
+$
+````
+
+If we specify the `throws` keyword but don't follow it with any classes,
+Juggle only lists the members that _don't_ throw any types:
+````
+$ juggle 'int (String,int) throws'
+public int String.codePointAt(int)
+public int String.codePointBefore(int)
+public int String.indexOf(int)
+public int String.lastIndexOf(int)
+public static int jdk.internal.icu.text.UTF16.charAt(String,int)
+public static int jdk.internal.jimage.ImageStringsReader.hashCode(String,int)
+public static int jdk.internal.jimage.ImageStringsReader.unmaskedHashCode(String,int)
+$
+````
+
+Conversely, specifying a type after the `throws` only lists members that throw
+that particular type:
+````
+$ juggle 'int (String,int) throws NumberFormatException'
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+$
+````
+
+As with return and parameter types, exception types are matched precisely
+which is why we see no results when we try to match on a superclass:
+````
+$ juggle 'int (String,int) throws RuntimeException'
+$
+````
+
+But we can use an upper bound if we wanted to match any class that is lower in
+the exception hierarchy:
+````
+$ juggle 'int (String,int) throws ? extends NumberFormatException'
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+$
+````
+
+Or even a wildcard if we don't care what class might be thrown:
+````
+$ juggle 'int (String,int) throws ?'
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+$
+````
+
+Lower bounds are possible too:
+````
+$ juggle 'int (String,int) throws ? super NumberFormatException'
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+$
+````
+
+
+

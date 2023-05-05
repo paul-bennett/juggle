@@ -54,6 +54,7 @@ decl
         returnType?
         methodName?
         params?
+        throwsClause?
     ;
 
 annotation
@@ -107,6 +108,12 @@ param
     |   ELLIPSIS        #ellipsisParam  // an unknown number of params      (extension to Java)
     |                   #wildcardParam  // unnamed, untyped (i.e. wildcard)
     ;
+
+throwsClause
+    :   'throws' (exception (',' exception)* )?
+    ;
+
+exception : type ;
 
 WS      : [\r\n\t ]+  -> skip;
 

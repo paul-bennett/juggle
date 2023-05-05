@@ -37,6 +37,9 @@ public class DeclQuery {
         public static BoundedType subtypeOf(Set<Class<?>> cs) {
             return new BoundedType(cs, null);
         }
+        public static BoundedType subtypeOf(Class<?>... cs) {
+            return new BoundedType(Set.of(cs), null);
+        }
 
         public static BoundedType supertypeOf(Class<?> c) {
             return new BoundedType(null, c);
@@ -254,8 +257,19 @@ public class DeclQuery {
     }
 
     boolean matchesExceptions(CandidateMember cm) {
+        // Need to check both ways:
+        //  1. Is everything thrown by the query also thrown by the candidate?
+        //  2. Is everything thrown by the candidate also thrown by the query?
         return this.exceptions == null
-                || this.exceptions.stream().allMatch(ex -> cm.throwTypes().stream().anyMatch(ex::matchesClass));
+                || this.exceptions.stream()
+                    .allMatch(ex -> cm.throwTypes().stream()
+                            .anyMatch(ex::matchesClass)
+                    )
+                && cm.throwTypes().stream()
+                    .allMatch(ex1 -> this.exceptions.stream()
+                            .anyMatch(ex2 -> ex2.matchesClass(ex1))
+                    )
+                ;
     }
 
     public DeclQuery() {}
@@ -355,7 +369,6 @@ public class DeclQuery {
         }
 
 
-
         // TYPE ===============================================================
 
         // This is populated by the type listeners, gathering information about
@@ -409,6 +422,7 @@ public class DeclQuery {
 
 
         // PARAMS =============================================================
+
         @Override
         public void enterParams(DeclParser.ParamsContext ctx) {
             // We've seen parentheses, so we're matching parameters
@@ -433,6 +447,20 @@ public class DeclQuery {
         @Override
         public void exitUntypedParam(DeclParser.UntypedParamContext ctx) {
             params.add(ParamSpec.untyped(tempName));
+        }
+
+
+        // EXCEPTIONS =========================================================
+
+
+        @Override
+        public void enterThrowsClause(DeclParser.ThrowsClauseContext ctx) {
+            exceptions = new HashSet<>();
+        }
+
+        @Override
+        public void exitException(DeclParser.ExceptionContext ctx) {
+            exceptions.add(tempType);
         }
     }
 }

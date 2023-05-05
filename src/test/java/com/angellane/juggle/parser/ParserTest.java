@@ -226,4 +226,114 @@ public class ParserTest {
     }
 
     // TODO: tests for parameters by name
+
+    @Test
+    public void testNoThrowsClause() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "()");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.params = List.of();
+        expectedQuery.exceptions = null;
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testThrowsNothing() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "throws");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.exceptions = Set.of();
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testThrowsOneClass() {
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "throws ArithmeticException");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.exceptions =
+                Set.of(BoundedType.exactType(ArithmeticException.class));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testThrowsWildcard() {
+        DeclQuery actualQuery = new DeclQuery(juggler, "throws ?");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.exceptions = Set.of(BoundedType.wildcardType());
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testThrowsLowerBound() {
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "throws ? super java.io.FileNotFoundException");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.exceptions = Set.of(
+                BoundedType.supertypeOf(java.io.FileNotFoundException.class)
+        );
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testThrowsSingleUpperBound() {
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "throws ? extends java.io.IOException");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.exceptions =
+                Set.of(BoundedType.subtypeOf(java.io.IOException.class));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testThrowsMultipleUpperBounds() {
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "throws ? extends Error & Exception & Throwable");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.exceptions =
+                Set.of(BoundedType.subtypeOf(
+                        Error.class, Exception.class, Throwable.class));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testThrowsTwoClasses() {
+        DeclQuery actualQuery = new DeclQuery(juggler,
+                "throws ArithmeticException, java.io.IOException");
+
+        DeclQuery expectedQuery = new DeclQuery();
+        expectedQuery.exceptions =
+                Set.of(BoundedType.exactType(ArithmeticException.class),
+                        BoundedType.exactType(java.io.IOException.class));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    // TODO: implement Ellipsis in exceptions
+//    @Test
+//    public void testThrowsClassPlusEllipsis() {
+//        DeclQuery actualQuery = new DeclQuery(
+//                juggler, "() throws NullPointerException, ...");
+//
+//        DeclQuery expectedQuery = new DeclQuery();
+//        expectedQuery.exceptions =
+//                Set.of(BoundedType.exactType(NullPointerException.class)
+//                , DeclQuery.Ellipsis);
+//
+//        assertEquals(expectedQuery, actualQuery);
+//    }
+
+
 }
