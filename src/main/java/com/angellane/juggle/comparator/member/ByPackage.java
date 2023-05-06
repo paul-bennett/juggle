@@ -1,6 +1,6 @@
 package com.angellane.juggle.comparator.member;
 
-import com.angellane.juggle.CandidateMember;
+import com.angellane.juggle.candidate.CandidateMember;
 
 import java.util.Comparator;
 import java.util.List;

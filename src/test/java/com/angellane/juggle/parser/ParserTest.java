@@ -2,10 +2,8 @@ package com.angellane.juggle.parser;
 
 import com.angellane.juggle.Accessibility;
 import com.angellane.juggle.Juggler;
-import com.angellane.juggle.parser.DeclParser.DeclContext;
-import com.angellane.juggle.processor.DeclQuery;
-import com.angellane.juggle.processor.DeclQuery.BoundedType;
-import com.angellane.juggle.processor.DeclQuery.ParamSpec;
+import com.angellane.juggle.parser.DeclParser.MemberDeclContext;
+import com.angellane.juggle.query.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -22,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
     Juggler juggler = new Juggler();
+    QueryFactory factory = new QueryFactory(juggler);
 
     DeclParser parserForString(String input) {
         CharStream inputStream = CharStreams.fromString(input);
@@ -31,10 +30,21 @@ public class ParserTest {
         return new DeclParser(tokenStream);
     }
 
+    private MemberQuery memberQueryFor(String decl) {
+        Query q = factory.createQuery(decl);
+
+        if (q instanceof MemberQuery memberQuery)
+            return memberQuery;
+        else {
+            fail("Query is not a MemberQuery");
+            return null;
+        }
+    }
+
     @Test
     public void testCompleteInput() {
         DeclParser parser = parserForString("foo bar");
-        DeclContext tree = parser.decl();
+        MemberDeclContext tree = parser.memberDecl();
 
         Token tok = parser.getCurrentToken();
 
@@ -45,7 +55,7 @@ public class ParserTest {
     @Test
     public void testExtraInput() {
         DeclParser parser = parserForString("foo bar baz");
-        DeclContext tree = parser.decl();
+        MemberDeclContext tree = parser.memberDecl();
 
         Token tok = parser.getCurrentToken();
 
@@ -55,11 +65,12 @@ public class ParserTest {
 
     @Test
     public void testModifiers() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
-                        "@java.lang.SafeVarargs @java.lang.Deprecated"
-                                + " protected static");
+        MemberQuery actualQuery = memberQueryFor(
+                "@java.lang.SafeVarargs @java.lang.Deprecated"
+                + " protected static"
+        );
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.addAnnotationType(SafeVarargs.class);
         expectedQuery.addAnnotationType(Deprecated.class);
         expectedQuery.addModifier(Modifier.STATIC, true);
@@ -70,9 +81,9 @@ public class ParserTest {
 
     @Test
     public void testExactReturnType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "String");
+        MemberQuery actualQuery = memberQueryFor("String");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.exactType(String.class);
 
         assertEquals(expectedQuery, actualQuery);
@@ -80,9 +91,9 @@ public class ParserTest {
 
     @Test
     public void testArrayReturnType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "Integer[][][]");
+        MemberQuery actualQuery = memberQueryFor("Integer[][][]");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.exactType(
                 Integer.class.arrayType().arrayType().arrayType());
 
@@ -91,9 +102,9 @@ public class ParserTest {
 
     @Test
     public void testEllipsisReturnType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "float[]...");
+        MemberQuery actualQuery = memberQueryFor("float[]...");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.exactType(
                 Float.TYPE.arrayType().arrayType());
 
@@ -102,9 +113,9 @@ public class ParserTest {
 
     @Test
     public void testWildcardReturnType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "?");
+        MemberQuery actualQuery = memberQueryFor("?");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.wildcardType();
 
         assertEquals(expectedQuery, actualQuery);
@@ -112,9 +123,9 @@ public class ParserTest {
 
     @Test
     public void testSingleUpperBoundedReturnType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "? extends String");
+        MemberQuery actualQuery = memberQueryFor("? extends String");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.subtypeOf(String.class);
 
         assertEquals(expectedQuery, actualQuery);
@@ -122,10 +133,10 @@ public class ParserTest {
 
     @Test
     public void testMultipleUpperBoundedReturnType() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
+        MemberQuery actualQuery = memberQueryFor(
                 "? extends String & java.io.Serializable");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType =
                 BoundedType.subtypeOf(Set.of(String.class, Serializable.class));
 
@@ -134,9 +145,9 @@ public class ParserTest {
 
     @Test
     public void testLowerBoundedReturnType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "? super Integer");
+        MemberQuery actualQuery = memberQueryFor("? super Integer");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.supertypeOf(Integer.class);
 
         assertEquals(expectedQuery, actualQuery);
@@ -145,10 +156,9 @@ public class ParserTest {
 
     @Test
     public void testNameExact() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
-                "? memberName");
+        MemberQuery actualQuery = memberQueryFor("? memberName");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
 
         expectedQuery.returnType = BoundedType.wildcardType();
         expectedQuery.setNameExact("memberName");
@@ -158,10 +168,9 @@ public class ParserTest {
 
     @Test
     public void testNamePattern() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
-                "? /pattern/i");
+        MemberQuery actualQuery = memberQueryFor("? /pattern/i");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
 
         expectedQuery.returnType = BoundedType.wildcardType();
         expectedQuery.setNamePattern(Pattern.compile("pattern", Pattern.CASE_INSENSITIVE));
@@ -171,9 +180,9 @@ public class ParserTest {
 
     @Test
     public void testWildcardEllipsisParamType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "(,?,...)");
+        MemberQuery actualQuery = memberQueryFor("(,?,...)");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.params = List.of(
                 ParamSpec.wildcard(),
                 ParamSpec.wildcard(),
@@ -184,12 +193,12 @@ public class ParserTest {
 
     @Test
     public void testBoundedParamType() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
+        MemberQuery actualQuery = memberQueryFor(
                 "(? extends java.net.InetAddress,"
                         + "? extends java.util.List & java.util.RandomAccess,"
                         + "? super Integer)");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.params = List.of(
                 ParamSpec.unnamed(
                         BoundedType.subtypeOf(java.net.InetAddress.class)),
@@ -206,9 +215,9 @@ public class ParserTest {
 
     @Test
     public void testExactParamType() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "(Integer)");
+        MemberQuery actualQuery = memberQueryFor("(Integer)");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.params = List.of(
                 ParamSpec.unnamed(BoundedType.exactType(Integer.class)));
 
@@ -217,9 +226,9 @@ public class ParserTest {
 
     @Test
     public void testEmptyParams() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "()");
+        MemberQuery actualQuery = memberQueryFor("()");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.params = List.of();
 
         assertEquals(expectedQuery, actualQuery);
@@ -227,9 +236,9 @@ public class ParserTest {
 
     @Test
     public void testNoThrowsClause() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "()");
+        MemberQuery actualQuery = memberQueryFor("()");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.params = List.of();
         expectedQuery.exceptions = null;
 
@@ -238,9 +247,9 @@ public class ParserTest {
 
     @Test
     public void testThrowsNothing() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "throws");
+        MemberQuery actualQuery = memberQueryFor("throws");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions = Set.of();
 
         assertEquals(expectedQuery, actualQuery);
@@ -248,10 +257,9 @@ public class ParserTest {
 
     @Test
     public void testThrowsOneClass() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
-                "throws ArithmeticException");
+        MemberQuery actualQuery = memberQueryFor("throws ArithmeticException");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
                 Set.of(BoundedType.exactType(ArithmeticException.class));
 
@@ -260,9 +268,9 @@ public class ParserTest {
 
     @Test
     public void testThrowsWildcard() {
-        DeclQuery actualQuery = new DeclQuery(juggler, "throws ?");
+        MemberQuery actualQuery = memberQueryFor("throws ?");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions = Set.of(BoundedType.wildcardType());
 
         assertEquals(expectedQuery, actualQuery);
@@ -270,10 +278,10 @@ public class ParserTest {
 
     @Test
     public void testThrowsLowerBound() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
+        MemberQuery actualQuery = memberQueryFor(
                 "throws ? super java.io.FileNotFoundException");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions = Set.of(
                 BoundedType.supertypeOf(java.io.FileNotFoundException.class)
         );
@@ -283,10 +291,10 @@ public class ParserTest {
 
     @Test
     public void testThrowsSingleUpperBound() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
+        MemberQuery actualQuery = memberQueryFor(
                 "throws ? extends java.io.IOException");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
                 Set.of(BoundedType.subtypeOf(java.io.IOException.class));
 
@@ -295,10 +303,10 @@ public class ParserTest {
 
     @Test
     public void testThrowsMultipleUpperBounds() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
+        MemberQuery actualQuery = memberQueryFor(
                 "throws ? extends Error & Exception & Throwable");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
                 Set.of(BoundedType.subtypeOf(
                         Error.class, Exception.class, Throwable.class));
@@ -308,10 +316,10 @@ public class ParserTest {
 
     @Test
     public void testThrowsTwoClasses() {
-        DeclQuery actualQuery = new DeclQuery(juggler,
+        MemberQuery actualQuery = memberQueryFor(
                 "throws ArithmeticException, java.io.IOException");
 
-        DeclQuery expectedQuery = new DeclQuery();
+        MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
                 Set.of(BoundedType.exactType(ArithmeticException.class),
                         BoundedType.exactType(java.io.IOException.class));
@@ -321,10 +329,10 @@ public class ParserTest {
 
 //    @Test
 //    public void testThrowsClassPlusEllipsis() {
-//        DeclQuery actualQuery = new DeclQuery(
-//                juggler, "() throws NullPointerException, ...");
+//        MemberQuery actualQuery = memberQueryFor(
+//                "() throws NullPointerException, ...");
 //
-//        DeclQuery expectedQuery = new DeclQuery();
+//        MemberQuery expectedQuery = new MemberQuery();
 //        expectedQuery.exceptions =
 //                Set.of(BoundedType.exactType(NullPointerException.class)
 //                , DeclQuery.Ellipsis);

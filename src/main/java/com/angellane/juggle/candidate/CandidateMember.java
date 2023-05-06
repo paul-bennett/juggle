@@ -1,4 +1,6 @@
-package com.angellane.juggle;
+package com.angellane.juggle.candidate;
+
+import com.angellane.juggle.Accessibility;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -21,9 +23,8 @@ public record CandidateMember(
         Class<?> returnType,
         List<Class<?>> paramTypes,
         Set<Class<?>> throwTypes
-) {
-    private static final int ACCESS_MODIFIERS_MASK = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE;
-    private static final int OTHER_MODIFIERS_MASK  = ~ACCESS_MODIFIERS_MASK;
+)
+        implements Candidate {
 
     // Constructor used by factory methods
     private CandidateMember(Member member, Set<Class<?>> annotationTypes,

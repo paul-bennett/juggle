@@ -1,9 +1,7 @@
-package com.angellane.juggle.processor;
+package com.angellane.juggle.query;
 
 import com.angellane.juggle.Accessibility;
-import com.angellane.juggle.CandidateMember;
-import com.angellane.juggle.processor.DeclQuery.BoundedType;
-import com.angellane.juggle.processor.DeclQuery.ParamSpec;
+import com.angellane.juggle.candidate.CandidateMember;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *    `protected java.net.URL ClassLoader.findResource(String name)`
  * using various forms of DeclQuery
  */
-public class TestMatch_ClassLoader_findResource {
+public class TestMemberDecl {
     static CandidateMember cm;
 
     @BeforeAll
@@ -33,7 +31,7 @@ public class TestMatch_ClassLoader_findResource {
         cm = CandidateMember.memberFromMethod(m);
     }
 
-    private static void matchQueryAndCandidate(DeclQuery q, CandidateMember cm) {
+    private static void matchQueryAndCandidate(MemberQuery q, CandidateMember cm) {
         assertTrue(q.matchesAnnotations(cm) , "Match annotations");
         assertTrue(cm.matchesModifiers(q.modifierMask, q.modifiers)
                 , "Match modifiers");
@@ -49,7 +47,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testAllAttributes() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
 
         q.annotationTypes = Set.of();
         q.modifierMask = Modifier.STATIC;
@@ -66,7 +64,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testEllipsis() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
 
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(ParamSpec.ellipsis());
@@ -76,7 +74,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testTooManyArgs() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
 
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(
@@ -90,7 +88,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testTooFewArgs() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
 
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(ParamSpec.param(null, ClassLoader.class));
@@ -101,41 +99,41 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testNoAttributes() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testCorrectAnnotations() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.annotationTypes = Set.of();
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testCorrectModifiers() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.modifierMask = Modifier.STATIC;
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testCorrectAccessibility() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.accessibility = Accessibility.PROTECTED;
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testCorrectReturnType() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.returnType = BoundedType.exactType(java.net.URL.class);
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testCorrectDeclarationName() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.declarationPattern = Pattern.compile("^findResource$");
         matchQueryAndCandidate(q, cm);
     }
@@ -143,21 +141,21 @@ public class TestMatch_ClassLoader_findResource {
     @Test
     @Disabled("Param name matching not implemented yet")
     public void testCorrectParams() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("name", String.class));
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testCorrectExceptions() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.exceptions = Set.of();
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testWrongAnnotations() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.annotationTypes = Set.of(Override.class);
         assertFalse(q.matchesAnnotations(cm), "Match annotations");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
@@ -165,7 +163,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongModifiers() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
 
         q.modifierMask = Modifier.STATIC;
         q.modifiers = Modifier.STATIC;
@@ -177,7 +175,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongAccessibility() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.accessibility = Accessibility.PUBLIC;
         assertFalse(cm.matchesAccessibility(q.accessibility),
                 "Match accessibility");
@@ -186,7 +184,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongReturnType() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.returnType = BoundedType.exactType(Integer.TYPE);
         assertFalse(q.matchesReturn(cm), "Match return");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
@@ -194,7 +192,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongDeclarationName() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.declarationPattern = Pattern.compile("^barf$");
         assertFalse(q.matchesName(cm), "Match name");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
@@ -202,7 +200,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongParamName() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("foo", String.class));
         assertFalse(q.matchesParams(cm), "Match params");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
@@ -210,7 +208,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongParamType() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("name", Integer.class));
         assertFalse(q.matchesParams(cm), "Match params");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
@@ -218,7 +216,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongParamArity() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.params = List.of(
                 ParamSpec.param("name", String.class),
                 ParamSpec.param("name", String.class)
@@ -229,7 +227,7 @@ public class TestMatch_ClassLoader_findResource {
 
     @Test
     public void testWrongExceptions() {
-        DeclQuery q = new DeclQuery();
+        MemberQuery q = new MemberQuery();
         q.exceptions =
                 Set.of(BoundedType.exactType(NoSuchMethodException.class));
         assertFalse(q.matchesExceptions(cm), "Match exceptions");

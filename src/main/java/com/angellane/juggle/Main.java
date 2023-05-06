@@ -3,8 +3,10 @@ package com.angellane.juggle;
 import com.angellane.juggle.formatter.AnsiColourFormatter;
 import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.PlaintextFormatter;
-import com.angellane.juggle.processor.DeclQuery;
+import com.angellane.juggle.query.MemberQuery;
 import com.angellane.juggle.processor.PermuteParams;
+import com.angellane.juggle.query.Query;
+import com.angellane.juggle.query.QueryFactory;
 import com.angellane.juggle.sink.TextOutput;
 import com.angellane.juggle.source.JarFile;
 import com.angellane.juggle.source.Module;
@@ -222,8 +224,16 @@ public class Main implements Runnable {
 
         String queryString = getQueryString();
         if (!queryString.isEmpty()) {
-            DeclQuery decl = new DeclQuery(juggler, queryString);
-            juggler.appendFilter(decl::isMatchForCandidate);
+            QueryFactory factory = new QueryFactory(juggler);
+
+            Query query = factory.createQuery(queryString);
+
+            if (query instanceof MemberQuery mq)
+                juggler.appendFilter(mq::isMatchForCandidate);
+            else {
+                System.err.println("*** Only member queries are supported at the moment");
+                return;
+            }
         }
 
         // Sinks

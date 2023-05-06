@@ -39,17 +39,72 @@
  */
 grammar Decl;
 
-//@header {
-//    package com.angellane.juggle.parser;
-//}
-
-oneDecl
-    :   decl EOF
+decl
+    :   classDecl
+    |   enumDecl
+    |   recordDecl
+    |   interfaceDecl
+    |   annotationDecl
+    |   memberDecl
     ;
 
-decl
+classDecl
+    :   classModifier*
+        'class' uname?
+        ('extends' qname)?
+        ('implements' qname (',' qname)*)?
+        permitsClause?
+    ;
+
+recordDecl
+    :   classModifier*
+        'record' uname?
+        params
+        ('implements' qname (',' qname)*)?
+    ;
+
+enumDecl
+    :   classModifier*
+        'enum' uname?
+        ('implements' qname (',' qname)*)?
+    ;
+
+interfaceDecl
+    :   interfaceModifier*
+        'interface' uname?
+        ('extends' qname (',' qname)*)?
+        permitsClause?
+    ;
+
+annotationDecl
+    :   annotationModifier*
+        '@' 'interface' uname
+    ;
+
+classModifier
+    :   annotation
+    |   'private' | 'protected' | 'package' | 'public'
+    |   'abstract' | 'static' | 'sealed' | 'non-sealed' | 'strictfp'
+    ;
+
+interfaceModifier
+    :   annotation
+    |   'private' | 'protected' | 'package' | 'public'
+    |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
+    ;
+
+annotationModifier
+    :   annotation
+    |   'public' | 'abstract'
+    ;
+
+permitsClause
+    :   'permits' qname (',' qname)*
+    ;
+
+memberDecl
     :   annotation*
-        modifier*
+        memberModifier*
         returnType?
         methodName?
         params?
@@ -60,7 +115,7 @@ annotation
     :   '@' qname
     ;
 
-modifier
+memberModifier
     : 'private' | 'protected' | 'package' | 'public'
     | 'abstract' | 'static' | 'final' | 'native' | 'strictfp' | 'synchronized'
     ;

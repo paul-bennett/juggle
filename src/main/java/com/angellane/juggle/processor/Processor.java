@@ -1,6 +1,6 @@
 package com.angellane.juggle.processor;
 
-import com.angellane.juggle.CandidateMember;
+import com.angellane.juggle.candidate.CandidateMember;
 
 import java.util.function.Function;
 import java.util.stream.Stream;

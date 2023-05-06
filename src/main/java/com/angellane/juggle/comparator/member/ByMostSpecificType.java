@@ -1,6 +1,6 @@
 package com.angellane.juggle.comparator.member;
 
-import com.angellane.juggle.CandidateMember;
+import com.angellane.juggle.candidate.CandidateMember;
 import com.angellane.juggle.CartesianProduct;
 import com.angellane.juggle.PermutationGenerator;
 import com.angellane.juggle.TypeSignature;

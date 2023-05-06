@@ -1,7 +1,7 @@
 package com.angellane.juggle.comparator.member;
 
 import com.angellane.juggle.Accessibility;
-import com.angellane.juggle.CandidateMember;
+import com.angellane.juggle.candidate.CandidateMember;
 
 import java.util.Comparator;
 

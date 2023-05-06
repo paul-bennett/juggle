@@ -1,6 +1,5 @@
-package com.angellane.juggle.processor;
+package com.angellane.juggle.query;
 
-import com.angellane.juggle.processor.DeclQuery.BoundedType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
