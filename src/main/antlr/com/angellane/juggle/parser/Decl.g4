@@ -49,7 +49,6 @@ oneDecl
 
 decl
     :   annotation*
-        // TODO: add generic_introducer <T>
         modifier*
         returnType?
         methodName?
@@ -77,21 +76,17 @@ methodName
 uname
     :   REGEX
     |   IDENT
-//    |   '_'               // TODO: add underscore=unnamed
     ;
 
 qname
     :   (IDENT DOT)* IDENT
     ;
 
-// TODO: consider how to disable ELLIPSIS in return types
-
 type
     :   qname dim* ELLIPSIS?                # exactType
     |   '?'                                 # unboundedType
-    |   '?' 'extends' qname ('&' qname)*    # upperBoundedType  // TODO: consider is qname right here?
-    |   '?' 'super'   qname                 # lowerBoundedType  // TODO: consider is qname right here?
-    // TODO: add type parameters, e.g. "List<Foo>"
+    |   '?' 'extends' qname ('&' qname)*    # upperBoundedType
+    |   '?' 'super'   qname                 # lowerBoundedType
     ;
 
 dim : '[' ']' ;
@@ -104,8 +99,7 @@ params
 param
     :   type uname?     #unnamedParam   // potentially unnamed type
     |   type? uname     #untypedParam   // potentially untyped name
-    // TODO: add parameter @annotations and modifiers (`final`)
-    |   ELLIPSIS        #ellipsisParam  // an unknown number of params      (extension to Java)
+    |   ELLIPSIS        #ellipsisParam  // an unknown number of params (illegal in Java)
     |                   #wildcardParam  // unnamed, untyped (i.e. wildcard)
     ;
 
@@ -130,5 +124,3 @@ IDENT   : ID_START ID_PART* ;
 
 fragment ID_START  : [a-zA-Z_];         // Should be java.lang.Character.isJavaIdentifierStart(int)
 fragment ID_PART   : [a-zA-Z_0-9];      // Should be java.lang.Character.isJavaIdentifierPart(int)
-
-// TODO: align identifier definition with JLS... or can we just call Character.isJavaIdentifier{Start|Part}?

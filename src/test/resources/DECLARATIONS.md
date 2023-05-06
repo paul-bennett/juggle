@@ -281,7 +281,7 @@ $
 ````
 
 Using `^` and `$` ties it. (Note: both of these characters are
-usually interpreted by the shell so we additionally need quote
+usually interpreted by the shell, so we additionally need quote
 marks.)
 ````
 $ juggle '/^isJavaLetter$/'
@@ -289,7 +289,7 @@ public static boolean Character.isJavaLetter(char)
 $
 ````
 
-Adding a `i` after the closing `/` makes the match case insensitive.
+Adding a `i` after the closing `/` makes the match case-insensitive.
 Combined with the anchors this gives us the same as the old `-n`.
 ````
 $ juggle '/^isjavaletterordigit$/i'

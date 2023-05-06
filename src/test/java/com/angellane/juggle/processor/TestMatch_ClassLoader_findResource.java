@@ -141,7 +141,7 @@ public class TestMatch_ClassLoader_findResource {
     }
 
     @Test
-    @Disabled("Param matching not implemented yet")
+    @Disabled("Param name matching not implemented yet")
     public void testCorrectParams() {
         DeclQuery q = new DeclQuery();
         q.params = List.of(ParamSpec.param("name", String.class));

@@ -50,7 +50,6 @@ public class DeclQuery {
         }
 
         public boolean matchesClass(Class<?> candidate) {
-            // TODO: consider what to do about conversions here (esp boxing/unboxing)
             return (lowerBound  == null || candidate.isAssignableFrom(lowerBound)) &&
                     (upperBound == null || upperBound.stream().allMatch(b -> b.isAssignableFrom(candidate)));
         }
@@ -95,7 +94,7 @@ public class DeclQuery {
 
     public Juggler juggler;
 
-    public Set<Class<?>> annotationTypes = null;    // TODO: consider Set<Class<? extends Annotation>>
+    public Set<Class<?>> annotationTypes = null;
     public Accessibility accessibility = null;
     public int modifierMask = 0, modifiers = 0;
     public BoundedType returnType = null;
@@ -126,7 +125,6 @@ public class DeclQuery {
 
     @Override
     public String toString() {
-        // TODO: improve this!
         return "DeclQuery{" +
                 "annotationTypes=" + annotationTypes +
                 ", accessibility=" + accessibility +
@@ -243,7 +241,6 @@ public class DeclQuery {
                 Iterator<? extends Class<?>> actualParamIter =
                         cm.paramTypes().iterator();
                 return params.stream().allMatch(ps -> {
-                    // TODO: check parameter names as well
                     // Cast is OK because we tested hasEllipsis
                     BoundedType bounds = ((SingleParam) ps).paramType();
                     Class<?> actualType = actualParamIter.next();
@@ -252,7 +249,6 @@ public class DeclQuery {
             }
         }
         else
-            // TODO: handle ellipsis properly; should check all actual params
             return numActualParams >= numParamSpecs;
     }
 

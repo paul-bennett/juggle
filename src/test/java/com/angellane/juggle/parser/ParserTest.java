@@ -225,8 +225,6 @@ public class ParserTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
-    // TODO: tests for parameters by name
-
     @Test
     public void testNoThrowsClause() {
         DeclQuery actualQuery = new DeclQuery(juggler, "()");
@@ -321,7 +319,6 @@ public class ParserTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
-    // TODO: implement Ellipsis in exceptions
 //    @Test
 //    public void testThrowsClassPlusEllipsis() {
 //        DeclQuery actualQuery = new DeclQuery(

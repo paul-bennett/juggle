@@ -180,8 +180,8 @@ public String StringBuffer.substring(int,int)
 $
 ````
 
-Similarly you can use `-c` to restrict the search to classes that match a
-particular name.  Perhaps you can't remember the package that the
+Similarly, you can use `-c` to restrict the search to classes that match
+a particular name.  Perhaps you can't remember the package that the
 `URLEncoder` class is in:
 ````
 $ juggle -c URLEncoder

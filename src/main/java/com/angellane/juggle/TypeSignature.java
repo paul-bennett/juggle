@@ -40,7 +40,6 @@ public class TypeSignature {
         if (!Modifier.isStatic(m.getModifiers()) && !(m instanceof Constructor<?>))
             implicitParams.add(m.getDeclaringClass());
 
-        // TODO: replace with switch expression when pattern-matching supported
         if (m instanceof Constructor<?> c)
             return List.of(new TypeSignature(
                     List.of(c.getParameterTypes()),
