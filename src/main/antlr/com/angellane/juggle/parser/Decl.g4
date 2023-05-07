@@ -41,44 +41,52 @@ grammar Decl;
 
 decl
     :   classDecl
-    |   enumDecl
-    |   recordDecl
     |   interfaceDecl
     |   annotationDecl
+    |   enumDecl
+    |   recordDecl
     |   memberDecl
     ;
 
 classDecl
     :   classModifier*
-        'class' uname?
-        ('extends' qname)?
-        ('implements' qname (',' qname)*)?
+        'class' declName?
+        classExtendsClause?
+        classImplementsClause?
         permitsClause?
     ;
 
-recordDecl
-    :   classModifier*
-        'record' uname?
-        params
-        ('implements' qname (',' qname)*)?
+classExtendsClause
+    :   ('extends' type)
     ;
 
-enumDecl
-    :   classModifier*
-        'enum' uname?
-        ('implements' qname (',' qname)*)?
+classImplementsClause
+    :   ('implements' type (',' type)*)
     ;
 
 interfaceDecl
     :   interfaceModifier*
-        'interface' uname?
-        ('extends' qname (',' qname)*)?
+        'interface' declName?
+        ('extends' type (',' type)*)?
         permitsClause?
     ;
 
 annotationDecl
     :   annotationModifier*
-        '@' 'interface' uname
+        '@' 'interface' declName
+    ;
+
+enumDecl
+    :   classModifier*
+        'enum' declName?
+        ('implements' type (',' type)*)?
+    ;
+
+recordDecl
+    :   classModifier*
+        'record' declName?
+        params?
+        ('implements' type (',' type)*)?
     ;
 
 classModifier
@@ -103,10 +111,9 @@ permitsClause
     ;
 
 memberDecl
-    :   annotation*
-        memberModifier*
+    :   memberModifier*
         returnType?
-        methodName?
+        declName?
         params?
         throwsClause?
     ;
@@ -116,7 +123,8 @@ annotation
     ;
 
 memberModifier
-    : 'private' | 'protected' | 'package' | 'public'
+    : annotation
+    | 'private' | 'protected' | 'package' | 'public'
     | 'abstract' | 'static' | 'final' | 'native' | 'strictfp' | 'synchronized'
     ;
 
@@ -124,7 +132,7 @@ returnType
     : type
     ;
 
-methodName
+declName
     : uname
     ;
 

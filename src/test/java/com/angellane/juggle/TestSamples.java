@@ -28,6 +28,7 @@ public class TestSamples {
                         , "REGRESSIONS.md"
                         , "COVERAGE.md"
                         , "DECLARATIONS.md"
+                        , "TYPE-SEARCH.md"
                 )
                 .map(fn -> DynamicContainer.dynamicContainer(fn, sampleTestStreamFrom(cl.getResource(fn))));
     }

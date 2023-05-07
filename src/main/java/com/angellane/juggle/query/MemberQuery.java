@@ -3,7 +3,6 @@ package com.angellane.juggle.query;
 import com.angellane.juggle.candidate.CandidateMember;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * This class represents a declaration query -- the result of parsing a
@@ -11,28 +10,32 @@ import java.util.regex.Pattern;
  * to match.
  */
 public final class MemberQuery extends Query {
-    public BoundedType returnType = null;
+    public BoundedType      returnType  = null;
 
-    public List<ParamSpec> params = null;
-    public Set<BoundedType> exceptions = null;
+    public List<ParamSpec>  params      = null;
+    public Set<BoundedType> exceptions  = null;
 
     @Override
     public boolean equals(Object other) {
         if (this == other)
             return true;
-        else if (!(other instanceof MemberQuery memberQuery)) {
+        else if (!(other instanceof MemberQuery q))
             return false;
-        } else {
-            return modifierMask == memberQuery.modifierMask
-                    && modifiers == memberQuery.modifiers
-                    && Objects.equals(annotationTypes, memberQuery.annotationTypes)
-                    && accessibility == memberQuery.accessibility
-                    && Objects.equals(returnType, memberQuery.returnType)
-                    && patternsEqual(this.declarationPattern,
-                            memberQuery.declarationPattern)
-                    && Objects.equals(params, memberQuery.params)
-                    && Objects.equals(exceptions, memberQuery.exceptions);
-        }
+        else
+            return super.equals(q)
+                    && Objects.equals(returnType,   q.returnType)
+                    && Objects.equals(params,       q.params)
+                    && Objects.equals(exceptions,   q.exceptions)
+                    ;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode()
+                , returnType
+                , params
+                , exceptions
+        );
     }
 
     @Override
@@ -49,47 +52,23 @@ public final class MemberQuery extends Query {
                 '}';
     }
 
-    /*
-     * java.util.regex.Pattern doesn't provide a meaningful equality
-     * test, so we convert both sides to Strings and hope for the best
-     */
-    static boolean patternsEqual(Pattern a, Pattern b) {
-        return (a != null && b != null)
-                ? (Objects.equals(a.pattern(), b.pattern())
-                    && (a.flags() == b.flags()))
-                : (a == b);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                annotationTypes,
-                accessibility,
-                modifierMask, modifiers,
-                returnType,
-                declarationPattern,
-                params,
-                exceptions);
-    }
-
-
     public boolean isMatchForCandidate(CandidateMember cm) {
-        return cm.matchesAccessibility(accessibility)
-                && cm.matchesModifiers(modifierMask, modifiers)
-                && matchesAnnotations(cm)
-                && matchesReturn(cm)
-                && matchesName(cm)
-                && matchesParams(cm)
-                && matchesExceptions(cm)
+        return matchesAnnotations(cm.annotationTypes())
+                && matchesAccessibility(cm.accessibility())
+                && matchesModifiers(cm.otherModifiers())
+                && matchesReturn(cm.returnType())
+                && matchesName(cm.declarationName())
+                && matchesParams(cm.paramTypes())
+                && matchesExceptions(cm.throwTypes())
         ;
     }
 
-    boolean matchesReturn(CandidateMember cm) {
+    boolean matchesReturn(Class<?> returnType) {
         return this.returnType == null
-                || this.returnType.matchesClass(cm.returnType());
+                || this.returnType.matchesClass(returnType);
     }
 
-    boolean matchesParams(CandidateMember cm) {
+    boolean matchesParams(List<Class<?>> paramTypes) {
         if (params == null)
             return true;
 
@@ -105,14 +84,14 @@ public final class MemberQuery extends Query {
         long numParamSpecs =
                 params.stream().filter(p -> p instanceof SingleParam).count();
 
-        long numActualParams = cm.paramTypes().size();
+        long numActualParams = paramTypes.size();
 
         if (!hasEllipsis) {
             if (numActualParams != numParamSpecs)
                 return false;
             else {
                 Iterator<? extends Class<?>> actualParamIter =
-                        cm.paramTypes().iterator();
+                        paramTypes.iterator();
                 return params.stream().allMatch(ps -> {
                     // Cast is OK because we tested hasEllipsis
                     BoundedType bounds = ((SingleParam) ps).paramType();
@@ -125,16 +104,16 @@ public final class MemberQuery extends Query {
             return numActualParams >= numParamSpecs;
     }
 
-    boolean matchesExceptions(CandidateMember cm) {
+    boolean matchesExceptions(Set<Class<?>> exceptions) {
         // Need to check both ways:
         //  1. Is everything thrown by the query also thrown by the candidate?
         //  2. Is everything thrown by the candidate also thrown by the query?
         return this.exceptions == null
                 || this.exceptions.stream()
-                    .allMatch(ex -> cm.throwTypes().stream()
+                    .allMatch(ex -> exceptions.stream()
                             .anyMatch(ex::matchesClass)
                     )
-                && cm.throwTypes().stream()
+                && exceptions.stream()
                     .allMatch(ex1 -> this.exceptions.stream()
                             .anyMatch(ex2 -> ex2.matchesClass(ex1))
                     )

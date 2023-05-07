@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -52,20 +53,50 @@ public class QueryFactory {
 
         // tempQuery is either a ClassQuery or a MemberQuery; one of these
         // two fields will be the same as tempQuery, the other will be null.
-        // This is just a convenient way of missing a lot of type casts.
-        ClassQuery tempClassQuery;
+        // This is just a convenient way of avoiding a lot of type casts.
+        TypeQuery tempTypeQuery;
         MemberQuery tempMemberQuery;
 
 
+        // DECLARATIONS =======================================================
+
         @Override
         public void enterClassDecl(DeclParser.ClassDeclContext ctx) {
-            tempQuery = tempClassQuery = new ClassQuery();
+            tempQuery = tempTypeQuery = new TypeQuery(TypeFlavour.CLASS);
+        }
+
+        @Override
+        public void exitClassDecl(DeclParser.ClassDeclContext ctx) {
+            super.exitClassDecl(ctx);
+        }
+
+        @Override
+        public void enterInterfaceDecl(DeclParser.InterfaceDeclContext ctx) {
+            tempQuery = tempTypeQuery = new TypeQuery(TypeFlavour.INTERFACE);
+        }
+
+        @Override
+        public void enterAnnotationDecl(DeclParser.AnnotationDeclContext ctx) {
+            tempQuery = tempTypeQuery = new TypeQuery(TypeFlavour.ANNOTATION);
+        }
+
+        @Override
+        public void enterEnumDecl(DeclParser.EnumDeclContext ctx) {
+            tempQuery = tempTypeQuery = new TypeQuery(TypeFlavour.ENUM);
+        }
+
+        @Override
+        public void enterRecordDecl(DeclParser.RecordDeclContext ctx) {
+            tempQuery = tempTypeQuery = new TypeQuery(TypeFlavour.RECORD);
         }
 
         @Override
         public void enterMemberDecl(DeclParser.MemberDeclContext ctx) {
             tempQuery = tempMemberQuery = new MemberQuery();
         }
+
+
+        // MODIFIERS ==========================================================
 
         @Override
         public void enterAnnotation(DeclParser.AnnotationContext ctx) {
@@ -81,18 +112,23 @@ public class QueryFactory {
 
         @Override
         public void enterMemberModifier(DeclParser.MemberModifierContext ctx) {
+            if (ctx.annotation() != null)
+                return;             // Annotations are handled elsewhere
+
             String text = ctx.getText();
 
             switch (text) {
                 case "private", "package", "protected", "public" ->
                         tempQuery.setAccessibility(Accessibility.fromString(text));
 
-                case "abstract"     -> tempQuery.addModifier(Modifier.ABSTRACT);
                 case "static"       -> tempQuery.addModifier(Modifier.STATIC);
                 case "final"        -> tempQuery.addModifier(Modifier.FINAL);
-                case "native"       -> tempQuery.addModifier(Modifier.NATIVE);
-                case "strictfp"     -> tempQuery.addModifier(Modifier.STRICT);
                 case "synchronized" -> tempQuery.addModifier(Modifier.SYNCHRONIZED);
+                case "volatile"     -> tempQuery.addModifier(Modifier.VOLATILE);
+                case "transient"    -> tempQuery.addModifier(Modifier.TRANSIENT);
+                case "native"       -> tempQuery.addModifier(Modifier.NATIVE);
+                case "abstract"     -> tempQuery.addModifier(Modifier.ABSTRACT);
+                case "strictfp"     -> tempQuery.addModifier(Modifier.STRICT);
 
                 default ->
                         System.err.println("*** Unknown modifier `" + ctx.getText() + "'; ignoring");
@@ -114,7 +150,7 @@ public class QueryFactory {
         }
 
         @Override
-        public void exitMethodName(DeclParser.MethodNameContext ctx) {
+        public void exitDeclName(DeclParser.DeclNameContext ctx) {
             tempQuery.setNamePattern(tempName);
         }
 
@@ -138,11 +174,32 @@ public class QueryFactory {
         }
 
 
+        // SUPERTYPES =========================================================
+
+        @Override
+        public void exitClassExtendsClause(DeclParser.ClassExtendsClauseContext ctx) {
+            tempTypeQuery.setSupertype(tempType);
+        }
+
+        @Override
+        public void enterClassImplementsClause(DeclParser.ClassImplementsClauseContext ctx) {
+            tempTypeList.clear();
+        }
+
+        @Override
+        public void exitClassImplementsClause(DeclParser.ClassImplementsClauseContext ctx) {
+            tempTypeQuery.setSuperInterfaces(new HashSet<>(tempTypeList));
+        }
+
         // TYPE ===============================================================
 
         // This is populated by the type listeners, gathering information about
         // a return type, a parameter's type or an exception's type.
-        private BoundedType tempType = null;
+        private BoundedType             tempType        = null;
+
+        // As types are seen they're added to this list too.  It's only used
+        // by some rules (e.g. for collecting class supertypes)
+        private final List<BoundedType> tempTypeList    = new ArrayList<>();
 
         @Override
         public void exitExactType(DeclParser.ExactTypeContext ctx) {
@@ -157,6 +214,7 @@ public class QueryFactory {
             }
 
             tempType = BoundedType.exactType(cls);
+            tempTypeList.add(tempType);
         }
 
         @Override
@@ -167,6 +225,7 @@ public class QueryFactory {
                             .map(juggler::classForTypename)
                             .collect(Collectors.toSet())
             );
+            tempTypeList.add(tempType);
         }
 
         @Override
@@ -174,11 +233,13 @@ public class QueryFactory {
             tempType = BoundedType.supertypeOf(
                     juggler.classForTypename(ctx.qname().getText())
             );
+            tempTypeList.add(tempType);
         }
 
         @Override
         public void exitUnboundedType(DeclParser.UnboundedTypeContext ctx) {
             tempType = BoundedType.wildcardType();
+            tempTypeList.add(tempType);
         }
 
 

@@ -12,7 +12,8 @@ public record SingleParam(
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SingleParam that = (SingleParam) o;
-        return MemberQuery.patternsEqual(paramName, that.paramName) && Objects.equals(paramType, that.paramType);
+        return Query.patternsEqual(paramName, that.paramName)
+                && Objects.equals(paramType, that.paramType);
     }
 
     @Override

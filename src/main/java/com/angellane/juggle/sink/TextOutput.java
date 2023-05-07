@@ -1,6 +1,8 @@
 package com.angellane.juggle.sink;
 
+import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.CandidateMember;
+import com.angellane.juggle.candidate.CandidateType;
 import com.angellane.juggle.formatter.Formatter;
 
 import java.io.PrintStream;
@@ -25,10 +27,17 @@ public class TextOutput implements Sink {
     }
 
     @Override
-    public void accept(CandidateMember candidateMember) {
-        out.println(decode(candidateMember.member()));
+    public void accept(Candidate candidate) {
+        if (candidate instanceof CandidateType ct)
+            out.println(decode(ct.clazz()));
+        else if (candidate instanceof CandidateMember cm)
+            out.println(decode(cm.member()));
     }
 
+
+    public String decode(Class<?> c) {
+        return c.toString();
+    }
 
     public String decode(Member m) {
         StringBuilder ret = new StringBuilder();

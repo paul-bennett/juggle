@@ -32,15 +32,16 @@ public class TestMemberDecl {
     }
 
     private static void matchQueryAndCandidate(MemberQuery q, CandidateMember cm) {
-        assertTrue(q.matchesAnnotations(cm) , "Match annotations");
-        assertTrue(cm.matchesModifiers(q.modifierMask, q.modifiers)
+        assertTrue(q.matchesAnnotations(cm.annotationTypes())
+                , "Match annotations");
+        assertTrue(q.matchesModifiers(cm.otherModifiers())
                 , "Match modifiers");
-        assertTrue(cm.matchesAccessibility(q.accessibility)
+        assertTrue(q.matchesAccessibility(cm.accessibility())
                 , "Match accessibility");
-        assertTrue(q.matchesReturn(cm)      , "Match return type");
-        assertTrue(q.matchesName(cm)        , "Match method name");
-        assertTrue(q.matchesParams(cm)      , "Match parameters");
-        assertTrue(q.matchesExceptions(cm)  , "Match exceptions");
+        assertTrue(q.matchesReturn(cm.returnType())      , "Match return type");
+        assertTrue(q.matchesName(cm.declarationName())   , "Match method name");
+        assertTrue(q.matchesParams(cm.paramTypes())      , "Match parameters");
+        assertTrue(q.matchesExceptions(cm.throwTypes())  , "Match exceptions");
 
         assertTrue(q.isMatchForCandidate(cm), "Match entire declaration");
     }
@@ -95,7 +96,6 @@ public class TestMemberDecl {
 
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
-
 
     @Test
     public void testNoAttributes() {
@@ -157,7 +157,8 @@ public class TestMemberDecl {
     public void testWrongAnnotations() {
         MemberQuery q = new MemberQuery();
         q.annotationTypes = Set.of(Override.class);
-        assertFalse(q.matchesAnnotations(cm), "Match annotations");
+        assertFalse(q.matchesAnnotations(cm.annotationTypes()),
+                "Match annotations");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 
@@ -168,7 +169,7 @@ public class TestMemberDecl {
         q.modifierMask = Modifier.STATIC;
         q.modifiers = Modifier.STATIC;
 
-        assertFalse(cm.matchesModifiers(q.modifierMask, q.modifiers),
+        assertFalse(q.matchesModifiers(cm.otherModifiers()),
                 "Match modifiers");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
@@ -177,7 +178,7 @@ public class TestMemberDecl {
     public void testWrongAccessibility() {
         MemberQuery q = new MemberQuery();
         q.accessibility = Accessibility.PUBLIC;
-        assertFalse(cm.matchesAccessibility(q.accessibility),
+        assertFalse(q.matchesAccessibility(cm.accessibility()),
                 "Match accessibility");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
@@ -186,7 +187,7 @@ public class TestMemberDecl {
     public void testWrongReturnType() {
         MemberQuery q = new MemberQuery();
         q.returnType = BoundedType.exactType(Integer.TYPE);
-        assertFalse(q.matchesReturn(cm), "Match return");
+        assertFalse(q.matchesReturn(cm.returnType()), "Match return");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 
@@ -194,7 +195,7 @@ public class TestMemberDecl {
     public void testWrongDeclarationName() {
         MemberQuery q = new MemberQuery();
         q.declarationPattern = Pattern.compile("^barf$");
-        assertFalse(q.matchesName(cm), "Match name");
+        assertFalse(q.matchesName(cm.declarationName()), "Match name");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 
@@ -202,7 +203,7 @@ public class TestMemberDecl {
     public void testWrongParamName() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("foo", String.class));
-        assertFalse(q.matchesParams(cm), "Match params");
+        assertFalse(q.matchesParams(cm.paramTypes()), "Match params");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 
@@ -210,7 +211,7 @@ public class TestMemberDecl {
     public void testWrongParamType() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("name", Integer.class));
-        assertFalse(q.matchesParams(cm), "Match params");
+        assertFalse(q.matchesParams(cm.paramTypes()), "Match params");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 
@@ -221,7 +222,7 @@ public class TestMemberDecl {
                 ParamSpec.param("name", String.class),
                 ParamSpec.param("name", String.class)
         );
-        assertFalse(q.matchesParams(cm), "Match params");
+        assertFalse(q.matchesParams(cm.paramTypes()), "Match params");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 
@@ -230,7 +231,7 @@ public class TestMemberDecl {
         MemberQuery q = new MemberQuery();
         q.exceptions =
                 Set.of(BoundedType.exactType(NoSuchMethodException.class));
-        assertFalse(q.matchesExceptions(cm), "Match exceptions");
+        assertFalse(q.matchesExceptions(cm.throwTypes()), "Match exceptions");
         assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
     }
 }

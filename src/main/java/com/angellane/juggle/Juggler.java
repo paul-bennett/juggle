@@ -1,7 +1,9 @@
 package com.angellane.juggle;
 
 import com.angellane.juggle.candidate.CandidateMember;
+import com.angellane.juggle.candidate.CandidateType;
 import com.angellane.juggle.comparator.MultiComparator;
+import com.angellane.juggle.query.TypeQuery;
 import com.angellane.juggle.sink.Sink;
 import com.angellane.juggle.source.Module;
 import com.angellane.juggle.source.Source;
@@ -112,7 +114,12 @@ public class Juggler {
         return ret;
     }
 
-    public Stream<CandidateMember> allCandidates() {
+    public Stream<CandidateType> candidateTypeStream() {
+        return getClassesToSearch().stream()
+                .map(CandidateType::candidateForType);
+    }
+
+    public Stream<CandidateMember> candidateMemberStream() {
         return getClassesToSearch().stream()
                 .flatMap(c -> Stream.of(
                                   Arrays.stream(c.getDeclaredFields())
@@ -185,10 +192,28 @@ public class Juggler {
 
     // Main Event =====================================================================================================
 
-    public void goJuggle() {
-        chainProcessors(allCandidates())
+    TypeQuery typeQuery;
+    public void setTypeQuery(TypeQuery typeQuery) {
+        this.typeQuery = typeQuery;
+    }
+
+    public void juggleTypes() {
+        candidateTypeStream()
+                .filter(ct -> typeQuery.isMatchForCandidate(ct))
+                .forEach(ct -> sink.accept(ct));
+    }
+
+    public void juggleMembers() {
+        chainProcessors(candidateMemberStream())
                 .distinct()
                 .sorted(getComparator())
                 .forEach(m -> sink.accept(m));
+    }
+
+    public void doJuggle() {
+        if (typeQuery != null)
+            juggleTypes();
+        else
+            juggleMembers();
     }
 }

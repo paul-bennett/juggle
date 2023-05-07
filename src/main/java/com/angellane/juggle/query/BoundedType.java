@@ -31,7 +31,8 @@ public record BoundedType(
     }
 
     public boolean matchesClass(Class<?> candidate) {
-        return (lowerBound == null || candidate.isAssignableFrom(lowerBound)) &&
+        return candidate != null &&
+                (lowerBound == null || candidate.isAssignableFrom(lowerBound)) &&
                 (upperBound == null || upperBound.stream().allMatch(b -> b.isAssignableFrom(candidate)));
     }
 }

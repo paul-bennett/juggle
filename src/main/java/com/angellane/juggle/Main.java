@@ -1,5 +1,6 @@
 package com.angellane.juggle;
 
+import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.formatter.AnsiColourFormatter;
 import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.PlaintextFormatter;
@@ -7,6 +8,7 @@ import com.angellane.juggle.query.MemberQuery;
 import com.angellane.juggle.processor.PermuteParams;
 import com.angellane.juggle.query.Query;
 import com.angellane.juggle.query.QueryFactory;
+import com.angellane.juggle.query.TypeQuery;
 import com.angellane.juggle.sink.TextOutput;
 import com.angellane.juggle.source.JarFile;
 import com.angellane.juggle.source.Module;
@@ -203,11 +205,29 @@ public class Main implements Runnable {
         juggler.appendFilter(m -> !m.member().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
         juggler.appendFilter(m -> !m.member().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
 
-        juggler.prependFilter(m -> m.matchesAnnotations(getAnnotationTypes()));
-        if (getThrowTypes() != null) juggler.prependFilter(m -> m.matchesThrows(getThrowTypes()));
-        if (getReturnType() != null) juggler.prependFilter(m -> m.matchesReturn(getReturnType()));
-        if (getParamTypes() != null) juggler.appendFilter(m -> m.matchesParams(getParamTypes()));
+        juggler.prependFilter(m -> m.annotationTypes().containsAll(getAnnotationTypes()));
+        if (getThrowTypes() != null) juggler.prependFilter(m -> {
+            Set<Class<?>> throwTypes = getThrowTypes();
 
+            if (throwTypes.size() == 0)
+                return m.throwTypes().size() == 0;
+
+            // A candidate's throws clause matches if the types it might throw are listed
+            // in the query's set of caught exceptions
+            for (var caughtType : throwTypes) {
+                if (m.throwTypes().stream().noneMatch(thrownType -> Candidate.isTypeCompatibleForAssignment(caughtType, thrownType)))
+                    return false;
+            }
+            return true;
+        });
+        if (getReturnType() != null) juggler.prependFilter(m ->
+                Candidate.isTypeCompatibleForAssignment(getReturnType(), m.returnType()));
+        if (getParamTypes() != null) juggler.appendFilter(m -> {
+                    List<? extends Class<?>> paramTypes = getParamTypes();
+                    Iterator<? extends Class<?>> queryTypeIter = paramTypes.iterator();
+                    return m.paramTypes().stream().allMatch(mpt ->
+                            Candidate.isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
+                });
         juggler.prependFilter(m -> Accessibility.fromModifiers(
                 m.member().getModifiers()).isAtLeastAsAccessibleAsOther(minAccess));
 
@@ -230,10 +250,8 @@ public class Main implements Runnable {
 
             if (query instanceof MemberQuery mq)
                 juggler.appendFilter(mq::isMatchForCandidate);
-            else {
-                System.err.println("*** Only member queries are supported at the moment");
-                return;
-            }
+            else
+                juggler.setTypeQuery((TypeQuery)query);
         }
 
         // Sinks
@@ -242,7 +260,7 @@ public class Main implements Runnable {
 
         // Go!
 
-        juggler.goJuggle();
+        juggler.doJuggle();
     }
 
     public static void main(String[] args) {

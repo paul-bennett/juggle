@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParserTest {
+public class MemberParserTest {
     Juggler juggler = new Juggler();
     QueryFactory factory = new QueryFactory(juggler);
 
