@@ -212,3 +212,66 @@ $
 
 (Prior to fixing this issue, string literals were interpreted as
 case-sensitive substring matches.)
+
+
+## [GitHub Issue #45](https://github.com/paul-bennett/juggle/issues/45): JavaNut 27 (Class Defined-In Index)
+
+Juggle now answers this question directly:
+````
+$ juggle class FileNotFoundException
+class java.io.FileNotFoundException
+$
+````
+
+## [GitHub issue #47](https://github.com/paul-bennett/juggle/issues/47): Subclass Index
+
+Here's how to find the direct subclasses of a class:
+````
+$ juggle class extends java.lang.reflect.AccessibleObject
+class java.lang.reflect.Executable
+class java.lang.reflect.Field
+$
+````
+
+`java.lang.reflect.Executable` itself has two subclasses that weren't listed 
+above because they're _indirect_ subclasses of `AccessibleObject`: 
+````
+$ juggle class extends java.lang.reflect.Executable
+class java.lang.reflect.Constructor
+class java.lang.reflect.Method
+$
+````
+
+To show all subclasses, including indirect ones we can specify a type bound:
+````
+$ juggle class extends \? extends java.lang.reflect.AccessibleObject
+class java.lang.reflect.Constructor
+class java.lang.reflect.Executable
+class java.lang.reflect.Field
+class java.lang.reflect.Method
+$
+````
+
+## [GitHub issue #48](https://github.com/paul-bennett/juggle/issues/48): Implemented-By Index
+
+Juggle can show you all classes that directly implement a specific interface:
+````
+$ juggle class implements java.lang.reflect.Member                  
+class java.lang.reflect.Executable
+class java.lang.reflect.Field
+class java.lang.invoke.MemberName
+$
+````
+
+To show classes that indirectly implement an interface, use a type bound:
+````
+$ juggle class extends \? extends java.lang.reflect.Member
+class java.lang.reflect.Constructor
+class java.lang.reflect.Method
+$
+````
+
+Juggle doesn't presently offer a mechanism to list all classes that
+directly or indirectly implement an interface.
+(See [GitHub Issue #84](https://github.com/paul-bennett/juggle/issues/84).)
+

@@ -67,9 +67,14 @@ classImplementsClause
 interfaceDecl
     :   interfaceModifier*
         'interface' declName?
-        ('extends' type (',' type)*)?
+        interfaceExtendsClause?
         permitsClause?
     ;
+
+interfaceExtendsClause
+    :   ('extends' type (',' type)*)
+    ;
+
 
 annotationDecl
     :   annotationModifier*

@@ -191,6 +191,17 @@ public class QueryFactory {
             tempTypeQuery.setSuperInterfaces(new HashSet<>(tempTypeList));
         }
 
+        @Override
+        public void enterInterfaceExtendsClause(DeclParser.InterfaceExtendsClauseContext ctx) {
+            tempTypeList.clear();
+        }
+
+        @Override
+        public void exitInterfaceExtendsClause(DeclParser.InterfaceExtendsClauseContext ctx) {
+            tempTypeQuery.setSuperInterfaces(new HashSet<>(tempTypeList));
+        }
+
+
         // TYPE ===============================================================
 
         // This is populated by the type listeners, gathering information about
