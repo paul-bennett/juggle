@@ -47,7 +47,7 @@ implements Candidate
                 : List.of(c.getRecordComponents());
 
         return new CandidateType(c, f, annotations, access, mods,
-                c.getName(), superClass, superInterfaces,
+                c.getSimpleName(), superClass, superInterfaces,
                 permittedSubtypes, recordComponents);
     }
 

@@ -155,7 +155,7 @@ public class QueryFactory {
         }
 
         private Pattern patternFromLiteral(String s) {
-            return Pattern.compile(s, Pattern.LITERAL);
+            return Pattern.compile("^" + Pattern.quote(s) + "$");
         }
 
         private Pattern patternFromRegex(String re) {

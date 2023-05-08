@@ -82,7 +82,7 @@ public sealed class Query permits TypeQuery, MemberQuery {
     }
 
     public void setNameExact(final String name) {
-        setNamePattern(Pattern.compile(name, Pattern.LITERAL));
+        setNamePattern(Pattern.compile("^" + Pattern.quote(name) + "$"));
     }
 
     public void setNamePattern(Pattern pattern) {

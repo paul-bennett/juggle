@@ -176,4 +176,39 @@ public volatile void StringBuilder.setLength(int)
 $
 ````
 
+## [GitHub Issue #74](https://github.com/paul-bennett/juggle/issues/74): Search by exact name is broken (substring)
 
+There are no methods in the JDK called `Equals`:
+````
+$ juggle '? Equals'
+$
+````
+
+But there are some that contain the word `Equals`:
+````
+$ juggle '? /Equals/'
+public boolean String.contentEquals(CharSequence)
+public boolean String.contentEquals(StringBuffer)
+public static boolean StringUTF16.contentEquals(byte[],byte[],int)
+public static boolean StringUTF16.contentEquals(byte[],CharSequence,int)
+public static boolean java.util.Arrays.deepEquals(Object[],Object[])
+public static boolean java.util.Objects.deepEquals(Object,Object)
+$
+````
+
+Similarly, there's only one class called `StringBuffer`:
+````
+$ juggle 'class StringBuffer'
+class java.lang.StringBuffer
+$
+````
+But there are two that contain the letters `StringBuffer`:
+````
+$ juggle 'class /StringBuffer/'
+class java.lang.StringBuffer
+class java.io.StringBufferInputStream
+$
+````
+
+(Prior to fixing this issue, string literals were interpreted as
+case-sensitive substring matches.)
