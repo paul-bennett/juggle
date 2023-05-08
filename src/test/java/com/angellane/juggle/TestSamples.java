@@ -4,6 +4,7 @@ import com.angellane.juggle.testsupport.ShellParser;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +31,12 @@ public class TestSamples {
                         , "DECLARATIONS.md"
                         , "TYPE-SEARCH.md"
                 )
-                .map(fn -> DynamicContainer.dynamicContainer(fn, sampleTestStreamFrom(cl.getResource(fn))));
+                .map(fn -> DynamicContainer.dynamicContainer(fn, sampleTestStreamFrom(fn, cl.getResource(fn))));
     }
 
     enum State { SKIP, CMD, OUT }
 
-    private Stream<DynamicNode> sampleTestStreamFrom(URL url) {
+    private Stream<DynamicNode> sampleTestStreamFrom(String filename, URL url) {
         assertNotNull(url, "Couldn't load test resource");
 
         List<DynamicNode> ret = new ArrayList<>();
@@ -50,7 +51,7 @@ public class TestSamples {
         // to be ignored.
 
         try (InputStreamReader isr = new InputStreamReader(url.openStream());
-             BufferedReader br = new BufferedReader(isr))
+             LineNumberReader br = new LineNumberReader(isr))
         {
             final String JUGGLE_CMD = "$ juggle ";
             final String CONTINUE = "\\";
@@ -58,6 +59,7 @@ public class TestSamples {
 
             State state = SKIP;
 
+            int startLine = 0;
             StringBuilder command = new StringBuilder();
             StringBuilder output  = new StringBuilder();
 
@@ -72,6 +74,8 @@ public class TestSamples {
 
                           output  = new StringBuilder();
                           command = new StringBuilder();
+                          startLine = br.getLineNumber();
+
                           // fall through
                       case CMD:
                           if (line.endsWith(CONTINUE)) {
@@ -91,7 +95,10 @@ public class TestSamples {
                               assertTrue(cmdStr.startsWith(JUGGLE_CMD));
                               String args = command.substring(JUGGLE_CMD.length());
                               String expected = output.toString();
-                              ret.add(DynamicTest.dynamicTest(args, () -> runTest(args, expected)));
+                              ret.add(DynamicTest.dynamicTest(
+                                      "#" + startLine + ": " + args,
+                                      URI.create("classpath:/" + filename + "?line=" + startLine),
+                                      () -> runTest(args, expected)));
                               state = SKIP;
                           }
                           break;
