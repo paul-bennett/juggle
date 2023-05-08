@@ -44,7 +44,7 @@ $
 ````
 $ juggle -p ThisTypeDoesNotExist -r boolean
 *** Couldn't find type: ThisTypeDoesNotExist; using class java.lang.Object instead
-public static boolean Thread.holdsLock(Object)
+public static native boolean Thread.holdsLock(Object)
 public static boolean java.lang.invoke.MethodHandleProxies.isWrapperInstance(Object)
 public static boolean java.util.Objects.isNull(Object)
 public static boolean java.util.Objects.nonNull(Object)
@@ -87,7 +87,7 @@ at runtime due to type erasure, in which case it may be worth stripping this met
 
 ````
 $ juggle -m '' -@ '' -n getUpperBound"
-public java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
+public abstract java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
 public java.lang.reflect.Type[] sun.reflect.generics.reflectiveObjects.WildcardTypeImpl.getUpperBounds()
 public sun.reflect.generics.tree.FieldTypeSignature[] sun.reflect.generics.tree.Wildcard.getUpperBounds()
 $

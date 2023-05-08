@@ -126,6 +126,7 @@ memberModifier
     : annotation
     | 'private' | 'protected' | 'package' | 'public'
     | 'abstract' | 'static' | 'final' | 'native' | 'strictfp' | 'synchronized'
+    | 'transient' | 'volatile'
     ;
 
 returnType

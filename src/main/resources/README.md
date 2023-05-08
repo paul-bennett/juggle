@@ -115,11 +115,11 @@ As with non-static methods, non-static fields have an additional implicit
 ````
 $ juggle -r int -p java.io.InterruptedIOException
 public int java.io.InterruptedIOException.bytesTransferred
-public int Object.hashCode()
-public static int System.identityHashCode(Object)
+public native int Object.hashCode()
+public static native int System.identityHashCode(Object)
 public static int java.util.Objects.hashCode(Object)
 public static int sun.invoke.util.ValueConversions.widenSubword(Object)
-public static int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
+public static native int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 $
 ````
 
@@ -153,14 +153,14 @@ have the named annotations, or whose declaring class is so annotated.  If multip
 supplied, they must all be present on the class or method.
 ````
 $ juggle -@ FunctionalInterface -r int
-public int java.util.Comparator<T>.compare(T,T)
-public int java.util.function.DoubleToIntFunction.applyAsInt(double)
-public int java.util.function.IntBinaryOperator.applyAsInt(int,int)
-public int java.util.function.IntSupplier.getAsInt()
-public int java.util.function.IntUnaryOperator.applyAsInt(int)
-public int java.util.function.LongToIntFunction.applyAsInt(long)
-public int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
-public int java.util.function.ToIntFunction<T>.applyAsInt(T)
+public abstract int java.util.Comparator<T>.compare(T,T)
+public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
+public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
+public abstract int java.util.function.IntSupplier.getAsInt()
+public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
+public abstract int java.util.function.LongToIntFunction.applyAsInt(long)
+public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
+public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
 $
 ````
 
@@ -173,10 +173,10 @@ public String AbstractStringBuilder.substring(int)
 public String AbstractStringBuilder.substring(int,int)
 public String String.substring(int)
 public String String.substring(int,int)
-public String StringBuilder.substring(int)
-public String StringBuilder.substring(int,int)
-public String StringBuffer.substring(int)
-public String StringBuffer.substring(int,int)
+public volatile String StringBuilder.substring(int)
+public volatile String StringBuilder.substring(int,int)
+public synchronized String StringBuffer.substring(int)
+public synchronized String StringBuffer.substring(int,int)
 $
 ````
 
@@ -212,9 +212,9 @@ any modules that this module requires transitively (sometimes referred to as
 
 ````
 $ juggle -m java.sql -r java.sql.CallableStatement
-public java.sql.CallableStatement java.sql.Connection.prepareCall(String) throws java.sql.SQLException
-public java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int) throws java.sql.SQLException
-public java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int,int) throws java.sql.SQLException
+public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String) throws java.sql.SQLException
+public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int) throws java.sql.SQLException
+public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int,int) throws java.sql.SQLException
 $
 ````
 
@@ -287,8 +287,8 @@ set an alternative minimum level of accessibility (`public`, `package`,
 $ juggle -r java.io.OutputStream -p '' -a protected
 public java.io.OutputStream.<init>()
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
-public static java.io.PrintStream System.err
-public static java.io.PrintStream System.out
+public static final java.io.PrintStream System.err
+public static final java.io.PrintStream System.out
 public java.io.ByteArrayOutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
 public sun.net.www.http.PosterOutputStream.<init>()

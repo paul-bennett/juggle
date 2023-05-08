@@ -64,14 +64,7 @@ public class TextOutput implements Sink {
     }
 
     public String decodeModifiers(int mods) {
-        // To reduce clutter we're only interested in a subset of the modifiers
-        StringBuilder ret = new StringBuilder(Modifier.toString(
-                mods & (Modifier.STATIC
-                        | Modifier.PUBLIC
-                        | Modifier.PROTECTED
-                        | Modifier.PRIVATE
-                )
-        ));
+        StringBuilder ret = new StringBuilder(Modifier.toString(mods));
 
         if (ret.length() > 0)
             ret.append(' ');

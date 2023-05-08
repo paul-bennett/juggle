@@ -113,17 +113,17 @@ the second -- `-m java.se` -- showed no results.)
 
 ````
 $ juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
-public ResultSet PreparedStatement.executeQuery() throws SQLException
-public ResultSet Statement.getGeneratedKeys() throws SQLException
-public ResultSet Statement.getResultSet() throws SQLException
+public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
+public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
+public abstract ResultSet Statement.getResultSet() throws SQLException
 $
 ````
 
 ````
 $ juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
-public ResultSet PreparedStatement.executeQuery() throws SQLException
-public ResultSet Statement.getGeneratedKeys() throws SQLException
-public ResultSet Statement.getResultSet() throws SQLException
+public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
+public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
+public abstract ResultSet Statement.getResultSet() throws SQLException
 $
 ````
 
@@ -136,4 +136,44 @@ $ juggle -n asSubclass -m java.base,java.base
 public <U> Class<T> Class<T>.asSubclass(Class<T>)
 $
 ````
+
+### [GitHub issue #70](https://github.com/paul-bennett/juggle/issues/70): Add `transient` and `volatile` member modifiers
+
+There are about 400 `transient` methods in the JDK. Here are a few.
+````
+$ juggle -i java.util.stream -i java.nio.file transient Stream
+public static transient <T> Stream<T> Stream<T>.of(T[])
+public static transient Stream<T> Files.find(Path,int,java.util.function.BiPredicate<T,U>,FileVisitOption[]) throws java.io.IOException
+public static transient Stream<T> Files.walk(Path,int,FileVisitOption[]) throws java.io.IOException
+public static transient Stream<T> Files.walk(Path,FileVisitOption[]) throws java.io.IOException
+$
+````
+And here are some of the 2000 `volatile` methods:
+````
+$ juggle "volatile (StringBuilder,?)"
+public volatile char StringBuilder.charAt(int)
+public volatile int StringBuilder.codePointAt(int)
+public volatile int StringBuilder.codePointBefore(int)
+public volatile int StringBuilder.compareTo(Object)
+public volatile AbstractStringBuilder StringBuilder.append(boolean)
+public volatile AbstractStringBuilder StringBuilder.append(char)
+public volatile AbstractStringBuilder StringBuilder.append(char[])
+public volatile AbstractStringBuilder StringBuilder.append(double)
+public volatile AbstractStringBuilder StringBuilder.append(float)
+public volatile AbstractStringBuilder StringBuilder.append(int)
+public volatile AbstractStringBuilder StringBuilder.append(CharSequence)
+public volatile AbstractStringBuilder StringBuilder.append(Object)
+public volatile AbstractStringBuilder StringBuilder.append(String)
+public volatile AbstractStringBuilder StringBuilder.append(StringBuffer)
+public volatile AbstractStringBuilder StringBuilder.append(long)
+public volatile AbstractStringBuilder StringBuilder.appendCodePoint(int)
+public volatile AbstractStringBuilder StringBuilder.deleteCharAt(int)
+public volatile Appendable StringBuilder.append(char) throws java.io.IOException
+public volatile Appendable StringBuilder.append(CharSequence) throws java.io.IOException
+public volatile String StringBuilder.substring(int)
+public volatile void StringBuilder.ensureCapacity(int)
+public volatile void StringBuilder.setLength(int)
+$
+````
+
 
