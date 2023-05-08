@@ -52,7 +52,7 @@ classDecl
     :   classModifier*
         'class' declName?
         classExtendsClause?
-        classImplementsClause?
+        implementsClause?
         permitsClause?
     ;
 
@@ -60,7 +60,7 @@ classExtendsClause
     :   ('extends' type)
     ;
 
-classImplementsClause
+implementsClause
     :   ('implements' type (',' type)*)
     ;
 
@@ -78,32 +78,32 @@ interfaceExtendsClause
 
 annotationDecl
     :   annotationModifier*
-        '@' 'interface' declName
+        '@' 'interface' declName?
     ;
 
 enumDecl
     :   classModifier*
         'enum' declName?
-        ('implements' type (',' type)*)?
+        implementsClause?
     ;
 
 recordDecl
     :   classModifier*
         'record' declName?
         params?
-        ('implements' type (',' type)*)?
+        implementsClause?
     ;
 
 classModifier
     :   annotation
     |   'private' | 'protected' | 'package' | 'public'
-    |   'abstract' | 'static' | 'sealed' | 'non-sealed' | 'strictfp'
+    |   'abstract' | 'static' | /*'sealed' | 'non-sealed' |*/ 'strictfp'
     ;
 
 interfaceModifier
     :   annotation
     |   'private' | 'protected' | 'package' | 'public'
-    |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
+    |   'abstract' | 'static' | 'final' | /*'sealed' | 'non-sealed' |*/ 'strictfp'
     ;
 
 annotationModifier
@@ -112,7 +112,7 @@ annotationModifier
     ;
 
 permitsClause
-    :   'permits' qname (',' qname)*
+    :   'permits' type (',' type)*
     ;
 
 memberDecl

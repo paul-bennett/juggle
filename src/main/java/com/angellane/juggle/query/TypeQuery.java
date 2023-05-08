@@ -83,6 +83,14 @@ public final class TypeQuery extends Query {
         this.superInterfaces = superInterfaces;
     }
 
+    public void setPermittedSubtypes(Set<BoundedType> permittedSubtypes) {
+        this.permittedSubtypes = permittedSubtypes;
+    }
+
+    public void setRecordComponents(List<ParamSpec> components) {
+        this.recordComponents = components;
+    }
+
     private boolean matchesFlavour(TypeFlavour f) {
         return flavour == null || flavour.equals(f);
     }
@@ -117,8 +125,10 @@ public final class TypeQuery extends Query {
                 else {
                     RecordComponent rc = actualIter.next();
 
-                    return p.paramName().matcher(rc.getName()).matches()
-                            && p.paramType().matchesClass(rc.getType());
+                    boolean nameMatches = p.paramName().matcher(rc.getName()).find();
+                    boolean typeMatches = p.paramType().matchesClass(rc.getType());
+                    return
+                            nameMatches && typeMatches;
                 }
             });
         }

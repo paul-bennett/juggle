@@ -88,11 +88,23 @@ public class QueryFactory {
         @Override
         public void enterRecordDecl(DeclParser.RecordDeclContext ctx) {
             tempQuery = tempTypeQuery = new TypeQuery(TypeFlavour.RECORD);
+            tempParams = null;
+        }
+
+        @Override
+        public void exitRecordDecl(DeclParser.RecordDeclContext ctx) {
+            tempTypeQuery.setRecordComponents(tempParams);
         }
 
         @Override
         public void enterMemberDecl(DeclParser.MemberDeclContext ctx) {
             tempQuery = tempMemberQuery = new MemberQuery();
+            tempParams = null;
+        }
+
+        @Override
+        public void exitMemberDecl(DeclParser.MemberDeclContext ctx) {
+            tempMemberQuery.params = tempParams;
         }
 
 
@@ -111,12 +123,34 @@ public class QueryFactory {
         }
 
         @Override
+        public void enterClassModifier(DeclParser.ClassModifierContext ctx) {
+            if (ctx.annotation() != null)
+                return;             // Annotations are handled elsewhere
+            handleModifier(ctx.getText());
+        }
+
+        @Override
+        public void enterInterfaceModifier(DeclParser.InterfaceModifierContext ctx) {
+            if (ctx.annotation() != null)
+                return;             // Annotations are handled elsewhere
+            handleModifier(ctx.getText());
+        }
+
+        @Override
+        public void enterAnnotationModifier(DeclParser.AnnotationModifierContext ctx) {
+            if (ctx.annotation() != null)
+                return;             // Annotations are handled elsewhere
+            handleModifier(ctx.getText());
+        }
+
+        @Override
         public void enterMemberModifier(DeclParser.MemberModifierContext ctx) {
             if (ctx.annotation() != null)
                 return;             // Annotations are handled elsewhere
+            handleModifier(ctx.getText());
+        }
 
-            String text = ctx.getText();
-
+        private void handleModifier(String text) {
             switch (text) {
                 case "private", "package", "protected", "public" ->
                         tempQuery.setAccessibility(Accessibility.fromString(text));
@@ -131,7 +165,7 @@ public class QueryFactory {
                 case "strictfp"     -> tempQuery.addModifier(Modifier.STRICT);
 
                 default ->
-                        System.err.println("*** Unknown modifier `" + ctx.getText() + "'; ignoring");
+                        System.err.println("*** Unknown modifier `" + text + "'; ignoring");
             }
         }
 
@@ -174,7 +208,7 @@ public class QueryFactory {
         }
 
 
-        // SUPERTYPES =========================================================
+        // RELATED TYPES=======================================================
 
         @Override
         public void exitClassExtendsClause(DeclParser.ClassExtendsClauseContext ctx) {
@@ -182,12 +216,12 @@ public class QueryFactory {
         }
 
         @Override
-        public void enterClassImplementsClause(DeclParser.ClassImplementsClauseContext ctx) {
+        public void enterImplementsClause(DeclParser.ImplementsClauseContext ctx) {
             tempTypeList.clear();
         }
 
         @Override
-        public void exitClassImplementsClause(DeclParser.ClassImplementsClauseContext ctx) {
+        public void exitImplementsClause(DeclParser.ImplementsClauseContext ctx) {
             tempTypeQuery.setSuperInterfaces(new HashSet<>(tempTypeList));
         }
 
@@ -199,6 +233,16 @@ public class QueryFactory {
         @Override
         public void exitInterfaceExtendsClause(DeclParser.InterfaceExtendsClauseContext ctx) {
             tempTypeQuery.setSuperInterfaces(new HashSet<>(tempTypeList));
+        }
+
+        @Override
+        public void enterPermitsClause(DeclParser.PermitsClauseContext ctx) {
+            tempTypeList.clear();
+        }
+
+        @Override
+        public void exitPermitsClause(DeclParser.PermitsClauseContext ctx) {
+            tempTypeQuery.setPermittedSubtypes(new HashSet<>(tempTypeList));
         }
 
 
@@ -264,30 +308,32 @@ public class QueryFactory {
 
         // PARAMS =============================================================
 
+        List<ParamSpec> tempParams;
+
         @Override
         public void enterParams(DeclParser.ParamsContext ctx) {
             // We've seen parentheses, so we're matching parameters
-            tempMemberQuery.params = new ArrayList<>();
+            tempParams = new ArrayList<>();
         }
 
         @Override
         public void exitEllipsisParam(DeclParser.EllipsisParamContext ctx) {
-            tempMemberQuery.params.add(ParamSpec.ellipsis());
+            tempParams.add(ParamSpec.ellipsis());
         }
 
         @Override
         public void exitWildcardParam(DeclParser.WildcardParamContext ctx) {
-            tempMemberQuery.params.add(ParamSpec.wildcard());
+            tempParams.add(ParamSpec.wildcard());
         }
 
         @Override
         public void exitUnnamedParam(DeclParser.UnnamedParamContext ctx) {
-            tempMemberQuery.params.add(ParamSpec.unnamed(tempType));
+            tempParams.add(ParamSpec.unnamed(tempType));
         }
 
         @Override
         public void exitUntypedParam(DeclParser.UntypedParamContext ctx) {
-            tempMemberQuery.params.add(ParamSpec.untyped(tempName));
+            tempParams.add(ParamSpec.untyped(tempName));
         }
 
 

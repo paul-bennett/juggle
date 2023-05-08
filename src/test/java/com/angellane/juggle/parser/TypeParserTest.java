@@ -1,11 +1,10 @@
 package com.angellane.juggle.parser;
 
 import com.angellane.juggle.Juggler;
-import com.angellane.juggle.query.Query;
-import com.angellane.juggle.query.QueryFactory;
-import com.angellane.juggle.query.TypeFlavour;
-import com.angellane.juggle.query.TypeQuery;
+import com.angellane.juggle.query.*;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,5 +45,118 @@ public class TypeParserTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
+    @Test
+    public void testClassExactExtends() {
+        TypeQuery actualQuery = typeQueryFor("class extends String");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.CLASS;
+        expectedQuery.setSupertype(BoundedType.exactType(String.class));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testClassBoundedExtends() {
+        TypeQuery actualQuery = typeQueryFor("class extends ? super String");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.CLASS;
+        expectedQuery.setSupertype(BoundedType.supertypeOf(String.class));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testClassImplements() {
+        TypeQuery actualQuery = typeQueryFor(
+                "class implements java.io.Serializable, " +
+                "? extends java.lang.reflect.AnnotatedType");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.CLASS;
+        expectedQuery.setSuperInterfaces(Set.of(
+                BoundedType.exactType(java.io.Serializable.class),
+                BoundedType.subtypeOf(java.lang.reflect.AnnotatedType.class)
+                )
+        );
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testClassPermits() {
+        TypeQuery actualQuery = typeQueryFor(
+                "class permits Integer, ? extends Long");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.CLASS;
+        expectedQuery.setPermittedSubtypes(Set.of(
+                BoundedType.exactType(java.lang.Integer.class),
+                BoundedType.subtypeOf(java.lang.Long.class)
+        ));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testInterfaceExtends() {
+        TypeQuery actualQuery = typeQueryFor(
+                "interface extends java.lang.reflect.AnnotatedType," +
+                " ? super java.lang.reflect.TypeVariable," +
+                " ? extends java.lang.reflect.AnnotatedElement," +
+                " ?");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.INTERFACE;
+        expectedQuery.setSuperInterfaces(Set.of(
+                BoundedType.exactType(java.lang.reflect.AnnotatedType.class),
+                BoundedType.supertypeOf(java.lang.reflect.TypeVariable.class),
+                BoundedType.subtypeOf(java.lang.reflect.AnnotatedElement.class),
+                BoundedType.wildcardType()
+                )
+        );
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+
+    @Test
+    public void testInterfacePermits() {
+        TypeQuery actualQuery = typeQueryFor(
+                "interface permits java.lang.reflect.AnnotatedType");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.INTERFACE;
+        expectedQuery.setPermittedSubtypes(Set.of(
+                BoundedType.exactType(java.lang.reflect.AnnotatedType.class)
+        ));
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testAnnotationDecl() {
+        TypeQuery actualQuery = typeQueryFor(
+                "@interface Deprecated");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.ANNOTATION;
+        expectedQuery.setNameExact("Deprecated");
+
+        assertEquals(expectedQuery, actualQuery);
+    }
+
+    @Test
+    public void testMetaAnnotation() {
+        TypeQuery actualQuery = typeQueryFor(
+                "@Deprecated @interface");
+
+        TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.flavour = TypeFlavour.ANNOTATION;
+        expectedQuery.addAnnotationType(Deprecated.class);
+
+        assertEquals(expectedQuery, actualQuery);
+    }
 
 }
