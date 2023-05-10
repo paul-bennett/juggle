@@ -140,7 +140,7 @@ public class TestMemberDecl {
 
     @Test
     @Disabled("Param name matching not implemented yet")
-    public void testCorrectParams() {
+    public void testCorrectNamedParams() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("name", String.class));
         matchQueryAndCandidate(q, cm);

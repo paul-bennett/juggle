@@ -4,6 +4,8 @@ import com.angellane.juggle.candidate.CandidateMember;
 
 import java.util.*;
 
+import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
+
 /**
  * This class represents a declaration query -- the result of parsing a
  * pseudo-Java declaration that's subsequently used as a template against which
@@ -68,40 +70,71 @@ public final class MemberQuery extends Query {
                 || this.returnType.matchesClass(returnType);
     }
 
-    boolean matchesParams(List<Class<?>> paramTypes) {
+    boolean matchesParams(List<Class<?>> candidateParams) {
         if (params == null)
             return true;
 
         // params :: [ParamSpec]
-        // type ParamSpec = Ellipsis | SingleParam name type
-        // "Ellipsis" stands for zero or more actual parameters
+        // type ParamSpec = ZeroOrMoreParams | SingleParam name type
 
-        // Right now, we'll just do the simplest: check that the candidate has
-        // at least as many actual parameters as we have SingleParams.
+        // Intent is to construct a number of alternative queries of type
+        // List<SingleParam> by replacing the ZeroOrMoreParams objects with
+        // a number of wildcard SingleParam objects.
 
-        boolean hasEllipsis =
-                params.stream().anyMatch(p -> p instanceof ParamEllipsis);
-        long numParamSpecs =
-                params.stream().filter(p -> p instanceof SingleParam).count();
+        int numParamSpecs = (int)params.stream()
+                .filter(p -> p instanceof SingleParam).count();
+        int numEllipses = params.size() - numParamSpecs;
+        int spareParams = candidateParams.size() - numParamSpecs;
 
-        long numActualParams = paramTypes.size();
+        if (spareParams == 0)
+            // No ellipses, correct #params
+            return matchesParamSpecs(params.stream()
+                            .filter(ps -> ps instanceof SingleParam)
+                            .map(ps -> (SingleParam)ps).toList(),
+                    candidateParams);
+        else if (numEllipses == 0)
+            // No ellipses over which to distribute spare params
+            return false;
+        else if (spareParams < 0)
+            // More specified params than candidate params
+            return false;
+        else {
+            // Nasty: using a 1-element array so we can set inside lambda
+            final boolean[] ret = {false};
 
-        if (!hasEllipsis) {
-            if (numActualParams != numParamSpecs)
-                return false;
-            else {
-                Iterator<? extends Class<?>> actualParamIter =
-                        paramTypes.iterator();
-                return params.stream().allMatch(ps -> {
-                    // Cast is OK because we tested hasEllipsis
-                    BoundedType bounds = ((SingleParam) ps).paramType();
-                    Class<?> actualType = actualParamIter.next();
-                    return bounds.matchesClass(actualType);
-                });
-            }
+            decomposeIntoParts(spareParams, numEllipses, distribution -> {
+                int i = 0;  // index into distribution
+                List<SingleParam> queryParams = new ArrayList<>();
+
+                for (ParamSpec ps : params) {
+                    if (ps instanceof SingleParam singleParam)
+                        queryParams.add(singleParam);
+                    else
+                        for (int numWildcards = distribution[i++];
+                             numWildcards > 0; numWildcards--)
+                            queryParams.add(ParamSpec.wildcard());
+                }
+
+                ret[0] |= matchesParamSpecs(queryParams, candidateParams);
+            });
+
+            return ret[0];
         }
-        else
-            return numActualParams >= numParamSpecs;
+    }
+
+    private boolean matchesParamSpecs(List<SingleParam> queryParams,
+                                      List<Class<?>>    candidateParams) {
+        if (queryParams.size() != candidateParams.size())
+            return false;
+        else {
+            Iterator<? extends Class<?>> actualParamIter =
+                    candidateParams.iterator();
+            return queryParams.stream().allMatch(ps -> {
+                BoundedType bounds = ps.paramType();
+                Class<?> actualType = actualParamIter.next();
+                return bounds.matchesClass(actualType);
+            });
+        }
     }
 
     boolean matchesExceptions(Set<Class<?>> exceptions) {

@@ -252,7 +252,7 @@ class java.lang.reflect.Method
 $
 ````
 
-## [GitHub issue #48](https://github.com/paul-bennett/juggle/issues/48): Implemented-By Index
+## [GitHub Issue #48](https://github.com/paul-bennett/juggle/issues/48): Implemented-By Index
 
 Juggle can show you all classes that directly implement a specific interface:
 ````
@@ -275,3 +275,92 @@ Juggle doesn't presently offer a mechanism to list all classes that
 directly or indirectly implement an interface.
 (See [GitHub Issue #84](https://github.com/paul-bennett/juggle/issues/84).)
 
+
+## [GitHub Issue #65](https://github.com/paul-bennett/juggle/issues/65): Handle ellipsis in parameter lists
+
+For this bug we're going to try to find the 7-parameter `java.lang.foreign.MemorySegment.copy`
+function. This has lots of parameters of different types, which gives us plenty of scope for tests.
+
+Clearly fully specifying its type does the trick:
+
+````
+$ juggle -i java.lang.foreign 'static void copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)'
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+$
+````
+
+... as does naming the function and omitting the parameters altogether:
+````
+$ juggle -i java.lang.foreign 'static void copy'                                                                    
+public static void MemorySegment.copy(Object,int,MemorySegment,ValueLayout,long,int)
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
+public static <T> void java.util.Collections.copy(java.util.List<E>,java.util.List<E>)
+public static void jdk.internal.foreign.Utils.copy(MemorySegment,byte[])
+$
+````
+
+Specifying nothing but an ellipsis gives us the same results:
+````
+$ juggle -i java.lang.foreign 'static void copy(...)'                                                                    
+public static void MemorySegment.copy(Object,int,MemorySegment,ValueLayout,long,int)
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
+public static <T> void java.util.Collections.copy(java.util.List<E>,java.util.List<E>)
+public static void jdk.internal.foreign.Utils.copy(MemorySegment,byte[])
+$
+````
+
+Now let's just specify the first parameter. That should drop us down to four candidates:
+````
+$ juggle -i java.lang.foreign 'static void copy(MemorySegment,...)'                                                                    
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
+public static void jdk.internal.foreign.Utils.copy(MemorySegment,byte[])
+$
+````
+
+And a non-matching first arg should give us nothing:
+````
+$ juggle -i java.lang.foreign 'static void copy(int,...)'                                                                    
+$
+````
+
+Here's the same but with the last parameter:
+````
+$ juggle -i java.lang.foreign 'static void copy(...,long)'                                                                    
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
+$
+````
+````
+$ juggle -i java.lang.foreign 'static void copy(...,String)'                                                                    
+$
+````
+
+Let's put the ellipsis in the middle, missing out all but the first and last arg:
+````
+$ juggle -i java.lang.foreign 'static void copy(MemorySegment,...,long)'                                                                    
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
+$
+````
+
+And now the opposite: a param in the middle:
+````
+$ juggle -i java.lang.foreign 'static void copy(...,ValueLayout,...)'                                                                    
+public static void MemorySegment.copy(Object,int,MemorySegment,ValueLayout,long,int)
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+$
+````
+
+Finally, ellipses all over the place:
+````
+$ juggle -i java.lang.foreign 'static void copy(...,ValueLayout,long,...,long,...)'                                                                    
+public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+$
+````
