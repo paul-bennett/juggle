@@ -1,4 +1,4 @@
-package com.angellane.juggle;
+package com.angellane.juggle.util;
 
 import java.util.*;
 import java.util.function.Consumer;

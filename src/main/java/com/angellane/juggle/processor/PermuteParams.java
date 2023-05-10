@@ -1,7 +1,7 @@
 package com.angellane.juggle.processor;
 
 import com.angellane.juggle.candidate.CandidateMember;
-import com.angellane.juggle.PermutationGenerator;
+import com.angellane.juggle.util.PermutationGenerator;
 
 import java.util.stream.Stream;
 

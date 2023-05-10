@@ -1,10 +1,10 @@
-package com.angellane.juggle;
+package com.angellane.juggle.util;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.angellane.juggle.PermutationGenerator.PermSpliterator.permutationAfter;
+import static com.angellane.juggle.util.PermutationGenerator.PermSpliterator.permutationAfter;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
