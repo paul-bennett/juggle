@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public sealed class Query permits TypeQuery, MemberQuery {
     protected Set<Class<?>> annotationTypes     = null;
-    protected Accessibility accessibility       = null;
+    protected Accessibility accessibility       = Accessibility.PUBLIC;
     protected int           modifierMask        = 0;
     protected int           modifiers           = 0;
     protected Pattern       declarationPattern  = null;

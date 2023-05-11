@@ -255,6 +255,11 @@ public class Main implements Runnable {
 
             if (showQuery)
                 System.err.println("QUERY: " + query);
+
+            // Also disable the accessibility flag set by the `-a` option
+            // since that defaults to the restrictive PUBLIC value.
+            //
+            minAccess = Accessibility.PRIVATE;
         }
 
 

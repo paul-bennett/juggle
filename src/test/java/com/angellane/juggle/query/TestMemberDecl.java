@@ -67,6 +67,7 @@ public class TestMemberDecl {
     public void testEllipsis() {
         MemberQuery q = new MemberQuery();
 
+        q.accessibility = Accessibility.PROTECTED;
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(ParamSpec.ellipsis());
 
@@ -100,12 +101,14 @@ public class TestMemberDecl {
     @Test
     public void testNoAttributes() {
         MemberQuery q = new MemberQuery();
+        q.accessibility = Accessibility.PROTECTED;
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testCorrectAnnotations() {
         MemberQuery q = new MemberQuery();
+        q.accessibility = Accessibility.PROTECTED;
         q.annotationTypes = Set.of();
         matchQueryAndCandidate(q, cm);
     }
@@ -113,6 +116,7 @@ public class TestMemberDecl {
     @Test
     public void testCorrectModifiers() {
         MemberQuery q = new MemberQuery();
+        q.accessibility = Accessibility.PROTECTED;
         q.modifierMask = Modifier.STATIC;
         matchQueryAndCandidate(q, cm);
     }
@@ -127,6 +131,7 @@ public class TestMemberDecl {
     @Test
     public void testCorrectReturnType() {
         MemberQuery q = new MemberQuery();
+        q.accessibility = Accessibility.PROTECTED;
         q.returnType = BoundedType.exactType(java.net.URL.class);
         matchQueryAndCandidate(q, cm);
     }
@@ -135,6 +140,7 @@ public class TestMemberDecl {
     public void testCorrectDeclarationName() {
         MemberQuery q = new MemberQuery();
         q.declarationPattern = Pattern.compile("^findResource$");
+        q.accessibility = Accessibility.PROTECTED;
         matchQueryAndCandidate(q, cm);
     }
 
@@ -142,6 +148,7 @@ public class TestMemberDecl {
     @Disabled("Param name matching not implemented yet")
     public void testCorrectNamedParams() {
         MemberQuery q = new MemberQuery();
+        q.accessibility = Accessibility.PROTECTED;
         q.params = List.of(ParamSpec.param("name", String.class));
         matchQueryAndCandidate(q, cm);
     }
@@ -149,6 +156,7 @@ public class TestMemberDecl {
     @Test
     public void testCorrectExceptions() {
         MemberQuery q = new MemberQuery();
+        q.accessibility = Accessibility.PROTECTED;
         q.exceptions = Set.of();
         matchQueryAndCandidate(q, cm);
     }

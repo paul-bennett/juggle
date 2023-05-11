@@ -14,11 +14,6 @@ What about classes that implement `java.util.Collection`?
 ````
 $ juggle class implements java.util.Collection
 class java.util.AbstractCollection
-class java.util.Collections$CheckedCollection
-class java.util.Collections$SynchronizedCollection
-class java.util.Collections$UnmodifiableCollection
-class java.util.concurrent.ConcurrentHashMap$CollectionView
-class java.util.concurrent.ConcurrentHashMap$ValuesView
 $
 ````
 
@@ -36,10 +31,6 @@ $
 In reality, Juggle presently says:
 ````
 $ juggle -m jdk.net -i jdk.net,java.nio.file.attribute record
-class sun.security.pkcs.SignerInfo$AlgorithmInfo
-class sun.nio.ch.IOUtil$LinkedRunnable
-class sun.nio.ch.IOUtil$Releaser
-class apple.security.KeychainStore$LocalAttr
 class jdk.net.UnixDomainPrincipal
 $
 ````

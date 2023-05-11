@@ -261,7 +261,6 @@ Juggle can show you all classes that directly implement a specific interface:
 $ juggle class implements java.lang.reflect.Member                  
 class java.lang.reflect.Executable
 class java.lang.reflect.Field
-class java.lang.invoke.MemberName
 $
 ````
 
@@ -409,3 +408,17 @@ $ juggle '/search$/i (..., long[], ..., int, ...)'
 public static int java.util.Arrays.binarySearch(long[],int,int,long)
 $
 ````
+
+## [GitHub Issue #98](https://github.com/paul-bennett/juggle/issues/98): Access modifiers follow the usual pattern of specifying minimum accessibility:
+````
+$ juggle private java.net.Inet6Address 
+public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],int) throws java.net.UnknownHostException
+public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],java.net.NetworkInterface) throws java.net.UnknownHostException
+java.net.Inet6Address.<init>()
+java.net.Inet6Address.<init>(String,byte[])
+java.net.Inet6Address.<init>(String,byte[],int)
+java.net.Inet6Address.<init>(String,byte[],String) throws java.net.UnknownHostException
+java.net.Inet6Address.<init>(String,byte[],java.net.NetworkInterface) throws java.net.UnknownHostException
+$
+````
+
