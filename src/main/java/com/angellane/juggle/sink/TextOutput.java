@@ -170,7 +170,8 @@ public class TextOutput implements Sink {
                 ret.append(packageName).append('.');
 
             // Knock off the "packageName." prefix
-            ret.append(canonicalName.substring(packageName.length()+1));
+            ret.append((canonicalName != null ? canonicalName : c.getName())
+                    .substring(packageName.length()+1));
 
             TypeVariable<?>[] typeVars = c.getTypeParameters();
 
