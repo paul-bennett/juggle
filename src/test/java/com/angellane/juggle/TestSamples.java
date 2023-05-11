@@ -26,6 +26,7 @@ public class TestSamples {
         ClassLoader cl = getClass().getClassLoader();
 
         return Stream.of( "README.md"
+                        , "README-DECL.md"
                         , "REGRESSIONS.md"
                         , "COVERAGE.md"
                         , "DECLARATIONS.md"
