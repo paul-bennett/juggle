@@ -173,6 +173,12 @@ public class Main implements Runnable {
         }
     }
 
+    @Option(names={"--show-query"}, description="Show query")
+    public boolean showQuery = false;
+
+    @Option(names={"--dry-run"}, description="Dry run only")
+    public boolean dryRun = false;
+
     @Parameters(paramLabel="declaration", description="A Java-style declaration to match against")
     List<String> queryParams = new ArrayList<>();
 
@@ -246,15 +252,21 @@ public class Main implements Runnable {
                 juggler.appendFilter(mq::isMatchForCandidate);
             else
                 juggler.setTypeQuery((TypeQuery)query);
+
+            if (showQuery)
+                System.err.println("QUERY: " + query);
         }
 
-        // Sinks
 
-        juggler.setSink(new TextOutput(juggler.getImportedPackageNames(), System.out, formatterOption.getFormatter()));
+        if (!dryRun) {
+            // Sinks
 
-        // Go!
+            juggler.setSink(new TextOutput(juggler.getImportedPackageNames(), System.out, formatterOption.getFormatter()));
 
-        juggler.doJuggle();
+            // Go!
+
+            juggler.doJuggle();
+        }
     }
 
     public static void main(String[] args) {

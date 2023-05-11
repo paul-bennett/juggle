@@ -14,16 +14,18 @@ If we pass an invalid argument, we should get an error and the help text:
 ````
 $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
-Usage: juggle [-hVx] [-@=type,type,...] [-a=private|protected|package|public]
-              [-f=<formatterOption>] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
-              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-@=type,type,...]
+              [-a=private|protected|package|public] [-f=<formatterOption>]
+              [-i=packageName] [-j=jarFilePath] [-m=moduleName] [-n=methodName]
+              [-p=type,type,...] [-r=type] [-s=<addSortCriteria>] [-t=type,
+              type,...] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
   -@, --annotation=type,type,...
                              Annotations
   -a, --access=private|protected|package|public
                              Minimum accessibility of members to return
+      --dry-run              Dry run only
   -f, --format=<formatterOption>
                              Output format
   -h, --help                 Show this help message and exit.
@@ -36,6 +38,7 @@ An API search tool for Java
   -r, --return=type          Return type of searched function
   -s, --sort=<addSortCriteria>
                              Sort criteria
+      --show-query           Show query
   -t, --throws=type,type,... Thrown types
   -V, --version              Print version information and exit.
   -x, --[no-]permute         Also match permutations of parameters
@@ -46,16 +49,18 @@ Of course, we can explicitly ask for help:
 
 ````
 $ juggle --help
-Usage: juggle [-hVx] [-@=type,type,...] [-a=private|protected|package|public]
-              [-f=<formatterOption>] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
-              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-@=type,type,...]
+              [-a=private|protected|package|public] [-f=<formatterOption>]
+              [-i=packageName] [-j=jarFilePath] [-m=moduleName] [-n=methodName]
+              [-p=type,type,...] [-r=type] [-s=<addSortCriteria>] [-t=type,
+              type,...] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
   -@, --annotation=type,type,...
                              Annotations
   -a, --access=private|protected|package|public
                              Minimum accessibility of members to return
+      --dry-run              Dry run only
   -f, --format=<formatterOption>
                              Output format
   -h, --help                 Show this help message and exit.
@@ -68,6 +73,7 @@ An API search tool for Java
   -r, --return=type          Return type of searched function
   -s, --sort=<addSortCriteria>
                              Sort criteria
+      --show-query           Show query
   -t, --throws=type,type,... Thrown types
   -V, --version              Print version information and exit.
   -x, --[no-]permute         Also match permutations of parameters
