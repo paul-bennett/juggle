@@ -278,89 +278,132 @@ directly or indirectly implement an interface.
 
 ## [GitHub Issue #65](https://github.com/paul-bennett/juggle/issues/65): Handle ellipsis in parameter lists
 
-For this bug we're going to try to find the 7-parameter `java.lang.foreign.MemorySegment.copy`
-function. This has lots of parameters of different types, which gives us plenty of scope for tests.
-
-Clearly fully specifying its type does the trick:
+For this issue we're going to focus on methods whose name ends with the word 
+`search` (ignoring case):
 
 ````
-$ juggle -i java.lang.foreign 'static void copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)'
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+$ juggle '/search$/i'                                                
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
+public static int java.util.Arrays.binarySearch(byte[],byte)
+public static int java.util.Arrays.binarySearch(byte[],int,int,byte)
+public static int java.util.Arrays.binarySearch(char[],char)
+public static int java.util.Arrays.binarySearch(char[],int,int,char)
+public static int java.util.Arrays.binarySearch(double[],double)
+public static int java.util.Arrays.binarySearch(double[],int,int,double)
+public static int java.util.Arrays.binarySearch(float[],float)
+public static int java.util.Arrays.binarySearch(float[],int,int,float)
+public static int java.util.Arrays.binarySearch(int[],int)
+public static int java.util.Arrays.binarySearch(int[],int,int,int)
+public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
+public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<T>)
+public static int java.util.Arrays.binarySearch(Object[],Object)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
+public static int java.util.Arrays.binarySearch(long[],int,int,long)
+public static int java.util.Arrays.binarySearch(long[],long)
+public static int java.util.Arrays.binarySearch(short[],int,int,short)
+public static int java.util.Arrays.binarySearch(short[],short)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
 
-... as does naming the function and omitting the parameters altogether:
+
+Omitting parentheses as above indicates that we don't want to filter on 
+parameters at all.  Including parentheses but nothing between them matches
+zero-arg methods.  There are none that match the name filter in this case:
+
 ````
-$ juggle -i java.lang.foreign 'static void copy'                                                                    
-public static void MemorySegment.copy(Object,int,MemorySegment,ValueLayout,long,int)
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
-public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
-public static <T> void java.util.Collections.copy(java.util.List<E>,java.util.List<E>)
-public static void jdk.internal.foreign.Utils.copy(MemorySegment,byte[])
+$ juggle '/search$/i ()'
 $
 ````
 
-Specifying nothing but an ellipsis gives us the same results:
+If we put a single ellipsis in the parameter list we're saying that we
+want methods with zero or more parameters, so we get the same results
+as when we omitted parentheses altogether:
+
 ````
-$ juggle -i java.lang.foreign 'static void copy(...)'                                                                    
-public static void MemorySegment.copy(Object,int,MemorySegment,ValueLayout,long,int)
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
-public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
-public static <T> void java.util.Collections.copy(java.util.List<E>,java.util.List<E>)
-public static void jdk.internal.foreign.Utils.copy(MemorySegment,byte[])
+$ juggle '/search$/i (...)'                                                
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
+public static int java.util.Arrays.binarySearch(byte[],byte)
+public static int java.util.Arrays.binarySearch(byte[],int,int,byte)
+public static int java.util.Arrays.binarySearch(char[],char)
+public static int java.util.Arrays.binarySearch(char[],int,int,char)
+public static int java.util.Arrays.binarySearch(double[],double)
+public static int java.util.Arrays.binarySearch(double[],int,int,double)
+public static int java.util.Arrays.binarySearch(float[],float)
+public static int java.util.Arrays.binarySearch(float[],int,int,float)
+public static int java.util.Arrays.binarySearch(int[],int)
+public static int java.util.Arrays.binarySearch(int[],int,int,int)
+public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
+public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<T>)
+public static int java.util.Arrays.binarySearch(Object[],Object)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
+public static int java.util.Arrays.binarySearch(long[],int,int,long)
+public static int java.util.Arrays.binarySearch(long[],long)
+public static int java.util.Arrays.binarySearch(short[],int,int,short)
+public static int java.util.Arrays.binarySearch(short[],short)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
 
-Now let's just specify the first parameter. That should drop us down to four candidates:
+Now let's just specify the first parameter. That drops us down to three candidates:
 ````
-$ juggle -i java.lang.foreign 'static void copy(MemorySegment,...)'                                                                    
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
-public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
-public static void jdk.internal.foreign.Utils.copy(MemorySegment,byte[])
+$ juggle '/search$/i (? extends java.util.Collection,...)'                                                
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
+Note how the last of these is a non-static member, so the "first"
+parameter is actually the target class.
 
-And a non-matching first arg should give us nothing:
+If we specify something outlandish as our first parameter we get no results:
 ````
-$ juggle -i java.lang.foreign 'static void copy(int,...)'                                                                    
+$ juggle '/search$/i (java.net.InetAddress,...)'                                                
 $
 ````
 
 Here's the same but with the last parameter:
 ````
-$ juggle -i java.lang.foreign 'static void copy(...,long)'                                                                    
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
-public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
+$ juggle '/search$/i (...,double)'                                                
+public static int java.util.Arrays.binarySearch(double[],double)
+public static int java.util.Arrays.binarySearch(double[],int,int,double)
 $
 ````
 ````
-$ juggle -i java.lang.foreign 'static void copy(...,String)'                                                                    
+$ juggle '/search$/i (..., String)'                                                
 $
 ````
 
 Let's put the ellipsis in the middle, missing out all but the first and last arg:
 ````
-$ juggle -i java.lang.foreign 'static void copy(MemorySegment,...,long)'                                                                    
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
-public static void MemorySegment.copy(MemorySegment,long,MemorySegment,long,long)
+$ juggle '/search$/i (java.util.List, ..., java.util.Comparator)'                                                
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
 $
 ````
 
 And now the opposite: a param in the middle:
 ````
-$ juggle -i java.lang.foreign 'static void copy(...,ValueLayout,...)'                                                                    
-public static void MemorySegment.copy(Object,int,MemorySegment,ValueLayout,long,int)
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,Object,int,int)
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+$ juggle '/search$/i (..., int, ...)'                                                
+public static int java.util.Arrays.binarySearch(byte[],int,int,byte)
+public static int java.util.Arrays.binarySearch(char[],int,int,char)
+public static int java.util.Arrays.binarySearch(double[],int,int,double)
+public static int java.util.Arrays.binarySearch(float[],int,int,float)
+public static int java.util.Arrays.binarySearch(int[],int)
+public static int java.util.Arrays.binarySearch(int[],int,int,int)
+public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
+public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<T>)
+public static int java.util.Arrays.binarySearch(long[],int,int,long)
+public static int java.util.Arrays.binarySearch(short[],int,int,short)
 $
 ````
 
 Finally, ellipses all over the place:
 ````
-$ juggle -i java.lang.foreign 'static void copy(...,ValueLayout,long,...,long,...)'                                                                    
-public static void MemorySegment.copy(MemorySegment,ValueLayout,long,MemorySegment,ValueLayout,long,long)
+$ juggle '/search$/i (..., long[], ..., int, ...)'                                                
+public static int java.util.Arrays.binarySearch(long[],int,int,long)
 $
 ````
