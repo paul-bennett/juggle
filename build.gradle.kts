@@ -69,12 +69,6 @@ tasks.test {
 }
 tasks.jacocoTestReport {
     dependsOn(tasks.test)   // tests are required to run before generating the report
-
-//    classDirectories.setFrom(classDirectories.files.map {
-//        fileTree(it).matching {
-//            exclude(listOf("com/angellane/juggle/parser/**"))
-//        }
-//    })
 }
 tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.jacocoTestReport)
@@ -82,9 +76,30 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = "0.8".toBigDecimal()
+                minimum = "0.9".toBigDecimal()
             }
         }
+    }
+}
+// These next two blocks exclude our ANTLR-generated code from the JaCoCo
+// report and verification steps.  It's unclear to me why I can't put this
+// code in the previous named tasks, but it works here.
+tasks.withType<JacocoReport> {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude("com/angellane/juggle/parser/**")
+            }
+        }))
+    }
+}
+tasks.withType<JacocoCoverageVerification> {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude("com/angellane/juggle/parser/**")
+            }
+        }))
     }
 }
 
