@@ -422,3 +422,21 @@ java.net.Inet6Address.<init>(String,byte[],java.net.NetworkInterface) throws jav
 $
 ````
 
+## [GitHub Issue #99](https://github.com/paul-bennett/juggle/issues/99): Exception on `juggle private`
+
+Prior to fixing #99, this query was resulting in an uncaught exception.
+````
+$ juggle "private java.util.Optional /^lambda/"
+private java.util.Optional<T> jdk.internal.loader.Loader.lambda$initRemotePackageMap$2(java.lang.module.ResolvedModule,ModuleLayer)
+private java.util.Optional<T> jdk.internal.logger.SimpleConsoleLogger.CallerFinder.lambda$get$0(java.util.stream.Stream<T>)
+private static java.util.Optional<T> java.util.Currency.lambda$getValidCurrencyData$0(java.util.Properties,java.util.regex.Pattern,String)
+private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
+private static java.util.Optional<T> java.util.stream.Collectors.lambda$reducing$48(java.util.stream.Collectors$1OptionalBox)
+$
+````
+
+It may be the case that these methods will all be hidden from a future version of Juggle because they're private
+lambdas (and therefore of no use to external code).
+
+The exception was thrown when trying to emit the parameter type of the last of these,
+i.e. `java.util.stream.Collectors$1OptionalBox`.
