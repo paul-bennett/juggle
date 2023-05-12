@@ -440,3 +440,64 @@ lambdas (and therefore of no use to external code).
 
 The exception was thrown when trying to emit the parameter type of the last of these,
 i.e. `java.util.stream.Collectors$1OptionalBox`.
+
+
+## [GitHub Issue #62](https://github.com/paul-bennett/juggle/issues/62): Add ellipsis support to throws clauses
+
+We don't need to implement this because using a wildcard in the `throws` clause does the trick.
+
+Here are the methods that only throw `FileNotFoundException`:
+````
+$ juggle throws java.io.FileNotFoundException
+public java.io.FileInputStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(java.io.File,boolean) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(String,boolean) throws java.io.FileNotFoundException
+public java.io.FileReader.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.FileReader.<init>(String) throws java.io.FileNotFoundException
+public java.io.PrintStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.PrintStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.PrintWriter.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.PrintWriter.<init>(String) throws java.io.FileNotFoundException
+public java.io.RandomAccessFile.<init>(java.io.File,String) throws java.io.FileNotFoundException
+public java.io.RandomAccessFile.<init>(String,String) throws java.io.FileNotFoundException
+public java.util.Formatter.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.util.Formatter.<init>(String) throws java.io.FileNotFoundException
+public java.util.Scanner.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.util.Scanner.<init>(java.io.File,String) throws java.io.FileNotFoundException
+$
+````
+
+By adding a `, ?` to the `throws` clause, we include methods that throw other exceptions as well: 
+````
+$ juggle throws java.io.FileNotFoundException, \?
+public java.io.FileInputStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(java.io.File,boolean) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(String,boolean) throws java.io.FileNotFoundException
+public java.io.FileReader.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.FileReader.<init>(String) throws java.io.FileNotFoundException
+public java.io.PrintStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.PrintStream.<init>(java.io.File,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.io.PrintStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.PrintStream.<init>(String,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.io.PrintWriter.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.PrintWriter.<init>(java.io.File,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.io.PrintWriter.<init>(String) throws java.io.FileNotFoundException
+public java.io.PrintWriter.<init>(String,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.io.RandomAccessFile.<init>(java.io.File,String) throws java.io.FileNotFoundException
+public java.io.RandomAccessFile.<init>(String,String) throws java.io.FileNotFoundException
+public java.util.Formatter.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.util.Formatter.<init>(java.io.File,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.util.Formatter.<init>(java.io.File,String,java.util.Locale) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.util.Formatter.<init>(String) throws java.io.FileNotFoundException
+public java.util.Formatter.<init>(String,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.util.Formatter.<init>(String,String,java.util.Locale) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.util.Scanner.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.util.Scanner.<init>(java.io.File,String) throws java.io.FileNotFoundException
+$
+````
