@@ -1,6 +1,6 @@
 package com.angellane.juggle.candidate;
 
-import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.TypeFlavour;
 import org.junit.jupiter.api.Test;
 

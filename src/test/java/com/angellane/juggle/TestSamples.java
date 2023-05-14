@@ -126,7 +126,14 @@ public class TestSamples {
 
             Main.main(args);
 
-            assertEquals(expectedOutput, bs.toString());
+            String actualOutput = bs.toString();
+
+            assertArrayEquals(
+                    expectedOutput.lines().sorted().toArray(),
+                    actualOutput.lines().sorted().toArray(),
+                    "Sorted output matches"
+            );
+            assertEquals(expectedOutput, actualOutput, "Actual output matches");
         }
         catch (IOException ex) {
             fail(ex);

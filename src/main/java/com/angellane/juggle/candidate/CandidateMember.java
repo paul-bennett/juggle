@@ -1,6 +1,6 @@
 package com.angellane.juggle.candidate;
 
-import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.match.Accessibility;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -42,6 +42,11 @@ public record CandidateMember(
         this(other.member, other.accessibility, other.otherModifiers,
                 other.annotationTypes, other.declarationName,
                 other.returnType, params, other.throwTypes);
+    }
+
+    @Override
+    public String packageName() {
+        return member().getDeclaringClass().getPackageName();
     }
 
     public static CandidateMember memberFromMethod(Method m) {

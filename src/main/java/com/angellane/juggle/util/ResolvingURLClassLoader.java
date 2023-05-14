@@ -1,4 +1,4 @@
-package com.angellane.juggle;
+package com.angellane.juggle.util;
 
 import java.net.URL;
 import java.net.URLClassLoader;

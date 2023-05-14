@@ -4,6 +4,7 @@ import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.formatter.AnsiColourFormatter;
 import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.PlaintextFormatter;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.MemberQuery;
 import com.angellane.juggle.processor.PermuteParams;
 import com.angellane.juggle.query.Query;
@@ -235,10 +236,6 @@ public class Main implements Runnable {
             // Optimisation: filter out anything that hasn't got the right number of params
             // Useful because permutation of every candidate member's params takes forever.
             juggler.prependFilter(m -> m.paramTypes().size() == getParamTypes().size());
-
-        // These assist the CLOSEST sort.
-        juggler.setParamTypes(getParamTypes());
-        juggler.setReturnType(getReturnType());
 
         // Parameter String
 

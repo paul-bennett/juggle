@@ -1,6 +1,6 @@
 package com.angellane.juggle.candidate;
 
-import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.TypeFlavour;
 
 import java.lang.annotation.Annotation;
@@ -26,6 +26,10 @@ public record CandidateType(
 )
 implements Candidate
 {
+    public String packageName() {
+        return clazz.getPackageName();
+    }
+
     public static CandidateType candidateForType(Class<?> c) {
         TypeFlavour f                       = TypeFlavour.forClass(c);
         Accessibility access                =

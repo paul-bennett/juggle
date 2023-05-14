@@ -1,6 +1,6 @@
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.candidate.Candidate;
 
 import java.util.HashSet;

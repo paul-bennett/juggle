@@ -1,6 +1,6 @@
 package com.angellane.juggle.candidate;
 
-import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.match.Accessibility;
 
 import java.lang.reflect.Modifier;
 import java.util.Map;
@@ -8,14 +8,12 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface Candidate {
-    int ACCESS_MODIFIERS_MASK =
-            Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED;
-
     // These are the "other" modifiers we're interested in. Why am I not
-    // using ~ACCESS_MODIFIERS_MASK?  Because there are some modifiers that
-    // aren't published via the public API of java.lang.reflect.Modifier
-    // (for example 0x4000 = ENUM).  So instead we'll limit ourselves just
-    // to those modifiers that Juggle knows about.
+    // using `~(Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED)`?
+    // Because there are some modifiers that aren't published via the public
+    // API of java.lang.reflect.Modifier (for example 0x4000 = ENUM).  So
+    // instead we'll limit ourselves just to those modifiers that Juggle
+    // knows about.
     //
     // Public modifier bits we currently deliberately ignore:
     //   INTERFACE
@@ -31,17 +29,28 @@ public interface Candidate {
             | Modifier.ABSTRACT | Modifier.STRICT
             ;
 
-
     Set<Class<?>>   annotationTypes();
     Accessibility   accessibility();
     int             otherModifiers();
     String          declarationName();
+    String          packageName();
 
 
     // An instinctive notion of whether two types are compatible.
-    // May or may not be correct.  Written from memory, not the JLS
+    // May or may not be correct.  Written from memory, not the JLS.
     //
-    // Are the types of writtenType and readType compatible, as if:
+    // Indeed, it's not correct; this function only allows for a single
+    // conversion at a time, i.e.:
+    //  * Unboxing Conversion
+    //  * Widening Primitive Conversion
+    //  * Widening Reference Conversion
+    //  * Boxing Conversion
+    // According to the JLS the Assignment and Loose Invocation Contexts
+    // also allow (and therefore this function should permit):
+    //  * Boxing Conversion followed by Widening Reference Conversion
+    //  * Unboxing Conversion followed by Widening Primitive Conversion
+    //
+    // Are the types of targetType and exprType compatible, as if:
     // <pre>
     //    WrittenType w; ReadType r; w = r;
     // </pre>
@@ -50,14 +59,15 @@ public interface Candidate {
     //    ReadType r() {}
     //    WrittenType w = r();
     // </pre>
-    static boolean isTypeInstinctivelyCompatible(Class<?> writtenType, Class<?> readType) {
+    static boolean isTypeInstinctivelyCompatible(Class<?> targetType,
+                                                 Class<?> exprType) {
         // Three cases:
         // 1. Primitive widening conversions
         // 2. Boxing/unboxing conversions
         // 3. Reference conversions
-        return Optional.ofNullable(wideningConversions.get(readType)).orElse(Set.of()).contains(writtenType)
-                || writtenType.equals(boxingConversions.get(readType))
-                || writtenType.isAssignableFrom(readType);
+        return Optional.ofNullable(wideningConversions.get(exprType)).orElse(Set.of()).contains(targetType)
+                || targetType.equals(boxingConversions.get(exprType))
+                || targetType.isAssignableFrom(exprType);
     }
 
 

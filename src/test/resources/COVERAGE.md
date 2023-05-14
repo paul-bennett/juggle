@@ -7,26 +7,9 @@ selected in order to drive up the JaCoCo coverage metrics.
 ## No parameters in the query
 
 ````
-$ juggle -r NoSuchMethodException -s closest
+$ juggle -r NoSuchMethodException
 public NoSuchMethodException.<init>()
 public NoSuchMethodException.<init>(String)
-$
-````
-
-## ByMostSpecificType comparator
-
-````
-$ juggle -r NoSuchMethodException -s type
-public NoSuchMethodException.<init>()
-public NoSuchMethodException.<init>(String)
-$
-````
-
-````
-$ juggle -p String -r java.io.InputStream -s type
-public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
-public java.io.StringBufferInputStream.<init>(String)
-public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
 $
 ````
 
@@ -37,7 +20,6 @@ $ juggle -m this.module.does.not.exist
 *** Module this.module.does.not.exist not found
 $
 ````
-
 
 ## Unknown type
 

@@ -1,6 +1,6 @@
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.Accessibility;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.Juggler;
 import com.angellane.juggle.parser.DeclBaseListener;
 import com.angellane.juggle.parser.DeclLexer;

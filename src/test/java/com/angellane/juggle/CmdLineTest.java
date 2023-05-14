@@ -1,5 +1,6 @@
 package com.angellane.juggle;
 
+import com.angellane.juggle.match.Accessibility;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 import picocli.CommandLine.ParseResult;

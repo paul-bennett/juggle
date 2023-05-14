@@ -1,4 +1,4 @@
-package com.angellane.juggle;
+package com.angellane.juggle.match;
 
 import java.lang.reflect.Modifier;
 

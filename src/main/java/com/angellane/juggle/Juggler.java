@@ -1,11 +1,16 @@
 package com.angellane.juggle;
 
+import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.CandidateMember;
 import com.angellane.juggle.candidate.CandidateType;
 import com.angellane.juggle.comparator.MultiComparator;
+import com.angellane.juggle.match.Match;
+import com.angellane.juggle.query.MemberQuery;
+import com.angellane.juggle.query.Query;
 import com.angellane.juggle.query.TypeQuery;
 import com.angellane.juggle.sink.Sink;
 import com.angellane.juggle.source.Module;
+import com.angellane.juggle.util.ResolvingURLClassLoader;
 import com.angellane.juggle.source.Source;
 
 import java.net.URL;
@@ -137,35 +142,32 @@ public class Juggler {
 
     // Processors =====================================================================================================
 
-    private final Deque<Function<CandidateMember, Stream<CandidateMember>>> processors = new LinkedList<>();
-    public void appendProcessor(Function<CandidateMember, Stream<CandidateMember>> processor) {
+    private final Deque<Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>>> processors = new LinkedList<>();
+
+    public void appendProcessor(Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>> processor) {
         processors.addLast(processor);
     }
-    public void prependProcessor(Function<CandidateMember, Stream<CandidateMember>> processor) {
+    public void prependProcessor(Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>> processor) {
         processors.addFirst(processor);
     }
 
-    protected Function<CandidateMember, Stream<CandidateMember>> filter(Predicate<CandidateMember> pred) {
-        return m -> pred.test(m) ? Stream.of(m) : Stream.empty();
+    protected Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>> filter(Predicate<CandidateMember> pred) {
+        return m -> pred.test(m.candidate()) ? Stream.of(m) : Stream.empty();
     }
 
-    public void appendFilter (Predicate<CandidateMember> pred) { appendProcessor (filter(pred)); }
-    public void prependFilter(Predicate<CandidateMember> pred) { prependProcessor(filter(pred)); }
+    public void appendFilter (Predicate<CandidateMember> pred) {
+        appendProcessor (filter(pred));
+    }
+    public void prependFilter(Predicate<CandidateMember> pred) {
+        prependProcessor(filter(pred));
+    }
 
-    public Stream<CandidateMember> chainProcessors(Stream<CandidateMember> s) {
+    public Stream<Match<CandidateMember, MemberQuery>> chainProcessors(Stream<Match<CandidateMember, MemberQuery>> s) {
         return s.flatMap(processors.stream().reduce(Stream::of, (a,b) -> (m -> a.apply(m).flatMap(b))));
     }
 
 
     // Sorting ========================================================================================================
-
-    public List<Class<?>> paramTypes;
-    public void setParamTypes(List<Class<?>> paramTypes)    { this.paramTypes = paramTypes; }
-    public List<Class<?>> getParamTypes()                   { return paramTypes; }
-
-    public Class<?> returnType;
-    public void setReturnType(Class<?> returnType)          { this.returnType = returnType; }
-    public Class<?> getReturnType()                         { return returnType; }
 
     public List<SortCriteria> sortCriteria                  = new ArrayList<>();
     public void addSortCriteria(SortCriteria sort)          { sortCriteria.add(sort); }
@@ -173,10 +175,10 @@ public class Juggler {
         // Return default criteria of none were set.
         return sortCriteria.size() != 0
                 ? sortCriteria
-                : List.of(SortCriteria.CLOSEST, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
+                : List.of(SortCriteria.SCORE, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
     }
 
-    public Comparator<CandidateMember> getComparator() {
+    public Comparator<Match<Candidate, Query>> getComparator() {
         return MultiComparator.of(getSortCriteria().stream()
                         .map(g -> g.getComparator(this))
                         .toList());
@@ -189,6 +191,7 @@ public class Juggler {
     public void setSink(Sink sink) {
         this.sink = sink;
     }
+
 
     // Main Event =====================================================================================================
 
@@ -204,10 +207,15 @@ public class Juggler {
     }
 
     public void juggleMembers() {
-        chainProcessors(candidateMemberStream())
+        chainProcessors(candidateMemberStream()
+                .map(cm -> new Match<>(cm, null, 0)))
                 .distinct()
+                // Generalise from <CandidateMember,MemberQuery>
+                .map(m -> new Match<Candidate,Query>(
+                        m.candidate(), m.query(), m.score()
+                ))
                 .sorted(getComparator())
-                .forEach(m -> sink.accept(m));
+                .forEach(m -> sink.accept(m.candidate()));
     }
 
     public void doJuggle() {
