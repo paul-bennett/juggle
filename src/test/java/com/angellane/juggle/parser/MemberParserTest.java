@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -31,7 +32,7 @@ public class MemberParserTest {
     }
 
     private MemberQuery memberQueryFor(String decl) {
-        Query q = factory.createQuery(decl);
+        Query<?> q = factory.createQuery(decl);
 
         if (q instanceof MemberQuery memberQuery)
             return memberQuery;
@@ -159,7 +160,6 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("? memberName");
 
         MemberQuery expectedQuery = new MemberQuery();
-
         expectedQuery.returnType = BoundedType.wildcardType();
         expectedQuery.setNameExact("memberName");
 
@@ -171,7 +171,6 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("? /pattern/i");
 
         MemberQuery expectedQuery = new MemberQuery();
-
         expectedQuery.returnType = BoundedType.wildcardType();
         expectedQuery.setNamePattern(Pattern.compile("pattern", Pattern.CASE_INSENSITIVE));
 
@@ -327,18 +326,20 @@ public class MemberParserTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
-//    @Test
-//    public void testThrowsClassPlusEllipsis() {
-//        MemberQuery actualQuery = memberQueryFor(
-//                "() throws NullPointerException, ...");
-//
-//        MemberQuery expectedQuery = new MemberQuery();
-//        expectedQuery.exceptions =
-//                Set.of(BoundedType.exactType(NullPointerException.class)
-//                , DeclQuery.Ellipsis);
-//
-//        assertEquals(expectedQuery, actualQuery);
-//    }
+    @Disabled
+    @Test
+    public void testThrowsClassPlusEllipsis() {
+        MemberQuery actualQuery = memberQueryFor(
+                "() throws NullPointerException, ...");
+
+        MemberQuery expectedQuery = new MemberQuery();
+        expectedQuery.exceptions =
+                Set.of(BoundedType.exactType(NullPointerException.class)
+//                , MemberQuery.Ellipsis
+                );
+
+        assertEquals(expectedQuery, actualQuery);
+    }
 
 
 }

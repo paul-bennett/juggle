@@ -6,11 +6,18 @@ import com.angellane.juggle.query.Query;
 
 import java.util.Comparator;
 
-public class ByAccessibility implements Comparator<Match<Candidate, Query>> {
+/**
+ * Compares two Matches based on their Candidates' accessibility.
+ * More accessible candidates are sorted first (i.e. public before private).
+ */
+public class ByAccessibility<
+        C extends Candidate, Q extends Query<C>, M extends Match<C,Q>
+        >
+        implements Comparator<M> {
     @Override
-    public int compare(Match<Candidate, Query> o1, Match<Candidate, Query> o2) {
-        return Math.negateExact(o1.candidate().accessibility()
-                .compareTo(o2.candidate().accessibility()));
+    public int compare(M m1, M m2) {
+        return Math.negateExact(m1.candidate().accessibility()
+                .compareTo(m2.candidate().accessibility()));
     }
 }
 

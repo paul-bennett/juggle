@@ -2,6 +2,7 @@ package com.angellane.juggle.query;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.OptionalInt;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,4 +86,78 @@ public class TestBoundedType {
         assertTrue(bt.matchesClass(Middle.class),   "Middle");
         assertTrue(bt.matchesClass(Bottom.class),   "Bottom");
     }
+
+
+    // SCORE TESTS ============================================================
+
+    @Test
+    public void testScoreExactType() {
+        BoundedType bt = BoundedType.exactType(Middle.class);
+
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(RootI.class),  "RootI /= Middle");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Inter.class),  "Inter /= Middle");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Top.class),    "Top /= Middle");
+        assertEquals(OptionalInt.of(0),   bt.scoreMatch(Middle.class), "Middle == Middle");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Bottom.class), "Bottom /= Middle");
+    }
+
+    @Test
+    public void testScoreLowerBoundClass() {
+        BoundedType bt = BoundedType.supertypeOf(Middle.class);
+
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(RootI.class),  "Middle -> Inter -> RootI");
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(Inter.class),  "Middle -> Inter");
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(Top.class),    "Middle => Top");
+        assertEquals(OptionalInt.of(0),   bt.scoreMatch(Middle.class), "Middle == Middle");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Bottom.class), "Bottom => Middle => Top");
+    }
+
+    @Test
+    public void testScoreLowerBoundInterface() {
+        BoundedType bt = BoundedType.supertypeOf(Inter.class);
+
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(RootI.class),  "Inter => RootI");
+        assertEquals(OptionalInt.of(0),   bt.scoreMatch(Inter.class),  "Inter == Inter");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Top.class),    "Top ~ Inter");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Middle.class), "Middle -> Inter");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Bottom.class), "Bottom => Middle -> Inter");
+    }
+
+    @Test
+    public void testScoreUpperBoundClass() {
+        BoundedType bt = BoundedType.subtypeOf(Top.class);
+
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(RootI.class),  "Top ~ RootI");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Inter.class),  "Top ~ Inter");
+        assertEquals(OptionalInt.of(0),   bt.scoreMatch(Top.class),    "Top == Top");
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(Middle.class), "Middle => Top");
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(Bottom.class), "Bottom => Middle => Top");
+    }
+
+    @Test
+    public void testScoreUpperBoundInterface() {
+        BoundedType bt = BoundedType.subtypeOf(Inter.class);
+
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(RootI.class),  "Inter => RootI");
+        assertEquals(OptionalInt.of(0),   bt.scoreMatch(Inter.class),  "Inter == Inter");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Top.class),    "Top ~ Inter");
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(Middle.class), "Middle -> Inter");
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(Bottom.class), "Bottom => Middle -> Inter");
+    }
+
+    @Test
+    public void testScoreFullySpecified() {
+        BoundedType bt =
+                new BoundedType(Set.of(Inter.class, Top.class), Bottom.class);
+
+        assertEquals(Set.of(Inter.class, Top.class), bt.upperBound());
+        assertEquals(Bottom.class,                   bt.lowerBound());
+
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(RootI.class),   "RootI");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Inter.class),   "Inter");
+        assertEquals(OptionalInt.empty(), bt.scoreMatch(Top.class),     "Top");
+        assertEquals(OptionalInt.of(2),   bt.scoreMatch(Middle.class),  "Middle");
+        assertEquals(OptionalInt.of(1),   bt.scoreMatch(Bottom.class),  "Bottom");
+    }
+
 }

@@ -117,9 +117,9 @@ $ juggle -r int -p java.io.InterruptedIOException
 public int java.io.InterruptedIOException.bytesTransferred
 public native int Object.hashCode()
 public static native int System.identityHashCode(Object)
+public static native int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 public static int java.util.Objects.hashCode(Object)
 public static int sun.invoke.util.ValueConversions.widenSubword(Object)
-public static native int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 $
 ````
 
@@ -132,13 +132,13 @@ The `-t` option allows you to filter by methods that might throw a specific exce
 
 ````
 $ juggle -t java.net.URISyntaxException
-public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
-public java.net.URI java.net.URL.toURI() throws java.net.URISyntaxException
 public java.net.URI.<init>(String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,int,String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,String,String) throws java.net.URISyntaxException
+public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
+public java.net.URI java.net.URL.toURI() throws java.net.URISyntaxException
 $
 ````
 
@@ -153,14 +153,14 @@ have the named annotations, or whose declaring class is so annotated.  If multip
 supplied, they must all be present on the class or method.
 ````
 $ juggle -@ FunctionalInterface -r int
-public abstract int java.util.Comparator<T>.compare(T,T)
 public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
 public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
-public abstract int java.util.function.IntSupplier.getAsInt()
 public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
 public abstract int java.util.function.LongToIntFunction.applyAsInt(long)
 public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
 public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
+public abstract int java.util.Comparator<T>.compare(T,T)
+public abstract int java.util.function.IntSupplier.getAsInt()
 $
 ````
 
@@ -216,19 +216,14 @@ subsequent criteria.
 | Option       | Description                                                     |
 |--------------|-----------------------------------------------------------------|
 | `-s access`  | Shows members by access, with `public` first and `private` last |
-| `-s closest` | Member that most closely matches query type first.              |
 | `-s name`    | Sorts results by name alphabetically                            |
 | `-s package` | Orders members from imported (`-i`) packages before others      |
-| `-s type`    | Presents more specific types before less specific ones          |
-|              |                                                                 |
+| `-s score`   | Shows best matches for a query first                            |
+| `-s text`    | Sort by output text (approximately)                             |
 
-The default sort is equivalent to `-s type -s access -s package -s name`.
+The default sort is equivalent to `-s score -s access -s package -s name -s text`.
 The intent is that this default causes Juggle to list the "best" matches first.
 If that's not what's happening in practice, I'd like to hear about it! 
- 
-Warning: `-s closest` slows things down tremendously, especially for large
-result sets.  If Juggle appears to be taking too long, re-run your query
-with a simpler search order such as `-s name`.
 
 ## Extra goodies
 
@@ -271,12 +266,12 @@ set an alternative minimum level of accessibility (`public`, `package`,
 
 ````
 $ juggle -r java.io.OutputStream -p '' -a protected
-public java.io.OutputStream.<init>()
-public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static final java.io.PrintStream System.err
 public static final java.io.PrintStream System.out
 public java.io.ByteArrayOutputStream.<init>()
+public java.io.OutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
+public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public sun.net.www.http.PosterOutputStream.<init>()
 public sun.security.util.DerOutputStream.<init>()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
@@ -325,18 +320,19 @@ implement this is present in this build, but not yet fully functional.
 
 Each command-line option has a long name equivalent. This table summarises all options.
 
-| Option | Long Equivalent | Argument                                                 | Default                                   | Description                                         |
-|--------|-----------------|----------------------------------------------------------|-------------------------------------------|-----------------------------------------------------|
-| `-a`   | `--access`      | `private`, `protected`, `package`, `public`              | `-a public`                               | Minimum accessibility                               |
-| `-i`   | `--import`      | package name                                             |                                           | Packages to import (`java.lang` is always searched) |
-| `-j`   | `--jar`         | file path                                                |                                           | JAR files to search                                 |
-| `-m`   | `--module`      | module name(s)                                           | `-m java.base`                            | JMODs to search                                     |
-| `-n`   | `--name`        | method name                                              | (don't match method names)                | Filter results by method name (case insensitive)    |
-| `-p`   | `--param`       | type name(s)                                             | (don't match parameters)                  | Type of parameters to search for                    |
-| `-r`   | `--return`      | type name                                                | (don't match return)                      | Return type to search for                           |
-| `-t`   | `--throws`      | type name(s)                                             | (don't match throws)                      | Exception types that must be thrown                 |                                             
-| `-@`   | `--annotation`  | annotation name(s)                                       | (don't match annotations)                 | Annotations to filter on (class or method)          |
-| `-s`   | `--sort`        | `access`, `closest`, `import`, `name`, `package`, `type` | `-s closest -s access -s package -s name` | Sort criteria                                       |
-| `-x`   | `--permute`     | (none)                                                   | (don't permute)                           | Match permutations of supplied parameters           |    
+| Option | Long Equivalent | Argument                                     | Default                                         | Description                                         |
+|--------|-----------------|----------------------------------------------|-------------------------------------------------|-----------------------------------------------------|
+| `-a`   | `--access`      | `private`, `protected`, `package`, `public`  | `-a public`                                     | Minimum accessibility                               |
+| `-i`   | `--import`      | package name                                 |                                                 | Packages to import (`java.lang` is always searched) |
+| `-j`   | `--jar`         | file path                                    |                                                 | JAR files to search                                 |
+| `-m`   | `--module`      | module name(s)                               | `-m java.base`                                  | JMODs to search                                     |
+| `-n`   | `--name`        | method name                                  | (don't match method names)                      | Filter results by method name (case insensitive)    |
+| `-p`   | `--param`       | type name(s)                                 | (don't match parameters)                        | Type of parameters to search for                    |
+| `-r`   | `--return`      | type name                                    | (don't match return)                            | Return type to search for                           |
+| `-t`   | `--throws`      | type name(s)                                 | (don't match throws)                            | Exception types that must be thrown                 |
+| `-@`   | `--annotation`  | annotation name(s)                           | (don't match annotations)                       | Annotations to filter on (class or method)          |
+| `-s`   | `--sort`        | `access`, `name`, `package`, `score`, `text` | `-s score -s access -s package -s name -s text` | Sort criteria                                       |
+| `-x`   | `--permute`     | (none)                                       | (don't permute)                                 | Match permutations of supplied parameters           |    
 
-A declaration-style query can follow all arguments.
+A declaration-style query can follow all arguments, so long as none of the
+`-a`, `-n`, `-p`, `-r`, `-t` or `-@` options have been specified.

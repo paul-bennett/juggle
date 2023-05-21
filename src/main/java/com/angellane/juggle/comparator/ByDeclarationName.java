@@ -7,16 +7,15 @@ import com.angellane.juggle.query.Query;
 import java.util.Comparator;
 
 /**
- * Compares two Matches based on the score that was computed when their
- * Candidate was evaluated against the Query.  Lower scores (better fits)
- * are ordered first.
+ * Compares two Matches based on their Candidates' canonical name.
  */
-public class ByScore<
+public class ByDeclarationName<
         C extends Candidate, Q extends Query<C>, M extends Match<C,Q>
         >
         implements Comparator<M> {
     @Override
     public int compare(M m1, M m2) {
-        return Integer.compare(m1.score(), m2.score());
+        return m1.candidate().declarationName()
+                .compareTo(m2.candidate().declarationName());
     }
 }

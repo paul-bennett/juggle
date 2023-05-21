@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class runs tests against the method
@@ -38,12 +38,13 @@ public class TestMemberDecl {
                 , "Match modifiers");
         assertTrue(q.matchesAccessibility(cm.accessibility())
                 , "Match accessibility");
-        assertTrue(q.matchesReturn(cm.returnType())      , "Match return type");
+        assertEquals(OptionalInt.of(0), q.scoreReturn(cm.returnType())      , "Match return type");
         assertTrue(q.matchesName(cm.declarationName())   , "Match method name");
-        assertTrue(q.matchesParams(cm.paramTypes())      , "Match parameters");
-        assertTrue(q.matchesExceptions(cm.throwTypes())  , "Match exceptions");
+        assertEquals(OptionalInt.of(0), q.scoreParams(cm.paramTypes())      , "Match parameters");
+        assertEquals(OptionalInt.of(0), q.scoreExceptions(cm.throwTypes())  , "Match exceptions");
 
-        assertTrue(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertTrue(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -85,7 +86,8 @@ public class TestMemberDecl {
                 ParamSpec.param("name", String.class),
                 ParamSpec.ellipsis());
 
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -95,7 +97,8 @@ public class TestMemberDecl {
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(ParamSpec.param(null, ClassLoader.class));
 
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -167,7 +170,8 @@ public class TestMemberDecl {
         q.annotationTypes = Set.of(Override.class);
         assertFalse(q.matchesAnnotations(cm.annotationTypes()),
                 "Match annotations");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -179,7 +183,8 @@ public class TestMemberDecl {
 
         assertFalse(q.matchesModifiers(cm.otherModifiers()),
                 "Match modifiers");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -188,15 +193,17 @@ public class TestMemberDecl {
         q.accessibility = Accessibility.PUBLIC;
         assertFalse(q.matchesAccessibility(cm.accessibility()),
                 "Match accessibility");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
     public void testWrongReturnType() {
         MemberQuery q = new MemberQuery();
         q.returnType = BoundedType.exactType(Integer.TYPE);
-        assertFalse(q.matchesReturn(cm.returnType()), "Match return");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertEquals(OptionalInt.empty(), q.scoreReturn(cm.returnType()), "Match return");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -204,23 +211,26 @@ public class TestMemberDecl {
         MemberQuery q = new MemberQuery();
         q.declarationPattern = Pattern.compile("^barf$");
         assertFalse(q.matchesName(cm.declarationName()), "Match name");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
     public void testWrongParamName() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("foo", String.class));
-        assertFalse(q.matchesParams(cm.paramTypes()), "Match params");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertEquals(OptionalInt.empty(), q.scoreParams(cm.paramTypes()), "Match params");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
     public void testWrongParamType() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("name", Integer.class));
-        assertFalse(q.matchesParams(cm.paramTypes()), "Match params");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertEquals(OptionalInt.empty(), q.scoreParams(cm.paramTypes()), "Match params");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -230,8 +240,9 @@ public class TestMemberDecl {
                 ParamSpec.param("name", String.class),
                 ParamSpec.param("name", String.class)
         );
-        assertFalse(q.matchesParams(cm.paramTypes()), "Match params");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertEquals(OptionalInt.empty(), q.scoreParams(cm.paramTypes()), "Match params");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 
     @Test
@@ -239,7 +250,8 @@ public class TestMemberDecl {
         MemberQuery q = new MemberQuery();
         q.exceptions =
                 Set.of(BoundedType.exactType(NoSuchMethodException.class));
-        assertFalse(q.matchesExceptions(cm.throwTypes()), "Match exceptions");
-        assertFalse(q.isMatchForCandidate(cm), "Match entire declaration");
+        assertEquals(OptionalInt.empty(), q.scoreExceptions(cm.throwTypes()), "Match exceptions");
+        assertFalse(q.scoreCandidate(cm).isPresent(),
+                "Match entire declaration");
     }
 }

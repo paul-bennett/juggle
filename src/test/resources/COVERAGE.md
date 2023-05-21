@@ -27,10 +27,10 @@ $
 $ juggle -p ThisTypeDoesNotExist -r boolean
 *** Couldn't find type: ThisTypeDoesNotExist; using class java.lang.Object instead
 public static native boolean Thread.holdsLock(Object)
-public static boolean java.lang.invoke.MethodHandleProxies.isWrapperInstance(Object)
-public static boolean java.util.Objects.isNull(Object)
-public static boolean java.util.Objects.nonNull(Object)
 public static boolean jdk.internal.vm.vector.VectorSupport.isNonCapturingLambda(Object)
+public static boolean java.util.Objects.isNull(Object)
+public static boolean java.lang.invoke.MethodHandleProxies.isWrapperInstance(Object)
+public static boolean java.util.Objects.nonNull(Object)
 $
 ````
 

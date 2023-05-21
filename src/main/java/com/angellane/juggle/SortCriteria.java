@@ -1,12 +1,11 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.candidate.Candidate;
-import com.angellane.juggle.comparator.ByAccessibility;
-import com.angellane.juggle.comparator.ByCanonicalName;
-import com.angellane.juggle.comparator.ByPackage;
-import com.angellane.juggle.comparator.ByScore;
+import com.angellane.juggle.candidate.MemberCandidate;
+import com.angellane.juggle.candidate.TypeCandidate;
+import com.angellane.juggle.comparator.*;
 import com.angellane.juggle.match.Match;
-import com.angellane.juggle.query.Query;
+import com.angellane.juggle.query.MemberQuery;
+import com.angellane.juggle.query.TypeQuery;
 
 import java.util.Comparator;
 import java.util.function.Function;
@@ -24,19 +23,40 @@ import java.util.function.Function;
  *       - name is the option to enable the criteria on the command-line
  *       - constructor arg is a Function<Main, Comparator<Member>>
  */
+
 enum SortCriteria {
-    SCORE   (j -> new ByScore()),
-    ACCESS  (j -> new ByAccessibility()),
-    PACKAGE (j -> new ByPackage(j.getImportedPackageNames())),
-    NAME    (j -> new ByCanonicalName());
+    SCORE   (j -> new ByScore<>(), j -> new ByScore<>()),
+    ACCESS  (j -> new ByAccessibility<>(), j -> new ByAccessibility<>()),
+    PACKAGE (j -> new ByPackage<>(j.getImportedPackageNames()),
+             j -> new ByPackage<>(j.getImportedPackageNames())),
+    TEXT    (j -> new ByString<>(), j -> new ByString<>()),
+    NAME    (j -> new ByDeclarationName<>(), j -> new ByDeclarationName<>());
 
-    private final Function<Juggler, Comparator<Match<Candidate, Query>>> comparatorGenerator;
+    private final Function<
+            Juggler,
+            Comparator<Match<TypeCandidate, TypeQuery>>
+            > typeComparatorGenerator;
+    private final Function<
+            Juggler,
+            Comparator<Match<MemberCandidate, MemberQuery>>
+            > memberComparatorGenerator;
 
-    SortCriteria(Function<Juggler, Comparator<Match<Candidate, Query>>> comparatorGenerator) {
-        this.comparatorGenerator = comparatorGenerator;
+    SortCriteria(
+            Function<Juggler, Comparator<Match<TypeCandidate,   TypeQuery>>>
+                    typeComparatorGenerator,
+            Function<Juggler, Comparator<Match<MemberCandidate, MemberQuery>>>
+                    memberComparatorGenerator
+    ) {
+        this.typeComparatorGenerator   = typeComparatorGenerator;
+        this.memberComparatorGenerator = memberComparatorGenerator;
     }
 
-    Comparator<Match<Candidate, Query>> getComparator(Juggler j) {
-        return comparatorGenerator.apply(j);
+    Comparator<Match<TypeCandidate,TypeQuery>>
+    getTypeComparator(Juggler j) {
+        return typeComparatorGenerator.apply(j);
+    }
+    Comparator<Match<MemberCandidate,MemberQuery>>
+    getMemberComparator(Juggler j) {
+        return memberComparatorGenerator.apply(j);
     }
 }

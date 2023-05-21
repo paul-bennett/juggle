@@ -128,12 +128,19 @@ public class TestSamples {
 
             String actualOutput = bs.toString();
 
-            assertArrayEquals(
-                    expectedOutput.lines().sorted().toArray(),
-                    actualOutput.lines().sorted().toArray(),
-                    "Sorted output matches"
+            assertEquals(
+                    expectedOutput.lines().map(s -> s + "\n").sorted()
+                            .collect(StringBuilder::new,
+                                    StringBuilder::append,
+                                    StringBuilder::append).toString(),
+                    actualOutput.lines().map(s -> s + "\n").sorted()
+                            .collect(StringBuilder::new,
+                                    StringBuilder::append,
+                                    StringBuilder::append).toString(),
+                    "Sorted output should match"
             );
-            assertEquals(expectedOutput, actualOutput, "Actual output matches");
+            assertEquals(expectedOutput, actualOutput,
+                    "Actual output should match");
         }
         catch (IOException ex) {
             fail(ex);

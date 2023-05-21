@@ -20,51 +20,51 @@ public class Decomposer {
                                           Consumer<int[]> consumer) {
         // Essentially we're creating a group of #parts nested loops.
         // This array holds the current index of each loop.
-        int[] ixes = IntStream.iterate(num, identity())
+        int[] indices = IntStream.iterate(num, identity())
                 .limit(parts - 1)
                 .toArray();
 
-        while (Arrays.stream(ixes).anyMatch(ix -> ix != 0)) {
+        while (Arrays.stream(indices).anyMatch(ix -> ix != 0)) {
             // VISIT
-            consumer.accept(indexesToCounts(num, ixes));
+            consumer.accept(indexesToCounts(num, indices));
 
             // STEP
 
             // Does the rightmost divider (lowest ix) stand alone?
             // TODO: remove the length==1 special case
-            if (ixes.length == 1 || ixes[0] != ixes[1])
+            if (indices.length == 1 || indices[0] != indices[1])
                 // yes: bump it along one notch
-                ixes[0]--;
+                indices[0]--;
             else {
                 // no: nudge the leftmost divider from the group left one notch
                 // and move all the rest of the dividers in that group to the
                 // far right.
-                int oldNotch = ixes[0];
+                int oldNotch = indices[0];
                 int i;
 
-                for (i = 0; i < ixes.length; i++)
-                    if (ixes[i] == oldNotch)
-                        ixes[i] = num;     // Reset group's dividers
+                for (i = 0; i < indices.length; i++)
+                    if (indices[i] == oldNotch)
+                        indices[i] = num;     // Reset group's dividers
                     else
                         break;              // Stop when divider not in group
 
-                ixes[i - 1] = oldNotch - 1;     // Nudge previous div (last in grp)
+                indices[i - 1] = oldNotch - 1;     // Nudge previous div (last in grp)
             }
 
         }
-        consumer.accept(indexesToCounts(num, ixes));
+        consumer.accept(indexesToCounts(num, indices));
     }
 
-    private static int[] indexesToCounts(int elts, int[] ixes) {
+    private static int[] indexesToCounts(int num, int[] indexes) {
         // TODO: try to remove this special case
-        if (ixes.length == 0) return new int[]{elts};
+        if (indexes.length == 0) return new int[]{num};
 
-        int[] counts = new int[ixes.length + 1];
+        int[] counts = new int[indexes.length + 1];
 
-        counts[counts.length - 1] = elts - ixes[0];
-        for (int i = 1; i < ixes.length; i++)
-            counts[counts.length - 1 - i] = ixes[i - 1] - ixes[i];
-        counts[0] = ixes[ixes.length - 1];
+        counts[counts.length - 1] = num - indexes[0];
+        for (int i = 1; i < indexes.length; i++)
+            counts[counts.length - 1 - i] = indexes[i - 1] - indexes[i];
+        counts[0] = indexes[indexes.length - 1];
 
         return counts;
     }

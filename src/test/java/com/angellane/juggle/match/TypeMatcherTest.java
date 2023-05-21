@@ -2,21 +2,22 @@ package com.angellane.juggle.match;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
+import java.util.OptionalInt;
 
 import static com.angellane.juggle.match.TypeMatcher.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TypeMatcherTest {
-
     TypeMatcher noConv  = new TypeMatcher(false);
     TypeMatcher conv    = new TypeMatcher(true);
 
     private void checkMatches(Integer noConvScore, Integer convScore,
                               Class<?> targetType, Class<?> exprType) {
-        assertEquals(Optional.ofNullable(noConvScore),
+        assertEquals(noConvScore == null
+                        ? OptionalInt.empty() : OptionalInt.of(noConvScore),
                 noConv.scoreTypeMatch(targetType, exprType));
-        assertEquals(Optional.ofNullable(convScore),
+        assertEquals(convScore == null
+                        ? OptionalInt.empty() : OptionalInt.of(convScore),
                 conv.scoreTypeMatch(targetType, exprType));
     }
 

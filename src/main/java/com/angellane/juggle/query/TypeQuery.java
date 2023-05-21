@@ -1,11 +1,13 @@
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.Match;
 
 import java.lang.reflect.RecordComponent;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public final class TypeQuery extends Query<TypeCandidate> {
@@ -76,7 +78,6 @@ public final class TypeQuery extends Query<TypeCandidate> {
             return Stream.empty();
     }
 
-    // TODO: make this method private, or remove
     public boolean isMatchForCandidate(TypeCandidate ct) {
         return matchesAnnotations(ct.annotationTypes())
                 && matchesAccessibility(ct.accessibility())

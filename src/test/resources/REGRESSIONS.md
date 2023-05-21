@@ -153,10 +153,6 @@ $
 And here are some of the 2000 `volatile` methods:
 ````
 $ juggle "volatile (StringBuilder,?)"
-public volatile char StringBuilder.charAt(int)
-public volatile int StringBuilder.codePointAt(int)
-public volatile int StringBuilder.codePointBefore(int)
-public volatile int StringBuilder.compareTo(Object)
 public volatile AbstractStringBuilder StringBuilder.append(boolean)
 public volatile AbstractStringBuilder StringBuilder.append(char)
 public volatile AbstractStringBuilder StringBuilder.append(char[])
@@ -168,13 +164,17 @@ public volatile AbstractStringBuilder StringBuilder.append(Object)
 public volatile AbstractStringBuilder StringBuilder.append(String)
 public volatile AbstractStringBuilder StringBuilder.append(StringBuffer)
 public volatile AbstractStringBuilder StringBuilder.append(long)
-public volatile AbstractStringBuilder StringBuilder.appendCodePoint(int)
-public volatile AbstractStringBuilder StringBuilder.deleteCharAt(int)
 public volatile Appendable StringBuilder.append(char) throws java.io.IOException
 public volatile Appendable StringBuilder.append(CharSequence) throws java.io.IOException
-public volatile String StringBuilder.substring(int)
+public volatile AbstractStringBuilder StringBuilder.appendCodePoint(int)
+public volatile char StringBuilder.charAt(int)
+public volatile int StringBuilder.codePointAt(int)
+public volatile int StringBuilder.codePointBefore(int)
+public volatile int StringBuilder.compareTo(Object)
+public volatile AbstractStringBuilder StringBuilder.deleteCharAt(int)
 public volatile void StringBuilder.ensureCapacity(int)
 public volatile void StringBuilder.setLength(int)
+public volatile String StringBuilder.substring(int)
 $
 ````
 
@@ -284,7 +284,6 @@ For this issue we're going to focus on methods whose name ends with the word
 
 ````
 $ juggle '/search$/i'                                                
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public static int java.util.Arrays.binarySearch(byte[],byte)
 public static int java.util.Arrays.binarySearch(byte[],int,int,byte)
 public static int java.util.Arrays.binarySearch(char[],char)
@@ -305,6 +304,7 @@ public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
@@ -325,7 +325,6 @@ as when we omitted parentheses altogether:
 
 ````
 $ juggle '/search$/i (...)'                                                
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public static int java.util.Arrays.binarySearch(byte[],byte)
 public static int java.util.Arrays.binarySearch(byte[],int,int,byte)
 public static int java.util.Arrays.binarySearch(char[],char)
@@ -346,6 +345,7 @@ public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
@@ -427,10 +427,10 @@ $
 Prior to fixing #99, this query was resulting in an uncaught exception.
 ````
 $ juggle "private java.util.Optional /^lambda/"
-private java.util.Optional<T> jdk.internal.loader.Loader.lambda$initRemotePackageMap$2(java.lang.module.ResolvedModule,ModuleLayer)
+private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
 private java.util.Optional<T> jdk.internal.logger.SimpleConsoleLogger.CallerFinder.lambda$get$0(java.util.stream.Stream<T>)
 private static java.util.Optional<T> java.util.Currency.lambda$getValidCurrencyData$0(java.util.Properties,java.util.regex.Pattern,String)
-private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
+private java.util.Optional<T> jdk.internal.loader.Loader.lambda$initRemotePackageMap$2(java.lang.module.ResolvedModule,ModuleLayer)
 private static java.util.Optional<T> java.util.stream.Collectors.lambda$reducing$48(java.util.stream.Collectors$1OptionalBox)
 $
 ````

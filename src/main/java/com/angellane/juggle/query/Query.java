@@ -4,16 +4,14 @@ import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.match.Match;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public abstract sealed class Query<C extends Candidate>
         permits TypeQuery, MemberQuery {
     protected Set<Class<?>> annotationTypes     = null;
-    protected Accessibility accessibility       = Accessibility.PUBLIC;
+    protected Accessibility accessibility       = null;
     protected int           modifierMask        = 0;
     protected int           modifiers           = 0;
     protected Pattern       declarationPattern  = null;
@@ -42,7 +40,7 @@ public abstract sealed class Query<C extends Candidate>
     public boolean equals(Object other) {
         if (this == other)
             return true;
-        else if (!(other instanceof Query q))
+        else if (!(other instanceof Query<?> q))
             return false;
         else
             return Objects.equals(annotationTypes,       q.annotationTypes)
@@ -107,6 +105,11 @@ public abstract sealed class Query<C extends Candidate>
     }
 
 
+    // GETTERS ================================================================
+
+    public Accessibility getAccessibility() { return this.accessibility; }
+
+
     // MATCHERS ===============================================================
 
     protected boolean matchesAnnotations(Set<Class<?>> annotationTypes) {
@@ -128,5 +131,47 @@ public abstract sealed class Query<C extends Candidate>
         return this.declarationPattern == null
                 || this.declarationPattern.matcher(name).find();
     }
+
+
+    // SCORING ================================================================
+
+    /**
+     * Computes a total score from a list of scores.  If any of the scores
+     * are empty, the total is empty.  Otherwise, it's the sum of all scores.
+     *
+     * @param scores the component scores to add up
+     * @return Optional.empty() if any score is empty, or the sum otherwise.
+     */
+    public static OptionalInt totalScore(
+            List<OptionalInt> scores
+    ) {
+        return scores.stream()
+                .reduce(OptionalInt.of(0),
+                        (a,b) -> a.isEmpty() || b.isEmpty()
+                                ? OptionalInt.empty()
+                                : OptionalInt.of(a.getAsInt() + b.getAsInt())
+                );
+    }
+
+    protected OptionalInt scoreAnnotations(Set<Class<?>> annotationTypes) {
+        return matchesAnnotations(annotationTypes)
+                ? OptionalInt.of(0) : OptionalInt.empty();
+    }
+
+    protected OptionalInt scoreAccessibility(Accessibility access) {
+        return matchesAccessibility(access)
+                ? OptionalInt.of(0) : OptionalInt.empty();
+    }
+
+    protected OptionalInt scoreModifiers(int otherMods) {
+        return matchesModifiers(otherMods)
+                ? OptionalInt.of(0) : OptionalInt.empty();
+    }
+
+    protected OptionalInt scoreName(String name) {
+        return matchesName(name)
+                ? OptionalInt.of(0) : OptionalInt.empty();
+    }
+
 
 }

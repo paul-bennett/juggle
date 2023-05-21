@@ -3,10 +3,9 @@ package com.angellane.juggle;
 import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
+import com.angellane.juggle.comparator.MultiComparator;
 import com.angellane.juggle.match.Match;
-import com.angellane.juggle.query.MemberQuery;
-import com.angellane.juggle.query.Query;
-import com.angellane.juggle.query.TypeQuery;
+import com.angellane.juggle.query.*;
 import com.angellane.juggle.sink.Sink;
 import com.angellane.juggle.source.Module;
 import com.angellane.juggle.util.ResolvingURLClassLoader;
@@ -142,42 +141,38 @@ public class Juggler {
     // Processors =====================================================================================================
 
     private final
-    Deque<Function<Match<TypeCandidate, TypeQuery>,
-            Stream<Match<TypeCandidate, TypeQuery>>>>
-            typeProcessors = new LinkedList<>();
+    List<Function<TypeCandidate, Stream<TypeCandidate>>>
+            typeCandidateProcessors = new ArrayList<>();
+    Deque<Function<MemberCandidate, Stream<MemberCandidate>>>
+            memberCandidateProcessors = new LinkedList<>();
     private final
-    Deque<Function<Match<MemberCandidate, MemberQuery>,
+    List<Function<Match<TypeCandidate, TypeQuery>,
+            Stream<Match<TypeCandidate, TypeQuery>>>>
+            typeMatchProcessors = new ArrayList<>();
+    private final
+    List<Function<Match<MemberCandidate, MemberQuery>,
             Stream<Match<MemberCandidate, MemberQuery>>>>
-            memberProcessors = new LinkedList<>();
+            memberMatchProcessors = new ArrayList<>();
 
-    public void appendTypeProcessor(
+    public void prependMemberCandidateProcessor(
+            Function<MemberCandidate, Stream<MemberCandidate>> processor
+    ) {
+        memberCandidateProcessors.addFirst(processor);
+    }
+
+    public void addTypeMatchProcessor(
             Function<
                     Match<TypeCandidate, TypeQuery>,
                     Stream<Match<TypeCandidate, TypeQuery>>
                     > processor) {
-        typeProcessors.addLast(processor);
+        typeMatchProcessors.add(processor);
     }
-    public void prependTypeProcessor(
-            Function<
-                    Match<TypeCandidate, TypeQuery>,
-                    Stream<Match<TypeCandidate, TypeQuery>>
-                    > processor) {
-        typeProcessors.addFirst(processor);
-    }
-
-    public void appendMemberProcessor(
+    public void addMemberMatchProcessor(
             Function<
                     Match<MemberCandidate, MemberQuery>,
                     Stream<Match<MemberCandidate, MemberQuery>>
                     > processor) {
-        memberProcessors.addLast(processor);
-    }
-    public void prependMemberProcessor(
-            Function<
-                    Match<MemberCandidate, MemberQuery>,
-                    Stream<Match<MemberCandidate, MemberQuery>>
-                    > processor) {
-        memberProcessors.addFirst(processor);
+        memberMatchProcessors.add(processor);
     }
 
     private
@@ -187,19 +182,11 @@ public class Juggler {
                 ? Stream.of(m)
                 : Stream.empty();
     }
-
-    public void appendTypeFilter(Predicate<TypeCandidate> pred) {
-        appendTypeProcessor(makeFilter(pred));
+    public void addTypeFilter(Predicate<TypeCandidate> pred) {
+        addTypeMatchProcessor(makeFilter(pred));
     }
-    public void prependTypeFilter(Predicate<TypeCandidate> pred) {
-        prependTypeProcessor(makeFilter(pred));
-    }
-
-    public void appendMemberFilter(Predicate<MemberCandidate> pred) {
-        appendMemberProcessor(makeFilter(pred));
-    }
-    public void prependMemberFilter(Predicate<MemberCandidate> pred) {
-        prependMemberProcessor(makeFilter(pred));
+    public void addMemberFilter(Predicate<MemberCandidate> pred) {
+        addMemberMatchProcessor(makeFilter(pred));
     }
 
 
@@ -211,22 +198,23 @@ public class Juggler {
         // Return default criteria of none were set.
         return sortCriteria.size() != 0
                 ? sortCriteria
-                : List.of(SortCriteria.SCORE, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
+                : List.of(
+                        SortCriteria.SCORE,   SortCriteria.ACCESS,
+                        SortCriteria.PACKAGE, SortCriteria.NAME,
+                        SortCriteria.TEXT
+                );
     }
 
-    <C extends Candidate, Q extends Query<C>, M extends Match<C,Q>>
-    Comparator<M> getComparator() {
-        // TODO: implement
-        return null;
+    Comparator<Match<TypeCandidate,TypeQuery>> getTypeComparator() {
+        return MultiComparator.of(getSortCriteria().stream()
+                .map(g -> g.getTypeComparator(this))
+                .toList());
     }
-
-//    public <C extends Candidate, Q extends Query<Candidate>, M extends Match<C,Q>>
-//    Comparator<M> getComparator() {
-//        return null;
-////        return MultiComparator.of(getSortCriteria().stream()
-////                        .map(g -> g.getComparator(this))
-////                        .toList());
-//    }
+    Comparator<Match<MemberCandidate,MemberQuery>> getMemberComparator() {
+        return MultiComparator.of(getSortCriteria().stream()
+                .map(g -> g.getMemberComparator(this))
+                .toList());
+    }
 
 
     // Sinks ==========================================================================================================
@@ -249,30 +237,75 @@ public class Juggler {
         this.typeQuery = typeQuery;
     }
 
+
+    /**
+     * Chains together a collection of processor functions, passing the output
+     * elements of one to the input of the next.  Each processor function
+     * takes a single parameter of type T, and returns a Stream of T.
+     *
+     * @param processors Processors to be chained together
+     * @return The composite function
+     * @param <T> Type of elements to be passed through the chain
+     */
+    private <T>
+    Function<T, Stream<T>> chainProcessors(
+            Collection<Function<T, Stream<T>>> processors
+    ) {
+        return processors.stream()
+                .reduce(Stream::of, (a,b) -> (v -> a.apply(v).flatMap(b)));
+    }
+
     protected
     <C extends Candidate, Q extends Query<C>, M extends Match<C,Q>>
     void runPipeline(Stream<C> source,
                      Q query,
-                     Collection<Function<M, Stream<M>>> processors
+                     Collection<Function<C, Stream<C>>> candidateProcessors,
+                     Collection<Function<M, Stream<M>>> matchProcessors,
+                     Comparator<M> comparator
     ) {
-        // chain the output of one processor function to the next
-        Function<M, Stream<M>> processorChain = processors.stream()
-                .reduce(Stream::of,
-                        (a, b) -> (m -> a.apply(m).flatMap(b)));
+        var candidateChain  = chainProcessors(candidateProcessors);
+        var matchChain      = chainProcessors(matchProcessors);
 
         source
+                .flatMap(candidateChain)
                 .<M>flatMap(query::match)
-                .flatMap(processorChain)
+                .flatMap(matchChain)
                 .distinct()
-                .sorted(getComparator())
+                .sorted(comparator)
                 .map(Match::candidate)
                 .forEach(sink);
     }
 
     public void doJuggle() {
         if (typeQuery != null)
-            runPipeline(candidateTypeStream(), this.typeQuery, typeProcessors);
-        else
-            runPipeline(candidateMemberStream(), this.memberQuery, memberProcessors);
+            runPipeline(candidateTypeStream(), this.typeQuery,
+                    typeCandidateProcessors, typeMatchProcessors,
+                    getTypeComparator());
+        else {
+            if (this.memberQuery.params != null) {
+               // Permuting parameters can be very slow, so here's a small
+               // optimisation
+               final long minParams = this.memberQuery.params.stream()
+                       .filter(p -> p instanceof SingleParam).count();
+               final long maxParams = this.memberQuery.params.stream()
+                       .noneMatch(p -> p instanceof ZeroOrMoreParams)
+                       ? minParams
+                       : Long.MAX_VALUE;
+
+               prependMemberCandidateProcessor(
+                       c -> {
+                           int paramCount = c.paramTypes().size();
+                           return (paramCount >= minParams
+                                   && paramCount <= maxParams)
+                                   ? Stream.of(c)
+                                   : Stream.of();
+                       }
+               );
+            }
+
+            runPipeline(candidateMemberStream(), this.memberQuery,
+                    memberCandidateProcessors, memberMatchProcessors,
+                    getMemberComparator());
+        }
     }
 }

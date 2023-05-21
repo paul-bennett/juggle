@@ -2,6 +2,7 @@ package com.angellane.juggle.match;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 
 /**
@@ -32,11 +33,11 @@ public record TypeMatcher(boolean applyConversions) {
      * @param exprType the expression type (RHS of assignment)
      * @return A score for the match, or empty if the types are incompatible
      */
-    Optional<Integer> scoreTypeMatch(Class<?> targetType, Class<?> exprType) {
+    OptionalInt scoreTypeMatch(Class<?> targetType, Class<?> exprType) {
         if (targetType.equals(exprType))
-            return Optional.of(IDENTITY_SCORE);
+            return OptionalInt.of(IDENTITY_SCORE);
         else if (!applyConversions)
-            return Optional.empty();
+            return OptionalInt.empty();
         else if (exprType.isPrimitive()) {
             if (targetType.isPrimitive())
                 return scorePrimitiveToPrimitive(targetType, exprType);
@@ -51,56 +52,56 @@ public record TypeMatcher(boolean applyConversions) {
         }
     }
 
-    private static Optional<Integer> scorePrimitiveToPrimitive(
+    private static OptionalInt scorePrimitiveToPrimitive(
             Class<?> targetType, Class<?> exprType) {
         // PRIMITIVE -> PRIMITIVE
         // Allows: Widening Primitive
         return Optional.ofNullable(
                 wideningPrimitiveConversions.get(exprType)
         ).orElse(Set.of()).contains(targetType)
-                ? Optional.of(WIDENING_SCORE)
-                : Optional.empty();
+                ? OptionalInt.of(WIDENING_SCORE)
+                : OptionalInt.empty();
     }
 
-    private static Optional<Integer> scorePrimitiveToReference(
+    private static OptionalInt scorePrimitiveToReference(
             Class<?> targetType, Class<?> exprType) {
         // PRIMITIVE -> REFERENCE
         // Allows: Boxing, then optional Widening Reference
         Class<?> boxedType = boxingConversions.get(exprType);
         if (boxedType == null)
-            return Optional.empty();
+            return OptionalInt.empty();
         else if (targetType.equals(boxedType))
-            return Optional.of(BOXING_SCORE);
+            return OptionalInt.of(BOXING_SCORE);
         else
             return targetType.isAssignableFrom(boxedType)
-                    ? Optional.of(BOXING_SCORE + WIDENING_SCORE)
-                    : Optional.empty();
+                    ? OptionalInt.of(BOXING_SCORE + WIDENING_SCORE)
+                    : OptionalInt.empty();
     }
 
-    private static Optional<Integer> scoreReferenceToPrimitive(
+    private static OptionalInt scoreReferenceToPrimitive(
             Class<?> targetType, Class<?> exprType) {
         // REFERENCE -> PRIMITIVE
         // Allowed: Unboxing, then optional Widening Primitive
         Class<?> unboxedType = unboxingConversions.get(exprType);
         if (unboxedType == null)
-            return Optional.empty();
+            return OptionalInt.empty();
         else if (targetType.equals(unboxedType))
-            return Optional.of(BOXING_SCORE);
+            return OptionalInt.of(BOXING_SCORE);
         else
             return Optional.ofNullable(
                     wideningPrimitiveConversions.get(unboxedType)
             ).orElse(Set.of()).contains(targetType)
-                    ? Optional.of(BOXING_SCORE + WIDENING_SCORE)
-                    : Optional.empty();
+                    ? OptionalInt.of(BOXING_SCORE + WIDENING_SCORE)
+                    : OptionalInt.empty();
     }
 
-    private static Optional<Integer> scoreReferenceToReference(
+    private static OptionalInt scoreReferenceToReference(
             Class<?> targetType, Class<?> exprType) {
         // REFERENCE -> REFERENCE
         // Allowed: Widening Reference
         return targetType.isAssignableFrom(exprType)
-                ? Optional.of(WIDENING_SCORE)
-                : Optional.empty();
+                ? OptionalInt.of(WIDENING_SCORE)
+                : OptionalInt.empty();
     }
 
 

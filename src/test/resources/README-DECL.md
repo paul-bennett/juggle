@@ -61,26 +61,26 @@ $
 ````
 $ #juggle -t java.net.URISyntaxException
 $ juggle throws java.net.URISyntaxException
-public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
-public java.net.URI java.net.URL.toURI() throws java.net.URISyntaxException
 public java.net.URI.<init>(String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,int,String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,String,String) throws java.net.URISyntaxException
+public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
+public java.net.URI java.net.URL.toURI() throws java.net.URISyntaxException
 $
 ````
 ````
 $ #juggle -@ FunctionalInterface -r int
 $ juggle @FunctionalInterface int
-public abstract int java.util.Comparator<T>.compare(T,T)
 public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
 public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
-public abstract int java.util.function.IntSupplier.getAsInt()
 public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
 public abstract int java.util.function.LongToIntFunction.applyAsInt(long)
 public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
 public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
+public abstract int java.util.Comparator<T>.compare(T,T)
+public abstract int java.util.function.IntSupplier.getAsInt()
 $
 ````
 ````

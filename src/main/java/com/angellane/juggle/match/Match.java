@@ -15,10 +15,9 @@ import com.angellane.juggle.query.Query;
  * @param <C> The type of the candidate
  * @param <Q> The type of the query
  */
-public record Match<C extends Candidate, Q extends Query>(
+public record Match<C extends Candidate, Q extends Query<C>>(
         C candidate,
         Q query,
         int score) {
-
 }
 

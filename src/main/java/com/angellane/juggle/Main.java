@@ -1,15 +1,11 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.formatter.AnsiColourFormatter;
 import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.PlaintextFormatter;
 import com.angellane.juggle.match.Accessibility;
-import com.angellane.juggle.query.MemberQuery;
 import com.angellane.juggle.processor.PermuteParams;
-import com.angellane.juggle.query.Query;
-import com.angellane.juggle.query.QueryFactory;
-import com.angellane.juggle.query.TypeQuery;
+import com.angellane.juggle.query.*;
 import com.angellane.juggle.sink.TextOutput;
 import com.angellane.juggle.source.JarFile;
 import com.angellane.juggle.source.Module;
@@ -21,6 +17,7 @@ import picocli.CommandLine.Parameters;
 
 import java.lang.module.FindException;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -137,9 +134,8 @@ public class Main implements Runnable {
 
     @SuppressWarnings("unused")
     @Option(names={"-n", "--member-name"}, paramLabel="methodName", description="Filter by member name")
-    public void addMemberNameFilter(String name) {
-        juggler.prependMemberFilter(m -> m.member().getName().toLowerCase().contains(name.toLowerCase()));
-    }
+    String memberName = null;
+    public String getMemberName() { return memberName; }
 
 
     @Option(names={"-a", "--access"}, paramLabel="private|protected|package|public",
@@ -156,7 +152,7 @@ public class Main implements Runnable {
     @Option(names={"-x", "--permute"}, negatable=true, description="Also match permutations of parameters")
     public void addPermutationProcessor(boolean permute) {
         if (permute)
-            juggler.prependMemberProcessor(new PermuteParams());
+            juggler.prependMemberCandidateProcessor(new PermuteParams());
     }
 
     @Option(names={"-f", "--format"}, description="Output format")
@@ -203,52 +199,35 @@ public class Main implements Runnable {
 
         // Processors
 
-        juggler.appendMemberFilter(m -> !m.member().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
-        juggler.appendMemberFilter(m -> !m.member().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
+        juggler.addMemberFilter(m -> !m.member().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
+        juggler.addMemberFilter(m -> !m.member().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
 
-        juggler.prependMemberFilter(m -> m.annotationTypes().containsAll(getAnnotationTypes()));
-        if (getThrowTypes() != null) juggler.prependMemberFilter(m -> {
-            Set<Class<?>> throwTypes = getThrowTypes();
+        juggler.addTypeFilter(t -> !t.clazz().isAnonymousClass());
+        juggler.addTypeFilter(t -> !t.clazz().isLocalClass());
 
-            if (throwTypes.size() == 0)
-                return m.throwTypes().size() == 0;
+        MemberQuery cmdlineQuery = buildCmdlineQuery();
 
-            // A candidate's throws clause matches if the types it might throw are listed
-            // in the query's set of caught exceptions
-            for (var caughtType : throwTypes) {
-                if (m.throwTypes().stream().noneMatch(thrownType -> Candidate.isTypeCompatibleForAssignment(caughtType, thrownType)))
-                    return false;
-            }
-            return true;
-        });
-        if (getReturnType() != null) juggler.prependMemberFilter(m ->
-                Candidate.isTypeCompatibleForAssignment(getReturnType(), m.returnType()));
-        if (getParamTypes() != null) juggler.appendMemberFilter(m -> {
-                    List<? extends Class<?>> paramTypes = getParamTypes();
-                    Iterator<? extends Class<?>> queryTypeIter = paramTypes.iterator();
-                    return m.paramTypes().stream().allMatch(mpt ->
-                            Candidate.isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
-                });
-        juggler.prependMemberFilter(m -> Accessibility.fromModifiers(
-                m.member().getModifiers()).isAtLeastAsAccessibleAsOther(minAccess));
-
-        if (getParamTypes() != null)
-            // Optimisation: filter out anything that hasn't got the right number of params
-            // Useful because permutation of every candidate member's params takes forever.
-            juggler.prependMemberFilter(m -> m.paramTypes().size() == getParamTypes().size());
+        if (cmdlineQuery != null)
+            juggler.setMemberQuery(cmdlineQuery);
 
         // Parameter String
 
         String queryString = getQueryString();
+        if (cmdlineQuery != null && !queryString.isEmpty())
+            System.err.println("*** Can't mix -@/-a/-r/-n/-p/-t options with declaration query; ignoring declaration");
+        else
         if (!queryString.isEmpty()) {
             QueryFactory factory = new QueryFactory(juggler);
 
-            Query query = factory.createQuery(queryString);
+            Query<?> query = factory.createQuery(queryString);
+
+            if (query.getAccessibility() == null)
+                query.setAccessibility(Accessibility.PUBLIC);
 
             if (query instanceof MemberQuery mq)
-                juggler.appendMemberFilter(mq::isMatchForCandidate);
-            else
-                juggler.setTypeQuery((TypeQuery)query);
+                juggler.setMemberQuery(mq);
+            else if (query instanceof TypeQuery tq)
+                juggler.setTypeQuery(tq);
 
             if (showQuery)
                 System.err.println("QUERY: " + query);
@@ -268,6 +247,47 @@ public class Main implements Runnable {
             // Go!
 
             juggler.doJuggle();
+        }
+    }
+
+    private MemberQuery buildCmdlineQuery() {
+        Set<Class<?>>   annotationTypes = getAnnotationTypes();
+        Class<?>        returnType      = getReturnType();
+        String          memberName      = getMemberName();
+        List<Class<?>>  paramTypes      = getParamTypes();
+        Set<Class<?>>   throwTypes      = getThrowTypes();
+
+        if (annotationTypes.size() == 0
+                && returnType == null
+                && memberName == null
+                && paramTypes == null
+                && throwTypes == null
+        )
+            return null;
+        else {
+            MemberQuery ret = new MemberQuery();
+
+            annotationTypes.forEach(ret::addAnnotationType);
+
+            if (throwTypes != null) {
+                ret.exceptions = new HashSet<>();
+                throwTypes.forEach(t -> ret.exceptions.add(BoundedType.subtypeOf(t)));
+            }
+
+            if (returnType != null)
+                ret.returnType = BoundedType.subtypeOf(returnType);
+
+            if (memberName != null)
+                ret.setNamePattern(Pattern.compile(memberName, Pattern.CASE_INSENSITIVE));
+
+            if (paramTypes != null) {
+                ret.params = new ArrayList<>();
+                paramTypes.forEach(p -> ret.params.add(ParamSpec.unnamed(BoundedType.supertypeOf(p))));
+            }
+
+            ret.setAccessibility(minAccess);
+
+            return ret;
         }
     }
 

@@ -26,7 +26,7 @@ public class QueryFactory {
         this.juggler = juggler;
     }
 
-    public Query createQuery(final String declString) {
+    public Query<?> createQuery(final String declString) {
         CharStream inputStream = CharStreams.fromString(declString);
 
         DeclLexer lexer = new DeclLexer(inputStream);
@@ -49,7 +49,7 @@ public class QueryFactory {
 
     class Listener extends DeclBaseListener {
         // This is the object that the listener is constructing
-        Query tempQuery;
+        Query<?> tempQuery;
 
         // tempQuery is either a ClassQuery or a MemberQuery; one of these
         // two fields will be the same as tempQuery, the other will be null.
@@ -63,6 +63,7 @@ public class QueryFactory {
         @Override
         public void enterClassDecl(DeclParser.ClassDeclContext ctx) {
             tempQuery = tempTypeQuery = new TypeQuery(TypeFlavour.CLASS);
+            tempQuery.accessibility = Accessibility.PUBLIC;
         }
 
         @Override

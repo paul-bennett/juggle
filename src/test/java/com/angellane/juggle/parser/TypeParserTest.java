@@ -1,6 +1,7 @@
 package com.angellane.juggle.parser;
 
 import com.angellane.juggle.Juggler;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.*;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ public class TypeParserTest {
     QueryFactory factory = new QueryFactory(juggler);
 
     private TypeQuery typeQueryFor(final String decl) {
-        Query q = factory.createQuery(decl);
+        Query<?> q = factory.createQuery(decl);
 
         if (q instanceof TypeQuery typeQuery)
             return typeQuery;
@@ -29,6 +30,7 @@ public class TypeParserTest {
         TypeQuery actualQuery = typeQueryFor("class");
 
         TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.setAccessibility(Accessibility.PUBLIC);
         expectedQuery.flavour = TypeFlavour.CLASS;
 
         assertEquals(expectedQuery, actualQuery);
@@ -39,6 +41,7 @@ public class TypeParserTest {
         TypeQuery actualQuery = typeQueryFor("class String");
 
         TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.setAccessibility(Accessibility.PUBLIC);
         expectedQuery.flavour = TypeFlavour.CLASS;
         expectedQuery.setNameExact("String");
 
@@ -50,6 +53,7 @@ public class TypeParserTest {
         TypeQuery actualQuery = typeQueryFor("class extends String");
 
         TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.setAccessibility(Accessibility.PUBLIC);
         expectedQuery.flavour = TypeFlavour.CLASS;
         expectedQuery.setSupertype(BoundedType.exactType(String.class));
 
@@ -61,6 +65,7 @@ public class TypeParserTest {
         TypeQuery actualQuery = typeQueryFor("class extends ? super String");
 
         TypeQuery expectedQuery = new TypeQuery();
+        expectedQuery.setAccessibility(Accessibility.PUBLIC);
         expectedQuery.flavour = TypeFlavour.CLASS;
         expectedQuery.setSupertype(BoundedType.supertypeOf(String.class));
 
@@ -75,6 +80,7 @@ public class TypeParserTest {
 
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.CLASS;
+        expectedQuery.setAccessibility(Accessibility.PUBLIC);
         expectedQuery.setSuperInterfaces(Set.of(
                 BoundedType.exactType(java.io.Serializable.class),
                 BoundedType.subtypeOf(java.lang.reflect.AnnotatedType.class)
@@ -91,6 +97,7 @@ public class TypeParserTest {
 
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.CLASS;
+        expectedQuery.setAccessibility(Accessibility.PUBLIC);
         expectedQuery.setPermittedSubtypes(Set.of(
                 BoundedType.exactType(java.lang.Integer.class),
                 BoundedType.subtypeOf(java.lang.Long.class)
