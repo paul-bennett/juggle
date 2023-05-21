@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record CandidateType(
+public record TypeCandidate(
         Class<?>                clazz,
         TypeFlavour             flavour,
 
@@ -30,7 +30,7 @@ implements Candidate
         return clazz.getPackageName();
     }
 
-    public static CandidateType candidateForType(Class<?> c) {
+    public static TypeCandidate candidateForType(Class<?> c) {
         TypeFlavour f                       = TypeFlavour.forClass(c);
         Accessibility access                =
                 Accessibility.fromModifiers(c.getModifiers());
@@ -50,7 +50,7 @@ implements Candidate
                 ? List.of()
                 : List.of(c.getRecordComponents());
 
-        return new CandidateType(c, f, annotations, access, mods,
+        return new TypeCandidate(c, f, annotations, access, mods,
                 c.getSimpleName(), superClass, superInterfaces,
                 permittedSubtypes, recordComponents);
     }

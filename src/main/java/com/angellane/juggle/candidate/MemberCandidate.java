@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * fields, which represent the type the member would have if considered as a static function.  For static
  * methods the paramTypes field includes an implicit first entry representing the type of 'this'.
  */
-public record CandidateMember(
+public record MemberCandidate(
         Member member,
         Accessibility accessibility,
         int otherModifiers,
@@ -28,7 +28,7 @@ public record CandidateMember(
         implements Candidate {
 
     // Constructor used by factory methods
-    private CandidateMember(Member member, Set<Class<?>> annotationTypes,
+    private MemberCandidate(Member member, Set<Class<?>> annotationTypes,
                             Class<?> returnType, List<Class<?>> paramTypes,
                             Set<Class<?>> throwTypes) {
         this(member, Accessibility.fromModifiers(member.getModifiers()),
@@ -38,7 +38,7 @@ public record CandidateMember(
     }
 
     // This constructor is used by parameter permutation generator
-    public CandidateMember(CandidateMember other, List<Class<?>> params) {
+    public MemberCandidate(MemberCandidate other, List<Class<?>> params) {
         this(other.member, other.accessibility, other.otherModifiers,
                 other.annotationTypes, other.declarationName,
                 other.returnType, params, other.throwTypes);
@@ -49,8 +49,8 @@ public record CandidateMember(
         return member().getDeclaringClass().getPackageName();
     }
 
-    public static CandidateMember memberFromMethod(Method m) {
-        return new CandidateMember(m,
+    public static MemberCandidate memberFromMethod(Method m) {
+        return new MemberCandidate(m,
                 annotationClasses(m.getDeclaringClass().getAnnotations(), m.getAnnotations()),
                 m.getReturnType(),
                 paramsWithImplicitThis(m, Arrays.asList(m.getParameterTypes())),
@@ -58,8 +58,8 @@ public record CandidateMember(
         );
     }
 
-    public static CandidateMember memberFromConstructor(Constructor<?> c) {
-        return new CandidateMember(c,
+    public static MemberCandidate memberFromConstructor(Constructor<?> c) {
+        return new MemberCandidate(c,
                 annotationClasses(c.getDeclaringClass().getAnnotations(), c.getAnnotations()),
                 c.getDeclaringClass(),
                 Arrays.asList(c.getParameterTypes()),
@@ -67,11 +67,11 @@ public record CandidateMember(
         );
     }
 
-    public static List<CandidateMember> membersFromField(Field f) {
+    public static List<MemberCandidate> membersFromField(Field f) {
         Set<Class<?>> as = annotationClasses(f.getDeclaringClass().getDeclaredAnnotations(), f.getDeclaredAnnotations());
 
-        var getter = new CandidateMember(f, as, f.getType(), paramsWithImplicitThis(f, List.of()),            Set.of());
-        var setter = new CandidateMember(f, as, Void.TYPE,   paramsWithImplicitThis(f, List.of(f.getType())), Set.of());
+        var getter = new MemberCandidate(f, as, f.getType(), paramsWithImplicitThis(f, List.of()),            Set.of());
+        var setter = new MemberCandidate(f, as, Void.TYPE,   paramsWithImplicitThis(f, List.of(f.getType())), Set.of());
 
         return List.of(getter, setter);
     }

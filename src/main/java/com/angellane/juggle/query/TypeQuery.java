@@ -1,14 +1,14 @@
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.candidate.CandidateType;
+import com.angellane.juggle.candidate.MemberCandidate;
+import com.angellane.juggle.candidate.TypeCandidate;
+import com.angellane.juggle.match.Match;
 
 import java.lang.reflect.RecordComponent;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
-public final class TypeQuery extends Query {
+public final class TypeQuery extends Query<TypeCandidate> {
     public TypeFlavour          flavour             = null;
 
     public BoundedType          supertype           = null;
@@ -62,7 +62,22 @@ public final class TypeQuery extends Query {
                 + '}';
     }
 
-    public boolean isMatchForCandidate(CandidateType ct) {
+    @Override
+    public
+    <Q extends Query<TypeCandidate>, M extends Match<TypeCandidate, Q>>
+    Stream<M> match(TypeCandidate candidate) {
+        if (isMatchForCandidate(candidate)) {
+            // TODO: implement scoring
+            @SuppressWarnings("unchecked")      // TODO: remove this nasty cast
+            M m = (M)new Match<>(candidate, this, 0);
+            return Stream.of(m);
+        }
+        else
+            return Stream.empty();
+    }
+
+    // TODO: make this method private, or remove
+    public boolean isMatchForCandidate(TypeCandidate ct) {
         return matchesAnnotations(ct.annotationTypes())
                 && matchesAccessibility(ct.accessibility())
                 && matchesModifiers(ct.otherModifiers())

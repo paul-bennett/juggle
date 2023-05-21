@@ -1,7 +1,7 @@
 package com.angellane.juggle.query;
 
 import com.angellane.juggle.match.Accessibility;
-import com.angellane.juggle.candidate.CandidateType;
+import com.angellane.juggle.candidate.TypeCandidate;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TypeQueryTest {
     @Test
     public void testClassQuery() {
-        CandidateType ct =
-                CandidateType.candidateForType(java.lang.String.class);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.lang.String.class);
 
         TypeQuery q = new TypeQuery();
         q.annotationTypes   = Set.of();
@@ -34,8 +34,8 @@ public class TypeQueryTest {
 
     @Test
     public void testInterfaceQuery() {
-        CandidateType ct =
-                CandidateType.candidateForType(java.util.List.class);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.util.List.class);
 
         TypeQuery q = new TypeQuery();
         q.accessibility     = Accessibility.PUBLIC;
@@ -49,8 +49,8 @@ public class TypeQueryTest {
 
     @Test
     public void testEnumQuery() {
-        CandidateType ct =
-                CandidateType.candidateForType(java.lang.Thread.State.class);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.lang.Thread.State.class);
 
         TypeQuery q = new TypeQuery();
         q.accessibility     = Accessibility.PUBLIC;
@@ -63,8 +63,8 @@ public class TypeQueryTest {
     @Test
     public void testRecordQuery() {
         // As of Java 20 there's only one record class in the JDK!
-        CandidateType ct =
-                CandidateType.candidateForType(
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(
                         jdk.net.UnixDomainPrincipal.class);
 
         TypeQuery q = new TypeQuery();
@@ -83,8 +83,8 @@ public class TypeQueryTest {
         // It doesn't really make sense to use a primitive type as a candidate
         // but let's include a test for how that turns out anyway.
 
-        CandidateType ct =
-                CandidateType.candidateForType(java.lang.Integer.TYPE);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.lang.Integer.TYPE);
 
         TypeQuery q = new TypeQuery();
         q.annotationTypes   = Set.of();

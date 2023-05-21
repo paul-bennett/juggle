@@ -1,9 +1,8 @@
 package com.angellane.juggle;
 
 import com.angellane.juggle.candidate.Candidate;
-import com.angellane.juggle.candidate.CandidateMember;
-import com.angellane.juggle.candidate.CandidateType;
-import com.angellane.juggle.comparator.MultiComparator;
+import com.angellane.juggle.candidate.MemberCandidate;
+import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.query.MemberQuery;
 import com.angellane.juggle.query.Query;
@@ -119,21 +118,21 @@ public class Juggler {
         return ret;
     }
 
-    public Stream<CandidateType> candidateTypeStream() {
+    public Stream<TypeCandidate> candidateTypeStream() {
         return getClassesToSearch().stream()
-                .map(CandidateType::candidateForType);
+                .map(TypeCandidate::candidateForType);
     }
 
-    public Stream<CandidateMember> candidateMemberStream() {
+    public Stream<MemberCandidate> candidateMemberStream() {
         return getClassesToSearch().stream()
                 .flatMap(c -> Stream.of(
                                   Arrays.stream(c.getDeclaredFields())
-                                        .map(CandidateMember::membersFromField)
+                                        .map(MemberCandidate::membersFromField)
                                         .flatMap(List::stream)
                                 , Arrays.stream(c.getDeclaredConstructors())
-                                        .map(CandidateMember::memberFromConstructor)
+                                        .map(MemberCandidate::memberFromConstructor)
                                 , Arrays.stream(c.getDeclaredMethods())
-                                        .map(CandidateMember::memberFromMethod)
+                                        .map(MemberCandidate::memberFromMethod)
                                 )
                         .flatMap(Function.identity())
                 );
@@ -142,28 +141,65 @@ public class Juggler {
 
     // Processors =====================================================================================================
 
-    private final Deque<Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>>> processors = new LinkedList<>();
+    private final
+    Deque<Function<Match<TypeCandidate, TypeQuery>,
+            Stream<Match<TypeCandidate, TypeQuery>>>>
+            typeProcessors = new LinkedList<>();
+    private final
+    Deque<Function<Match<MemberCandidate, MemberQuery>,
+            Stream<Match<MemberCandidate, MemberQuery>>>>
+            memberProcessors = new LinkedList<>();
 
-    public void appendProcessor(Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>> processor) {
-        processors.addLast(processor);
+    public void appendTypeProcessor(
+            Function<
+                    Match<TypeCandidate, TypeQuery>,
+                    Stream<Match<TypeCandidate, TypeQuery>>
+                    > processor) {
+        typeProcessors.addLast(processor);
     }
-    public void prependProcessor(Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>> processor) {
-        processors.addFirst(processor);
-    }
-
-    protected Function<Match<CandidateMember, MemberQuery>, Stream<Match<CandidateMember, MemberQuery>>> filter(Predicate<CandidateMember> pred) {
-        return m -> pred.test(m.candidate()) ? Stream.of(m) : Stream.empty();
-    }
-
-    public void appendFilter (Predicate<CandidateMember> pred) {
-        appendProcessor (filter(pred));
-    }
-    public void prependFilter(Predicate<CandidateMember> pred) {
-        prependProcessor(filter(pred));
+    public void prependTypeProcessor(
+            Function<
+                    Match<TypeCandidate, TypeQuery>,
+                    Stream<Match<TypeCandidate, TypeQuery>>
+                    > processor) {
+        typeProcessors.addFirst(processor);
     }
 
-    public Stream<Match<CandidateMember, MemberQuery>> chainProcessors(Stream<Match<CandidateMember, MemberQuery>> s) {
-        return s.flatMap(processors.stream().reduce(Stream::of, (a,b) -> (m -> a.apply(m).flatMap(b))));
+    public void appendMemberProcessor(
+            Function<
+                    Match<MemberCandidate, MemberQuery>,
+                    Stream<Match<MemberCandidate, MemberQuery>>
+                    > processor) {
+        memberProcessors.addLast(processor);
+    }
+    public void prependMemberProcessor(
+            Function<
+                    Match<MemberCandidate, MemberQuery>,
+                    Stream<Match<MemberCandidate, MemberQuery>>
+                    > processor) {
+        memberProcessors.addFirst(processor);
+    }
+
+    private
+    <C extends Candidate, Q extends Query<C>, M extends Match<C,Q>>
+    Function<M, Stream<M>> makeFilter(Predicate<C> pred) {
+        return m -> pred.test(m.candidate())
+                ? Stream.of(m)
+                : Stream.empty();
+    }
+
+    public void appendTypeFilter(Predicate<TypeCandidate> pred) {
+        appendTypeProcessor(makeFilter(pred));
+    }
+    public void prependTypeFilter(Predicate<TypeCandidate> pred) {
+        prependTypeProcessor(makeFilter(pred));
+    }
+
+    public void appendMemberFilter(Predicate<MemberCandidate> pred) {
+        appendMemberProcessor(makeFilter(pred));
+    }
+    public void prependMemberFilter(Predicate<MemberCandidate> pred) {
+        prependMemberProcessor(makeFilter(pred));
     }
 
 
@@ -178,11 +214,19 @@ public class Juggler {
                 : List.of(SortCriteria.SCORE, SortCriteria.ACCESS, SortCriteria.PACKAGE, SortCriteria.NAME);
     }
 
-    public Comparator<Match<Candidate, Query>> getComparator() {
-        return MultiComparator.of(getSortCriteria().stream()
-                        .map(g -> g.getComparator(this))
-                        .toList());
+    <C extends Candidate, Q extends Query<C>, M extends Match<C,Q>>
+    Comparator<M> getComparator() {
+        // TODO: implement
+        return null;
     }
+
+//    public <C extends Candidate, Q extends Query<Candidate>, M extends Match<C,Q>>
+//    Comparator<M> getComparator() {
+//        return null;
+////        return MultiComparator.of(getSortCriteria().stream()
+////                        .map(g -> g.getComparator(this))
+////                        .toList());
+//    }
 
 
     // Sinks ==========================================================================================================
@@ -195,33 +239,40 @@ public class Juggler {
 
     // Main Event =====================================================================================================
 
+    MemberQuery memberQuery = new MemberQuery();
+    public void setMemberQuery(MemberQuery memberQuery) {
+        this.memberQuery = memberQuery;
+    }
+
     TypeQuery typeQuery;
     public void setTypeQuery(TypeQuery typeQuery) {
         this.typeQuery = typeQuery;
     }
 
-    public void juggleTypes() {
-        candidateTypeStream()
-                .filter(ct -> typeQuery.isMatchForCandidate(ct))
-                .forEach(ct -> sink.accept(ct));
-    }
+    protected
+    <C extends Candidate, Q extends Query<C>, M extends Match<C,Q>>
+    void runPipeline(Stream<C> source,
+                     Q query,
+                     Collection<Function<M, Stream<M>>> processors
+    ) {
+        // chain the output of one processor function to the next
+        Function<M, Stream<M>> processorChain = processors.stream()
+                .reduce(Stream::of,
+                        (a, b) -> (m -> a.apply(m).flatMap(b)));
 
-    public void juggleMembers() {
-        chainProcessors(candidateMemberStream()
-                .map(cm -> new Match<>(cm, null, 0)))
+        source
+                .<M>flatMap(query::match)
+                .flatMap(processorChain)
                 .distinct()
-                // Generalise from <CandidateMember,MemberQuery>
-                .map(m -> new Match<Candidate,Query>(
-                        m.candidate(), m.query(), m.score()
-                ))
                 .sorted(getComparator())
-                .forEach(m -> sink.accept(m.candidate()));
+                .map(Match::candidate)
+                .forEach(sink);
     }
 
     public void doJuggle() {
         if (typeQuery != null)
-            juggleTypes();
+            runPipeline(candidateTypeStream(), this.typeQuery, typeProcessors);
         else
-            juggleMembers();
+            runPipeline(candidateMemberStream(), this.memberQuery, memberProcessors);
     }
 }

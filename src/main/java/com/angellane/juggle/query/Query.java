@@ -1,14 +1,17 @@
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.candidate.Candidate;
+import com.angellane.juggle.match.Accessibility;
+import com.angellane.juggle.match.Match;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-public sealed class Query permits TypeQuery, MemberQuery {
+public abstract sealed class Query<C extends Candidate>
+        permits TypeQuery, MemberQuery {
     protected Set<Class<?>> annotationTypes     = null;
     protected Accessibility accessibility       = Accessibility.PUBLIC;
     protected int           modifierMask        = 0;
@@ -18,6 +21,20 @@ public sealed class Query permits TypeQuery, MemberQuery {
 
     private static final int OTHER_MODIFIERS_MASK =
             Candidate.OTHER_MODIFIERS_MASK;
+
+
+    // ABSTRACT METHODS =======================================================
+
+    /**
+     * Tries to match the candidate against this query.
+     *
+     * @param candidate the candidate to try to match against this query
+     * @return Match (+score), or empty if #candidate doesn't match.
+     */
+    public abstract
+    <Q extends Query<C>, M extends Match<C,Q>>
+    Stream<M> match(C candidate);
+
 
     // FRAMEWORK ==============================================================
 

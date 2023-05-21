@@ -12,11 +12,11 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class CandidateTypeTest {
+public class TypeCandidateTest {
     @Test
     public void testClassCandidate() {
-        CandidateType ct =
-                CandidateType.candidateForType(java.lang.String.class);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.lang.String.class);
 
         assertEquals(java.lang.String.class,            ct.clazz());
         assertEquals(TypeFlavour.CLASS,                 ct.flavour());
@@ -36,8 +36,8 @@ public class CandidateTypeTest {
 
     @Test
     public void testInterfaceCandidate() {
-        CandidateType ct =
-                CandidateType.candidateForType(java.util.List.class);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.util.List.class);
 
         assertEquals(java.util.List.class,              ct.clazz());
         assertEquals(TypeFlavour.INTERFACE,             ct.flavour());
@@ -51,8 +51,8 @@ public class CandidateTypeTest {
 
     @Test
     public void testEnumCandidate() {
-        CandidateType ct =
-                CandidateType.candidateForType(java.lang.Thread.State.class);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.lang.Thread.State.class);
 
         assertEquals(java.lang.Thread.State.class,      ct.clazz());
         assertEquals(TypeFlavour.ENUM,                  ct.flavour());
@@ -67,8 +67,8 @@ public class CandidateTypeTest {
     @Test
     public void testRecordCandidate() {
         // As of Java 20 there's only one record class in the JDK!
-        CandidateType ct =
-                CandidateType.candidateForType(
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(
                         jdk.net.UnixDomainPrincipal.class);
 
         assertEquals(jdk.net.UnixDomainPrincipal.class, ct.clazz());
@@ -98,8 +98,8 @@ public class CandidateTypeTest {
         // It doesn't really make sense to use a primitive type as a candidate
         // but let's include a test for how that turns out anyway.
 
-        CandidateType ct =
-                CandidateType.candidateForType(java.lang.Integer.TYPE);
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.lang.Integer.TYPE);
 
         assertEquals(java.lang.Integer.TYPE,            ct.clazz());
         assertEquals(TypeFlavour.CLASS,                 ct.flavour());

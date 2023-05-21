@@ -1,7 +1,7 @@
 package com.angellane.juggle.query;
 
 import com.angellane.juggle.match.Accessibility;
-import com.angellane.juggle.candidate.CandidateMember;
+import com.angellane.juggle.candidate.MemberCandidate;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -21,17 +21,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * using various forms of DeclQuery
  */
 public class TestMemberDecl {
-    static CandidateMember cm;
+    static MemberCandidate cm;
 
     @BeforeAll
     public static void createCandidateMember()
             throws NoSuchMethodException {
         Class<?> c = ClassLoader.class;
         Method m = c.getDeclaredMethod("findResource", String.class);
-        cm = CandidateMember.memberFromMethod(m);
+        cm = MemberCandidate.memberFromMethod(m);
     }
 
-    private static void matchQueryAndCandidate(MemberQuery q, CandidateMember cm) {
+    private static void matchQueryAndCandidate(MemberQuery q, MemberCandidate cm) {
         assertTrue(q.matchesAnnotations(cm.annotationTypes())
                 , "Match annotations");
         assertTrue(q.matchesModifiers(cm.otherModifiers())

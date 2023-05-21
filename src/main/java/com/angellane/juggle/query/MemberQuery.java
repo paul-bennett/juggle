@@ -1,8 +1,10 @@
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.candidate.CandidateMember;
+import com.angellane.juggle.candidate.MemberCandidate;
+import com.angellane.juggle.match.Match;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
 
@@ -11,7 +13,7 @@ import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
  * pseudo-Java declaration that's subsequently used as a template against which
  * to match.
  */
-public final class MemberQuery extends Query {
+public final class MemberQuery extends Query<MemberCandidate> {
     public BoundedType      returnType  = null;
 
     public List<ParamSpec>  params      = null;
@@ -54,7 +56,22 @@ public final class MemberQuery extends Query {
                 '}';
     }
 
-    public boolean isMatchForCandidate(CandidateMember cm) {
+    @Override
+    public
+    <Q extends Query<MemberCandidate>, M extends Match<MemberCandidate,Q>>
+    Stream<M> match(MemberCandidate candidate) {
+        if (isMatchForCandidate(candidate)) {
+            // TODO: implement scoring
+            @SuppressWarnings("unchecked")      // TODO: remove this nasty cast
+            M m = (M)new Match<>(candidate, this, 0);
+            return Stream.of(m);
+        }
+        else
+            return Stream.empty();
+    }
+
+    // TODO: make this method private, or remove it
+    public boolean isMatchForCandidate(MemberCandidate cm) {
         return matchesAnnotations(cm.annotationTypes())
                 && matchesAccessibility(cm.accessibility())
                 && matchesModifiers(cm.otherModifiers())

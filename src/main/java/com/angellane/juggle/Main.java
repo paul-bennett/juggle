@@ -138,7 +138,7 @@ public class Main implements Runnable {
     @SuppressWarnings("unused")
     @Option(names={"-n", "--member-name"}, paramLabel="methodName", description="Filter by member name")
     public void addMemberNameFilter(String name) {
-        juggler.prependFilter(m -> m.member().getName().toLowerCase().contains(name.toLowerCase()));
+        juggler.prependMemberFilter(m -> m.member().getName().toLowerCase().contains(name.toLowerCase()));
     }
 
 
@@ -156,7 +156,7 @@ public class Main implements Runnable {
     @Option(names={"-x", "--permute"}, negatable=true, description="Also match permutations of parameters")
     public void addPermutationProcessor(boolean permute) {
         if (permute)
-            juggler.prependProcessor(new PermuteParams());
+            juggler.prependMemberProcessor(new PermuteParams());
     }
 
     @Option(names={"-f", "--format"}, description="Output format")
@@ -203,11 +203,11 @@ public class Main implements Runnable {
 
         // Processors
 
-        juggler.appendFilter(m -> !m.member().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
-        juggler.appendFilter(m -> !m.member().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
+        juggler.appendMemberFilter(m -> !m.member().getDeclaringClass().isAnonymousClass());       // anon and local classes ...
+        juggler.appendMemberFilter(m -> !m.member().getDeclaringClass().isLocalClass());           // ... are unutterable anyway
 
-        juggler.prependFilter(m -> m.annotationTypes().containsAll(getAnnotationTypes()));
-        if (getThrowTypes() != null) juggler.prependFilter(m -> {
+        juggler.prependMemberFilter(m -> m.annotationTypes().containsAll(getAnnotationTypes()));
+        if (getThrowTypes() != null) juggler.prependMemberFilter(m -> {
             Set<Class<?>> throwTypes = getThrowTypes();
 
             if (throwTypes.size() == 0)
@@ -221,21 +221,21 @@ public class Main implements Runnable {
             }
             return true;
         });
-        if (getReturnType() != null) juggler.prependFilter(m ->
+        if (getReturnType() != null) juggler.prependMemberFilter(m ->
                 Candidate.isTypeCompatibleForAssignment(getReturnType(), m.returnType()));
-        if (getParamTypes() != null) juggler.appendFilter(m -> {
+        if (getParamTypes() != null) juggler.appendMemberFilter(m -> {
                     List<? extends Class<?>> paramTypes = getParamTypes();
                     Iterator<? extends Class<?>> queryTypeIter = paramTypes.iterator();
                     return m.paramTypes().stream().allMatch(mpt ->
                             Candidate.isTypeCompatibleForInvocation(mpt, queryTypeIter.next()));
                 });
-        juggler.prependFilter(m -> Accessibility.fromModifiers(
+        juggler.prependMemberFilter(m -> Accessibility.fromModifiers(
                 m.member().getModifiers()).isAtLeastAsAccessibleAsOther(minAccess));
 
         if (getParamTypes() != null)
             // Optimisation: filter out anything that hasn't got the right number of params
             // Useful because permutation of every candidate member's params takes forever.
-            juggler.prependFilter(m -> m.paramTypes().size() == getParamTypes().size());
+            juggler.prependMemberFilter(m -> m.paramTypes().size() == getParamTypes().size());
 
         // Parameter String
 
@@ -246,7 +246,7 @@ public class Main implements Runnable {
             Query query = factory.createQuery(queryString);
 
             if (query instanceof MemberQuery mq)
-                juggler.appendFilter(mq::isMatchForCandidate);
+                juggler.appendMemberFilter(mq::isMatchForCandidate);
             else
                 juggler.setTypeQuery((TypeQuery)query);
 
