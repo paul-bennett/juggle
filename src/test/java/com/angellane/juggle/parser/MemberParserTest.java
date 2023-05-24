@@ -117,7 +117,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("?");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.returnType = BoundedType.wildcardType();
+        expectedQuery.returnType = BoundedType.unboundedWildcardType();
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -160,7 +160,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("? memberName");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.returnType = BoundedType.wildcardType();
+        expectedQuery.returnType = BoundedType.unboundedWildcardType();
         expectedQuery.setNameExact("memberName");
 
         assertEquals(expectedQuery, actualQuery);
@@ -171,7 +171,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("? /pattern/i");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.returnType = BoundedType.wildcardType();
+        expectedQuery.returnType = BoundedType.unboundedWildcardType();
         expectedQuery.setNamePattern(Pattern.compile("pattern", Pattern.CASE_INSENSITIVE));
 
         assertEquals(expectedQuery, actualQuery);
@@ -270,7 +270,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("throws ?");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.exceptions = Set.of(BoundedType.wildcardType());
+        expectedQuery.exceptions = Set.of(BoundedType.unboundedWildcardType());
 
         assertEquals(expectedQuery, actualQuery);
     }

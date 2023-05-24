@@ -10,7 +10,7 @@ public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
 
     static SingleParam wildcard() {
         return new SingleParam(
-                Pattern.compile(""), BoundedType.wildcardType());
+                Pattern.compile(""), BoundedType.unboundedWildcardType());
     }
 
     static SingleParam unnamed(BoundedType bt) {
@@ -18,7 +18,7 @@ public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
     }
 
     static SingleParam untyped(Pattern pat) {
-        return new SingleParam(pat, BoundedType.wildcardType());
+        return new SingleParam(pat, BoundedType.unboundedWildcardType());
     }
 
     static SingleParam param(String name, Class<?> type) {

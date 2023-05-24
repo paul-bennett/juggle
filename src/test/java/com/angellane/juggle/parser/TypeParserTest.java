@@ -120,7 +120,7 @@ public class TypeParserTest {
                 BoundedType.exactType(java.lang.reflect.AnnotatedType.class),
                 BoundedType.supertypeOf(java.lang.reflect.TypeVariable.class),
                 BoundedType.subtypeOf(java.lang.reflect.AnnotatedElement.class),
-                BoundedType.wildcardType()
+                BoundedType.unboundedWildcardType()
                 )
         );
 

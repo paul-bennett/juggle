@@ -27,7 +27,7 @@ public record BoundedType(
         return new BoundedType(null, c);
     }
 
-    public static BoundedType wildcardType() {
+    public static BoundedType unboundedWildcardType() {
         return new BoundedType(null, null);
     }
 

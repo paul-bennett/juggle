@@ -294,7 +294,7 @@ public class QueryFactory {
 
         @Override
         public void exitUnboundedType(DeclParser.UnboundedTypeContext ctx) {
-            tempType = BoundedType.wildcardType();
+            tempType = BoundedType.unboundedWildcardType();
             tempTypeList.add(tempType);
         }
 
