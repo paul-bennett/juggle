@@ -36,7 +36,33 @@ public class TextOutput implements Sink {
 
 
     public String decode(Class<?> c) {
-        return c.toString();
+        StringBuilder ret = new StringBuilder();
+
+        ret.append(f.formatKeyword(decodeModifiers(c.getModifiers())));
+
+        ret.append(f.formatKeyword(decodeTypeKind(c)));
+        ret.append(" ");
+        ret.append(f.formatClassName(decodeClass(c)));
+
+        if (c.getSuperclass() != null
+                && !c.getSuperclass().equals(Object.class)
+                && !c.isRecord() && !c.isEnum()
+        ) {
+            ret.append(f.formatKeyword(" extends "));
+            ret.append(f.formatType(decodeClass(c.getSuperclass())));
+        }
+
+        if (c.getInterfaces().length > 0 && !c.isAnnotation()) {
+            ret.append(f.formatKeyword(" implements "));
+            ret.append(
+                    Arrays.stream(c.getInterfaces())
+                            .map(this::decodeClass)
+                            .map(f::formatType)
+                            .collect(Collectors.joining(f.formatKeyword(", ")))
+            );
+        }
+
+        return ret.toString();
     }
 
     public String decode(Member m) {
@@ -64,12 +90,25 @@ public class TextOutput implements Sink {
     }
 
     public String decodeModifiers(int mods) {
-        StringBuilder ret = new StringBuilder(Modifier.toString(mods));
+        // Modifier.toString() includes "interface" in its output, but we
+        // don't want it -- that's handled by decodeTypeKind()
+        int tweakedMods = mods & (~Modifier.INTERFACE);
+
+        StringBuilder ret = new StringBuilder(Modifier.toString(tweakedMods));
 
         if (ret.length() > 0)
             ret.append(' ');
 
         return ret.toString();
+    }
+
+    public String decodeTypeKind(Class<?> type) {
+             if (type.isRecord())       return "record";
+        else if (type.isAnnotation())   return "@interface";
+        else if (type.isInterface())    return "interface";
+        else if (type.isEnum())         return "enum";
+        else if (!type.isPrimitive())   return "class";
+        else                            return "";
     }
 
     public String decodeTypeParameters(TypeVariable<?>[] typeVariables) {

@@ -5,15 +5,15 @@ This file contains samples of Juggle's new type search feature.
 Which classes directly extend `InetAddress`?
 ````
 $ juggle -i java.net class extends InetAddress
-class java.net.Inet4Address
-class java.net.Inet6Address
+public final class Inet4Address extends InetAddress
+public final class Inet6Address extends InetAddress
 $
 ````
 
 What about classes that implement `java.util.Collection`?
 ````
 $ juggle class implements java.util.Collection
-class java.util.AbstractCollection
+public abstract class java.util.AbstractCollection<E> implements java.util.Collection<E>
 $
 ````
 
@@ -24,14 +24,14 @@ module.  However, the JDK leaks some other classes.  Here's what I'd like to
 get to:
 ````
 $ juggle -m jdk.net -i jdk.net -i java.nio.file.attribute record /Unix/
-class jdk.net.UnixDomainPrincipal
+public final record UnixDomainPrincipal
 $
 ````
 
 In reality, Juggle presently says:
 ````
 $ juggle -m jdk.net -i jdk.net,java.nio.file.attribute record
-class jdk.net.UnixDomainPrincipal
+public final record jdk.net.UnixDomainPrincipal
 $
 ````
 
@@ -45,7 +45,7 @@ $
 
 Here's a bit of a "Christmas Tree" query (all the bits turned on):
 ````
-$ juggle '@Deprecated package abstract static strictfp  class /asd/'
+$ juggle '@Deprecated package abstract static strictfp class /asd/'
 $
 ````
 
@@ -54,7 +54,7 @@ $
 Another Christmas tree
 ````
 $ juggle "@Deprecated abstract public interface /Obs/"  
-interface java.util.Observer
+public abstract interface java.util.Observer
 $
 ````
 
@@ -65,15 +65,15 @@ However, not all annotations are themselves annotated `@Documented`, so
 that's a little thing we can prove.
 ````
 $ juggle '@java.lang.annotation.Documented @interface'       
-interface java.lang.Deprecated
-interface java.lang.FunctionalInterface
-interface java.lang.SafeVarargs
-interface java.lang.annotation.Documented
-interface java.lang.annotation.Inherited
-interface java.lang.annotation.Native
-interface java.lang.annotation.Repeatable
-interface java.lang.annotation.Retention
-interface java.lang.annotation.Target
+public abstract @interface Deprecated
+public abstract @interface FunctionalInterface
+public abstract @interface SafeVarargs
+public abstract @interface java.lang.annotation.Documented
+public abstract @interface java.lang.annotation.Inherited
+public abstract @interface java.lang.annotation.Native
+public abstract @interface java.lang.annotation.Repeatable
+public abstract @interface java.lang.annotation.Retention
+public abstract @interface java.lang.annotation.Target
 $
 ````
 
@@ -82,8 +82,8 @@ $
 Enumerations can implement interfaces.
 ````
 $ juggle enum implements java.time.temporal.TemporalAccessor
-class java.time.DayOfWeek
-class java.time.Month
+public final enum java.time.DayOfWeek implements java.time.temporal.TemporalAccessor, java.time.temporal.TemporalAdjuster
+public final enum java.time.Month implements java.time.temporal.TemporalAccessor, java.time.temporal.TemporalAdjuster
 $
 ````
 
@@ -91,6 +91,6 @@ $
 
 ````
 $ juggle -m jdk.net -i jdk.net -i java.nio.file.attribute record "(UserPrincipal, GroupPrincipal)"
-class jdk.net.UnixDomainPrincipal
+public final record UnixDomainPrincipal
 $
 ````

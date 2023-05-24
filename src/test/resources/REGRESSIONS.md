@@ -201,14 +201,14 @@ $
 Similarly, there's only one class called `StringBuffer`:
 ````
 $ juggle 'class StringBuffer'
-class java.lang.StringBuffer
+public final class StringBuffer extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
 $
 ````
 But there are two that contain the letters `StringBuffer`:
 ````
 $ juggle 'class /StringBuffer/'
-class java.lang.StringBuffer
-class java.io.StringBufferInputStream
+public final class StringBuffer extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
+public class java.io.StringBufferInputStream extends java.io.InputStream
 $
 ````
 
@@ -221,7 +221,7 @@ case-sensitive substring matches.)
 Juggle now answers this question directly:
 ````
 $ juggle class FileNotFoundException
-class java.io.FileNotFoundException
+public class java.io.FileNotFoundException extends java.io.IOException
 $
 ````
 
@@ -230,8 +230,8 @@ $
 Here's how to find the direct subclasses of a class:
 ````
 $ juggle class extends java.lang.reflect.AccessibleObject
-class java.lang.reflect.Executable
-class java.lang.reflect.Field
+public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
 ````
 
@@ -239,18 +239,18 @@ $
 above because they're _indirect_ subclasses of `AccessibleObject`: 
 ````
 $ juggle class extends java.lang.reflect.Executable
-class java.lang.reflect.Constructor
-class java.lang.reflect.Method
+public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
+public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
 
 To show all subclasses, including indirect ones we can specify a type bound:
 ````
 $ juggle class extends \? extends java.lang.reflect.AccessibleObject
-class java.lang.reflect.Constructor
-class java.lang.reflect.Executable
-class java.lang.reflect.Field
-class java.lang.reflect.Method
+public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
+public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
+public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
 
@@ -259,16 +259,16 @@ $
 Juggle can show you all classes that directly implement a specific interface:
 ````
 $ juggle class implements java.lang.reflect.Member                  
-class java.lang.reflect.Executable
-class java.lang.reflect.Field
+public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
 ````
 
 To show classes that indirectly implement an interface, use a type bound:
 ````
 $ juggle class extends \? extends java.lang.reflect.Member
-class java.lang.reflect.Constructor
-class java.lang.reflect.Method
+public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
+public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
 
