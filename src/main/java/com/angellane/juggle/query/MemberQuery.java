@@ -1,9 +1,11 @@
 package com.angellane.juggle.query;
 
 import com.angellane.juggle.candidate.MemberCandidate;
+import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.match.Match;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -79,7 +81,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
                 , scoreModifiers(cm.otherModifiers())
                 , scoreReturn(cm.returnType())
                 , scoreName(cm.declarationName())
-                , scoreParams(cm.paramTypes())
+                , scoreParams(cm.params())
                 , scoreExceptions(cm.throwTypes())
                 ));
     }
@@ -106,7 +108,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
                 ? OptionalInt.of(0) : OptionalInt.empty();
     }
 
-    OptionalInt scoreParams(List<Class<?>> candidateParams) {
+    OptionalInt scoreParams(List<Param> candidateParams) {
         if (params == null)
             return OptionalInt.of(0);
 
@@ -167,20 +169,27 @@ public final class MemberQuery extends Query<MemberCandidate> {
 
     private OptionalInt scoreParamSpecs(
             List<SingleParam> queryParams,
-            List<Class<?>>    candidateParams
+            List<Param>       candidateParams
     ) {
         if (queryParams.size() != candidateParams.size())
             return OptionalInt.empty();
         else {
-            Iterator<? extends Class<?>> actualParamIter =
+            Iterator<? extends Param> actualParamIter =
                     candidateParams.iterator();
 
             return totalScore(
                     queryParams.stream()
                             .map(ps -> {
+                                Pattern namePat = ps.paramName();
                                 BoundedType bounds = ps.paramType();
-                                Class<?> actualType = actualParamIter.next();
-                                return bounds.scoreMatch(actualType);
+
+                                Param actualParam = actualParamIter.next();
+                                Class<?> actualType = actualParam.type();
+                                String actualName = actualParam.name();
+
+                                return namePat.matcher(actualName).find()
+                                        ? bounds.scoreMatch(actualType)
+                                        : OptionalInt.empty();
                             })
                             .toList()
             );
