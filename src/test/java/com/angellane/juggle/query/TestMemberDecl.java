@@ -39,8 +39,8 @@ public class TestMemberDecl {
         assertTrue(q.matchesAccessibility(cm.accessibility())
                 , "Match accessibility");
         assertEquals(OptionalInt.of(0), q.scoreReturn(cm.returnType())      , "Match return type");
-        assertTrue(q.matchesName(cm.declarationName())                      , "Match method name");
-        assertEquals(OptionalInt.of(0), q.scoreParams(cm.params())          , "Match parameters");
+        assertTrue(q.matchesName(cm.declarationName())   , "Match method name");
+        assertEquals(OptionalInt.of(0), q.scoreParams(cm.paramTypes())      , "Match parameters");
         assertEquals(OptionalInt.of(0), q.scoreExceptions(cm.throwTypes())  , "Match exceptions");
 
         assertTrue(q.scoreCandidate(cm).isPresent(),
@@ -57,8 +57,8 @@ public class TestMemberDecl {
         q.returnType = BoundedType.exactType(java.net.URL.class);
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(
-                ParamSpec.param("this", ClassLoader.class),
-                ParamSpec.param("arg0", String.class));
+                ParamSpec.param(null, ClassLoader.class),
+                ParamSpec.param("name", String.class));
         q.exceptions = Set.of();
 
         matchQueryAndCandidate(q, cm);
@@ -219,7 +219,7 @@ public class TestMemberDecl {
     public void testWrongParamName() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("foo", String.class));
-        assertEquals(OptionalInt.empty(), q.scoreParams(cm.params()), "Match params");
+        assertEquals(OptionalInt.empty(), q.scoreParams(cm.paramTypes()), "Match params");
         assertFalse(q.scoreCandidate(cm).isPresent(),
                 "Match entire declaration");
     }
@@ -228,7 +228,7 @@ public class TestMemberDecl {
     public void testWrongParamType() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(ParamSpec.param("name", Integer.class));
-        assertEquals(OptionalInt.empty(), q.scoreParams(cm.params()), "Match params");
+        assertEquals(OptionalInt.empty(), q.scoreParams(cm.paramTypes()), "Match params");
         assertFalse(q.scoreCandidate(cm).isPresent(),
                 "Match entire declaration");
     }
@@ -240,7 +240,7 @@ public class TestMemberDecl {
                 ParamSpec.param("name", String.class),
                 ParamSpec.param("name", String.class)
         );
-        assertEquals(OptionalInt.empty(), q.scoreParams(cm.params()), "Match params");
+        assertEquals(OptionalInt.empty(), q.scoreParams(cm.paramTypes()), "Match params");
         assertFalse(q.scoreCandidate(cm).isPresent(),
                 "Match entire declaration");
     }
