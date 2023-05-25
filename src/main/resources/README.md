@@ -225,6 +225,24 @@ The default sort is equivalent to `-s score -s access -s package -s name -s text
 The intent is that this default causes Juggle to list the "best" matches first.
 If that's not what's happening in practice, I'd like to hear about it! 
 
+## Output format
+
+The `-f` option allows you to select the format in which Juggle output
+results.  The two key values are `colour` and `plain`, where the former
+uses ANSI escape sequences to highlight certain elements of the output
+while the latter outputs unformatted text only.
+
+The default formatter is `auto`, which is the same as `colour` if Juggle
+is connected to a console or `plain` otherwise.
+
+| Formatter   | Description                                   |
+|-------------|-----------------------------------------------|
+| `-f plain`  | Unformatted, plain text                       |
+| `-f colour` | Text highlighted with ANSI escape sequences   |
+| `-f color`  | Alternative spelling of `-f colour`           |
+| `-f auto`   | Automatically choose                          |
+
+
 ## Extra goodies
 
 To make life easier, packages can be imported with `-i` so that fully qualified
@@ -332,7 +350,8 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-t`   | `--throws`      | type name(s)                                 | (don't match throws)                            | Exception types that must be thrown                 |
 | `-@`   | `--annotation`  | annotation name(s)                           | (don't match annotations)                       | Annotations to filter on (class or method)          |
 | `-s`   | `--sort`        | `access`, `name`, `package`, `score`, `text` | `-s score -s access -s package -s name -s text` | Sort criteria                                       |
-| `-x`   | `--permute`     | (none)                                       | (don't permute)                                 | Match permutations of supplied parameters           |    
+| `-x`   | `--permute`     | (none)                                       | (don't permute)                                 | Match permutations of supplied parameters           |
+| `-f`   | `--format`      | `auto`, `colour`, `color`, `plain`           | `auto`                                          | Output format                                       |
 
 A declaration-style query can follow all arguments, so long as none of the
 `-a`, `-n`, `-p`, `-r`, `-t` or `-@` options have been specified.

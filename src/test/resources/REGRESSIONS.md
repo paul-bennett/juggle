@@ -15,10 +15,10 @@ If we pass an invalid argument, we should get an error and the help text:
 $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-@=type,type,...]
-              [-a=private|protected|package|public] [-f=<formatterOption>]
-              [-i=packageName] [-j=jarFilePath] [-m=moduleName] [-n=methodName]
-              [-p=type,type,...] [-r=type] [-s=<addSortCriteria>] [-t=type,
-              type,...] [declaration...]
+              [-a=private|protected|package|public]
+              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
+              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
+              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
   -@, --annotation=type,type,...
@@ -26,7 +26,7 @@ An API search tool for Java
   -a, --access=private|protected|package|public
                              Minimum accessibility of members to return
       --dry-run              Dry run only
-  -f, --format=<formatterOption>
+  -f, --format=auto|plain|colour|color
                              Output format
   -h, --help                 Show this help message and exit.
   -i, --import=packageName   Imported package names
@@ -50,10 +50,10 @@ Of course, we can explicitly ask for help:
 ````
 $ juggle --help
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-@=type,type,...]
-              [-a=private|protected|package|public] [-f=<formatterOption>]
-              [-i=packageName] [-j=jarFilePath] [-m=moduleName] [-n=methodName]
-              [-p=type,type,...] [-r=type] [-s=<addSortCriteria>] [-t=type,
-              type,...] [declaration...]
+              [-a=private|protected|package|public]
+              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
+              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
+              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
   -@, --annotation=type,type,...
@@ -61,7 +61,7 @@ An API search tool for Java
   -a, --access=private|protected|package|public
                              Minimum accessibility of members to return
       --dry-run              Dry run only
-  -f, --format=<formatterOption>
+  -f, --format=auto|plain|colour|color
                              Output format
   -h, --help                 Show this help message and exit.
   -i, --import=packageName   Imported package names

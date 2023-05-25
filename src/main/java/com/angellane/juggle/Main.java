@@ -155,15 +155,19 @@ public class Main implements Runnable {
             juggler.prependMemberCandidateProcessor(new PermuteParams());
     }
 
-    @Option(names={"-f", "--format"}, description="Output format")
-    public FormatterOption formatterOption = FormatterOption.PLAIN;
+    @Option(names={"-f", "--format"}, paramLabel="auto|plain|colour|color",
+            description="Output format")
+    public FormatterOption formatterOption = FormatterOption.AUTO;
 
     public enum FormatterOption {
         PLAIN(new PlaintextFormatter()),
-        COLOUR(new AnsiColourFormatter());
+        COLOUR(new AnsiColourFormatter()),
+        COLOR(COLOUR),
+        AUTO(System.console() == null ? PLAIN : COLOUR);
 
         private final Formatter f;
         FormatterOption(Formatter f) { this.f = f; }
+        FormatterOption(FormatterOption other) { this.f = other.f; }
 
         Formatter getFormatter() {
             return f;
