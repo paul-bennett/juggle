@@ -31,7 +31,6 @@ public class Decomposer {
             // STEP
 
             // Does the rightmost divider (lowest ix) stand alone?
-            // TODO: remove the length==1 special case
             if (indices.length == 1 || indices[0] != indices[1])
                 // yes: bump it along one notch
                 indices[0]--;
@@ -56,7 +55,6 @@ public class Decomposer {
     }
 
     private static int[] indexesToCounts(int num, int[] indexes) {
-        // TODO: try to remove this special case
         if (indexes.length == 0) return new int[]{num};
 
         int[] counts = new int[indexes.length + 1];

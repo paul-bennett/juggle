@@ -233,7 +233,7 @@ $
 be interpreted either as a return type or a member name.  In time
 Juggle will resolve this by favouring a return type if a type of
 that name can be found. For now though, I'm forcing the parser's
-hand by including a type of `?`. TODO: remove these `?`s and `'`s.)
+hand by including a type of `?`.)
 
 Just dropping the `-n` adopts the new syntax, but literals are matched
 case-sensitively, so our first attempt fails: 

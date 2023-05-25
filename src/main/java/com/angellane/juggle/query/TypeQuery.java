@@ -69,8 +69,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
     <Q extends Query<TypeCandidate>, M extends Match<TypeCandidate, Q>>
     Stream<M> match(TypeCandidate candidate) {
         if (isMatchForCandidate(candidate)) {
-            // TODO: implement scoring
-            @SuppressWarnings("unchecked")      // TODO: remove this nasty cast
+            @SuppressWarnings("unchecked")
             M m = (M)new Match<>(candidate, this, 0);
             return Stream.of(m);
         }

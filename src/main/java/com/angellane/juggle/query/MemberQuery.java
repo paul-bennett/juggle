@@ -64,7 +64,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
         OptionalInt  optScore = scoreCandidate(candidate);
 
         if (optScore.isPresent()) {
-            @SuppressWarnings("unchecked")      // TODO: remove this nasty cast
+            @SuppressWarnings("unchecked")
             M m = (M)new Match<>(candidate, this, optScore.getAsInt());
             return Stream.of(m);
         }
