@@ -87,21 +87,11 @@ $
 
 Here's a modified example from `README.md`:
 ````
-$ juggle -i java.net -r Inet6Address
-public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
-public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
-$
-````
-
-The equivalent in the new syntax is:
-````
 $ juggle -i java.net Inet6Address
 public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
 public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
 $
 ````
-(We've just omitted the `-r`.)
-
 The above is an exact type match.
 
 When using the `-r` option, we are implicitly setting an upper bound of the return type. Using the declaration
@@ -109,7 +99,7 @@ syntax we need to be specific if we want to use an upper bound.
 
 For example, here are all the methods named `getByAddress` that return an `InetAddress` or one of its subclasses:
 ````
-$ juggle -n getByAddress -i java.net -r InetAddress 
+$ juggle -i java.net '? extends InetAddress getByAddress' 
 public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
 public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
 public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
@@ -117,19 +107,9 @@ public static InetAddress InetAddress.getByAddress(String,byte[]) throws Unknown
 $
 ````
 
-If we omit the `-r` and specify a return type of `InetAddress`, we only get the methods that return exactly that type: 
+If we omit the `? extends` wildcard, we only get the methods that return exactly that type: 
 ````
 $ juggle -i java.net InetAddress getByAddress 
-public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
-public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
-$
-````
-
-We can get back to the full list with the new syntax by explicitly requesting an upper bound:
-````
-$ juggle -i java.net \? extends InetAddress getByAddress 
-public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
-public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
 public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
 public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
 $
@@ -165,7 +145,7 @@ Finally, a question mark on its own represents an unbounded wildcard type.  Unli
 
 Here are all the methods called `checkAccess`:
 ````
-$ juggle -n checkAccess
+$ juggle /checkAccess/
 public final void Thread.checkAccess()
 public final void ThreadGroup.checkAccess()
 public void SecurityManager.checkAccess(Thread)
@@ -224,7 +204,7 @@ or by regular expression.
 
 Here's what the old syntax allowed: a case-insensitive literal match:
 ````
-$ juggle -n isjavaletterordigit
+$ juggle /isjavaletterordigit/i
 public static boolean Character.isJavaLetterOrDigit(char)
 $
 ````

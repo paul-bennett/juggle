@@ -17,7 +17,7 @@ public class TestSamples {
     @Test
     public void testSimpleRun() {
         // Confirm that our 'runTest' function does the right thing, with a simple example.
-        runTest("-p java.time.Clock -r java.time.LocalTime",
+        runTest("java.time.LocalTime (java.time.Clock)",
                 "public static java.time.LocalTime java.time.LocalTime.now(java.time.Clock)\n");
     }
 
@@ -26,7 +26,6 @@ public class TestSamples {
         ClassLoader cl = getClass().getClassLoader();
 
         return Stream.of( "README.md"
-                        , "README-DECL.md"
                         , "REGRESSIONS.md"
                         , "COVERAGE.md"
                         , "DECLARATIONS.md"

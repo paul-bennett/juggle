@@ -14,17 +14,11 @@ If we pass an invalid argument, we should get an error and the help text:
 ````
 $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
-Usage: juggle [-hVx] [--dry-run] [--show-query] [-@=type,type,...]
-              [-a=private|protected|package|public]
-              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
-              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
+              [-i=packageName] [-j=jarFilePath] [-m=moduleName]
+              [-s=<addSortCriteria>] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
-  -@, --annotation=type,type,...
-                             Annotations
-  -a, --access=private|protected|package|public
-                             Minimum accessibility of members to return
       --dry-run              Dry run only
   -f, --format=auto|plain|colour|color
                              Output format
@@ -32,14 +26,9 @@ An API search tool for Java
   -i, --import=packageName   Imported package names
   -j, --jar=jarFilePath      JAR file to include in search
   -m, --module=moduleName    Modules to search
-  -n, --member-name=methodName
-                             Filter by member name
-  -p, --param=type,type,...  Parameter type of searched function
-  -r, --return=type          Return type of searched function
   -s, --sort=<addSortCriteria>
                              Sort criteria
       --show-query           Show query
-  -t, --throws=type,type,... Thrown types
   -V, --version              Print version information and exit.
   -x, --[no-]permute         Also match permutations of parameters
 $
@@ -49,17 +38,11 @@ Of course, we can explicitly ask for help:
 
 ````
 $ juggle --help
-Usage: juggle [-hVx] [--dry-run] [--show-query] [-@=type,type,...]
-              [-a=private|protected|package|public]
-              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-n=methodName] [-p=type,type,...] [-r=type]
-              [-s=<addSortCriteria>] [-t=type,type,...] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
+              [-i=packageName] [-j=jarFilePath] [-m=moduleName]
+              [-s=<addSortCriteria>] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
-  -@, --annotation=type,type,...
-                             Annotations
-  -a, --access=private|protected|package|public
-                             Minimum accessibility of members to return
       --dry-run              Dry run only
   -f, --format=auto|plain|colour|color
                              Output format
@@ -67,14 +50,9 @@ An API search tool for Java
   -i, --import=packageName   Imported package names
   -j, --jar=jarFilePath      JAR file to include in search
   -m, --module=moduleName    Modules to search
-  -n, --member-name=methodName
-                             Filter by member name
-  -p, --param=type,type,...  Parameter type of searched function
-  -r, --return=type          Return type of searched function
   -s, --sort=<addSortCriteria>
                              Sort criteria
       --show-query           Show query
-  -t, --throws=type,type,... Thrown types
   -V, --version              Print version information and exit.
   -x, --[no-]permute         Also match permutations of parameters
 $
@@ -94,9 +72,9 @@ $
 
 Searching (with -p or -r) for an array of a primitive type falls back to Object
 
-
 ````
-$ juggle -p double[],int,int,double -r void
+% juggle -p double[],int,int,double -r void
+$ juggle void '(double[],int,int,double)'
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
@@ -114,7 +92,8 @@ So the following two executions should return the same results.  (Prior to the f
 the second -- `-m java.se` -- showed no results.)
 
 ````
-$ juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
+% juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
+$ juggle -m java.sql -i java.sql ResultSet '(? super PreparedStatement)'
 public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
 public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
 public abstract ResultSet Statement.getResultSet() throws SQLException
@@ -122,7 +101,8 @@ $
 ````
 
 ````
-$ juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
+% juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
+$ juggle -m java.se -i java.sql ResultSet '(? super PreparedStatement)'
 public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
 public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
 public abstract ResultSet Statement.getResultSet() throws SQLException
@@ -134,7 +114,8 @@ $
 Results aren't deduplicated
 
 ````
-$ juggle -n asSubclass -m java.base,java.base
+% juggle -n asSubclass -m java.base,java.base
+$ juggle /asSubclass/ -m java.base,java.base
 public <U> Class<T> Class<T>.asSubclass(Class<T>)
 $
 ````

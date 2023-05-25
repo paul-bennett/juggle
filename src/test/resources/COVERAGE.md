@@ -7,7 +7,7 @@ selected in order to drive up the JaCoCo coverage metrics.
 ## No parameters in the query
 
 ````
-$ juggle -r NoSuchMethodException
+$ juggle NoSuchMethodException
 public NoSuchMethodException.<init>()
 public NoSuchMethodException.<init>(String)
 $
@@ -24,7 +24,7 @@ $
 ## Unknown type
 
 ````
-$ juggle -p ThisTypeDoesNotExist -r boolean
+$ juggle 'boolean (ThisTypeDoesNotExist)'
 *** Couldn't find type: ThisTypeDoesNotExist; using class java.lang.Object instead
 public static native boolean Thread.holdsLock(Object)
 public static boolean jdk.internal.vm.vector.VectorSupport.isNonCapturingLambda(Object)
@@ -37,7 +37,7 @@ $
 ## Methods that don't throw
 
 ````
-$ juggle -p java.io.InputStream -r String -t ''
+$ juggle 'String (? super java.io.InputStream) throws'
 public String Object.toString()
 public static String String.valueOf(Object)
 public static String java.util.Objects.toString(Object)
@@ -45,7 +45,7 @@ public static String sun.invoke.util.BytecodeDescriptor.unparse(Object)
 $
 ````
 
-If it wasn't for the `-t ''` we'd expect the above query to also include 
+If it wasn't for the `throws` we'd expect the above query to also include 
 `String java.net.URLConnection.guessContentTypeFromStream(java.io.InputStream)` in its results.
 
 
@@ -56,7 +56,7 @@ doesn't seem to be called at all, even when I explicitly search for a method tha
 returns a wildcard type:
 
 ````
-$ juggle -n asSubclass
+$ juggle /asSubclass/
 public <U> Class<T> Class<T>.asSubclass(Class<T>)
 $
 ````
@@ -65,10 +65,10 @@ The `Class.asSubclass` method is declared to return `Class<? extends U>`. I susp
 at runtime due to type erasure, in which case it may be worth stripping this method from the source altogether.
 
 
-## Empty -m or -@
+## Empty -m
 
 ````
-$ juggle -m '' -@ '' -n getUpperBound"
+$ juggle -m '' /getUpperBound/
 public abstract java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
 public java.lang.reflect.Type[] sun.reflect.generics.reflectiveObjects.WildcardTypeImpl.getUpperBounds()
 public sun.reflect.generics.tree.FieldTypeSignature[] sun.reflect.generics.tree.Wildcard.getUpperBounds()
@@ -79,7 +79,7 @@ $
 ## Multiple -t options
 
 ````
-$ juggle -t java.io.NotActiveException -t java.io.InvalidObjectException
+$ juggle throws java.io.NotActiveException, java.io.InvalidObjectException
 public void java.io.ObjectInputStream.registerValidation(java.io.ObjectInputValidation,int) throws java.io.NotActiveException,java.io.InvalidObjectException
 $
 ````
@@ -94,12 +94,12 @@ will only ever take the value `true`.  That means JaCoCo will always present one
 followed.
 
 ````
-$ juggle -p String,ClassLoader,boolean
+$ juggle '(String,ClassLoader,boolean)'
 $
 ````
 
 ````
-$ juggle -x -p String,ClassLoader,boolean
+$ juggle -x '(String,ClassLoader,boolean)'
 public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
 public void ClassLoader.setPackageAssertionStatus(String,boolean)
@@ -110,7 +110,7 @@ But there's a workaround... add `negatable=true` to the `@Option` annotation, an
 suddenly the long option name can be prefixed with `no-` on the command-line.
 
 ````
-$ juggle --permute -p String,ClassLoader,boolean
+$ juggle --permute '(String,ClassLoader,boolean)'
 public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
 public void ClassLoader.setPackageAssertionStatus(String,boolean)
@@ -118,7 +118,7 @@ $
 ````
 
 ````
-$ juggle --no-permute -p String,ClassLoader,boolean
+$ juggle --no-permute '(String,ClassLoader,boolean)'
 $
 ````
 
@@ -128,10 +128,20 @@ The (contrived) App class from testApp uses the Lib class from testLib in its in
 dependent classes in the JAR (it's not an uberjar).  This means trying to load the App class fails.  
 
 ````
-$ juggle -j build/libs/testApp.jar -r com.angellane.juggle.testinput.app.App -p void            
+$ juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
 *** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 *** Couldn't find type: com.angellane.juggle.testinput.app.App; using class java.lang.Object instead
 *** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
+public Object.<init>()
+public static final Object sun.security.validator.ValidatorException.T_ALGORITHM_DISABLED
+public static final Object sun.security.validator.ValidatorException.T_CA_EXTENSIONS
+public static final Object sun.security.validator.ValidatorException.T_CERT_EXPIRED
+public static final Object sun.security.validator.ValidatorException.T_EE_EXTENSIONS
+public static final Object sun.security.validator.ValidatorException.T_NAME_CHAINING
+public static final Object sun.security.validator.ValidatorException.T_NO_TRUST_ANCHOR
+public static final Object sun.security.validator.ValidatorException.T_SIGNATURE_ERROR
+public static final Object sun.security.validator.ValidatorException.T_UNTRUSTED_CERT
+public static Object sun.security.jca.Providers.startJarVerification()
 $
 ````
 
@@ -139,7 +149,7 @@ $
 
 Curiously this test fails here, but works in README.md.  See GitHub issue #39.
 ````
-% juggle -j build/libs/testLib.jar -r com.angellane.juggle.testinput.lib.Lib -a package
+% juggle -j build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
 public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
 com.angellane.juggle.testinput.lib.Lib.<init>()
 %

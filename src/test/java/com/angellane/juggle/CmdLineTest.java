@@ -1,6 +1,7 @@
 package com.angellane.juggle;
 
-import com.angellane.juggle.match.Accessibility;
+import com.angellane.juggle.query.BoundedType;
+import com.angellane.juggle.query.ParamSpec;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 import picocli.CommandLine.ParseResult;
@@ -19,13 +20,8 @@ public class CmdLineTest {
 
         assertEquals(List.of(), result.unmatched());
 
-        assertNull(app.paramTypeNames);
         assertEquals(1, app.juggler.getImportedPackageNames().size());   // java.lang
-        assertNull(app.returnTypeName);
-        assertEquals(Accessibility.PUBLIC, app.minAccess);
         assertEquals(1, app.juggler.getSources().size());   // just the default source, java.base
-
-        assertNull(app.paramTypeNames);
     }
 
     @Test
@@ -39,100 +35,43 @@ public class CmdLineTest {
 
     @Test
     public void testNullParamsOption() {
-        String[] args = {"-p", ""};
+        String[] args = {"()"};
         Main app = new Main();
         ParseResult result = new CommandLine(app).parseArgs(args);
+        app.parseDeclarationQuery(app.getQueryString());
 
         assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(0, app.paramTypeNames.size());
+        assertNotNull(app.juggler.memberQuery.params);
+        assertEquals(0, app.juggler.memberQuery.params.size());
     }
 
     @Test
     public void testOneParamsOption() {
-        String[] args = {"-p", "one"};
+        String[] args = {"(Object))"};
         Main app = new Main();
         ParseResult result = new CommandLine(app).parseArgs(args);
+        app.parseDeclarationQuery(app.getQueryString());
 
         assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(1, app.paramTypeNames.size());
-        assertEquals("one", app.paramTypeNames.get(0));
-    }
-
-    @Test
-    public void testOneCommaNullParamsOption() {
-        String[] args = {"-p", "one,"};
-        Main app = new Main();
-        ParseResult result = new CommandLine(app).parseArgs(args);
-
-        assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(1, app.paramTypeNames.size());
-        assertEquals("one", app.paramTypeNames.get(0));
-    }
-
-    @Test
-    public void testNullCommaOneParamsOption() {
-        String[] args = {"-p", ",one"};
-        Main app = new Main();
-        ParseResult result = new CommandLine(app).parseArgs(args);
-
-        assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(1, app.paramTypeNames.size());
-        assertEquals("one", app.paramTypeNames.get(0));
-    }
-
-    @Test
-    public void testOnePlusNullParamsOption() {
-        String[] args = {"-p", "one", "-p", ""};
-        Main app = new Main();
-        ParseResult result = new CommandLine(app).setOverwrittenOptionsAllowed(true).parseArgs(args);
-
-        assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(1, app.paramTypeNames.size());
-        assertEquals("one", app.paramTypeNames.get(0));
+        assertNotNull(app.juggler.memberQuery.params);
+        assertEquals(1, app.juggler.memberQuery.params.size());
+        assertEquals(ParamSpec.unnamed(BoundedType.exactType(Object.class)),
+                app.juggler.memberQuery.params.get(0));
     }
 
     @Test
     public void testTwoParamsOptions() {
-        String[] args = {"-p", "one", "-p", "two"};
+        String[] args = {"(String", ",", "Integer)"};
         Main app = new Main();
         ParseResult result = new CommandLine(app).setOverwrittenOptionsAllowed(true).parseArgs(args);
+        app.parseDeclarationQuery(app.getQueryString());
 
         assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(2, app.paramTypeNames.size());
-        assertEquals("one", app.paramTypeNames.get(0));
-        assertEquals("two", app.paramTypeNames.get(1));
-    }
-
-    @Test
-    public void testCommaSeparatedParamsOptions() {
-        String[] args = {"-p", "one,two", "-p", "three"};
-        Main app = new Main();
-        ParseResult result = new CommandLine(app).setOverwrittenOptionsAllowed(true).parseArgs(args);
-
-        assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(3, app.paramTypeNames.size());
-        assertEquals("one", app.paramTypeNames.get(0));
-        assertEquals("two", app.paramTypeNames.get(1));
-        assertEquals("three", app.paramTypeNames.get(2));
-    }
-
-    @Test
-    public void testDoubleCommaParamsOptions() {
-        String[] args = {"-p", "one,,two"};
-        Main app = new Main();
-        ParseResult result = new CommandLine(app).parseArgs(args);
-
-        assertEquals(List.of(), result.unmatched());
-        assertNotNull(app.paramTypeNames);
-        assertEquals(2, app.paramTypeNames.size());
-        assertEquals("one", app.paramTypeNames.get(0));
-        assertEquals("two", app.paramTypeNames.get(1));
+        assertNotNull(app.juggler.memberQuery.params);
+        assertEquals(2, app.juggler.memberQuery.params.size());
+        assertEquals(ParamSpec.unnamed(BoundedType.exactType(String.class)),
+                app.juggler.memberQuery.params.get(0));
+        assertEquals(ParamSpec.unnamed(BoundedType.exactType(Integer.class)),
+                app.juggler.memberQuery.params.get(1));
     }
 }

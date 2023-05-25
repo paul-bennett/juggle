@@ -30,7 +30,7 @@ Juggle searches Java libraries for methods that match a given type signature.
 For example, is there a method that when given a `java.time.Clock` returns a
 `java.time.LocalTime`?
 ````
-$ juggle -p java.time.Clock -r java.time.LocalTime
+$ juggle "java.time.LocalTime (java.time.Clock)"
 public static java.time.LocalTime java.time.LocalTime.now(java.time.Clock)
 $
 ````
@@ -46,24 +46,24 @@ The `-p` option specifies a comma-separated list of parameter types.
 (Using multiple `-p` options is an alternative way of specifying
 multiple parameter types.) 
 ````
-$ juggle -p double[] -p int -p int -p double -r void 
+$ juggle void '(double[], int, int, double)' 
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
 
-If no `-r` is specified, Juggle shows matching methods with _any_ return type:
+If no return type is specified, Juggle shows matching methods with _any_ return type:
 ````
-$ juggle -p double[] -p int -p int -p double 
+$ juggle '(double[], int, int, double)' 
 public static int java.util.Arrays.binarySearch(double[],int,int,double)
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
 
-Similarly, omitting `-p` lists methods that take _any number_ of arguments
+Similarly, omitting parameters lists methods that take _any number_ of arguments
 of _any type_.  This provides a means of listing all the ways of obtaining
 an object of a specific type:
 ````
-$ juggle -r java.net.Inet6Address
+$ juggle java.net.Inet6Address
 public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],int) throws java.net.UnknownHostException
 public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],java.net.NetworkInterface) throws java.net.UnknownHostException
 $
@@ -82,17 +82,17 @@ would result in long and not particularly helpful outputs. (Since `Object` is a
 superclass of every reference type, at a minimum Juggle would have to include
 hundreds of methods that return `Object` in every result.)
 
-Omitting `-p` and omitting `-r` will list all methods in the JDK.
+Omitting the return type and parameters will list all methods in the JDK.
 While marginally interesting, the output is rather too long to be helpful!
 
-If Juggle can't find classes that you mention in `-p` or `-r` arguments, it
-emits a warning and treats them as if you specified `Object` instead.  This
-can result in exceedingly lengthy output.
+If Juggle can't find classes that you mention in the query, it
+emits a warning and treats them as if you specified `Object` instead.  
+This also can result in exceedingly lengthy output.
 
 Juggle treats non-static methods as if they have a silent
 first parameter whose type is the class in question:
 ````
-$ juggle -p java.util.regex.Matcher -p java.lang.String -r java.lang.String
+$ juggle 'java.lang.String (? super java.util.regex.Matcher, java.lang.String)' 
 public String java.util.regex.Matcher.group(String)
 public String java.util.regex.Matcher.replaceAll(String)
 public String java.util.regex.Matcher.replaceFirst(String)
@@ -113,7 +113,7 @@ no additional arguments and returns a value of the field's type).
 As with non-static methods, non-static fields have an additional implicit 
 `this` parameter:
 ````
-$ juggle -r int -p java.io.InterruptedIOException
+$ juggle 'int (? super java.io.InterruptedIOException)'
 public int java.io.InterruptedIOException.bytesTransferred
 public native int Object.hashCode()
 public static native int System.identityHashCode(Object)
@@ -131,7 +131,7 @@ by virtue of Juggle treating fields as having zero-arg pseudo-getters.)
 The `-t` option allows you to filter by methods that might throw a specific exception type:
 
 ````
-$ juggle -t java.net.URISyntaxException
+$ juggle throws java.net.URISyntaxException
 public java.net.URI.<init>(String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,int,String,String,String) throws java.net.URISyntaxException
@@ -152,7 +152,7 @@ You can also ask Juggle to look for annotations using the `-@` option.  Juggle w
 have the named annotations, or whose declaring class is so annotated.  If multiple annotations are
 supplied, they must all be present on the class or method.
 ````
-$ juggle -@ FunctionalInterface -r int
+$ juggle @FunctionalInterface int
 public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
 public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
 public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
@@ -168,7 +168,7 @@ If you want to find a method whose name includes a specific sequence of characte
 Method names are compared without regards to case, and by substring only.
 
 ````
-$ juggle -n substring
+$ juggle /substring/i
 public String AbstractStringBuilder.substring(int)
 public String AbstractStringBuilder.substring(int,int)
 public String String.substring(int)
@@ -186,7 +186,7 @@ $
 You can tell Juggle which JARs to include in the search by using the `-j`
 option:
 ````
-$ juggle -j build/libs/testLib.jar -r com.angellane.juggle.testinput.lib.Lib -a package
+$ juggle -j build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
 public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
 com.angellane.juggle.testinput.lib.Lib.<init>()
 $
@@ -197,7 +197,7 @@ any modules that this module requires transitively (sometimes referred to as
 "implied reads").
 
 ````
-$ juggle -m java.sql -r java.sql.CallableStatement
+$ juggle -m java.sql java.sql.CallableStatement
 public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String) throws java.sql.SQLException
 public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int) throws java.sql.SQLException
 public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int,int) throws java.sql.SQLException
@@ -267,7 +267,7 @@ returning an instance of the declaring class.  In the following example
 you'll see a couple of constructors and a static method, all with broadly
 similar signatures:
 ````
-$ juggle -p String -r java.io.InputStream
+$ juggle '? extends java.io.InputStream (? super String)'
 public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
 public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
 public java.io.StringBufferInputStream.<init>(String)
@@ -283,7 +283,7 @@ set an alternative minimum level of accessibility (`public`, `package`,
 `protected`, or `private`).
 
 ````
-$ juggle -r java.io.OutputStream -p '' -a protected
+$ juggle 'protected ? extends java.io.OutputStream ()'
 public static final java.io.PrintStream System.err
 public static final java.io.PrintStream System.out
 public java.io.ByteArrayOutputStream.<init>()
@@ -312,14 +312,14 @@ For example, there are no methods that take a `double[]`, an `int`, a
 `double` and then an `int`:
 
 ````
-$ juggle -p double[],int,double,int -r void
+$ juggle "void (double[],int,double,int)"
 $
 ````
 
 However, if we allow Juggle to permute parameters, it locates a match:
 
 ````
-$ juggle -p double[],int,double,int -r void -x
+$ juggle -x "void (double[],int,double,int)"
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
@@ -340,18 +340,11 @@ Each command-line option has a long name equivalent. This table summarises all o
 
 | Option | Long Equivalent | Argument                                     | Default                                         | Description                                         |
 |--------|-----------------|----------------------------------------------|-------------------------------------------------|-----------------------------------------------------|
-| `-a`   | `--access`      | `private`, `protected`, `package`, `public`  | `-a public`                                     | Minimum accessibility                               |
 | `-i`   | `--import`      | package name                                 |                                                 | Packages to import (`java.lang` is always searched) |
 | `-j`   | `--jar`         | file path                                    |                                                 | JAR files to search                                 |
 | `-m`   | `--module`      | module name(s)                               | `-m java.base`                                  | JMODs to search                                     |
-| `-n`   | `--name`        | method name                                  | (don't match method names)                      | Filter results by method name (case insensitive)    |
-| `-p`   | `--param`       | type name(s)                                 | (don't match parameters)                        | Type of parameters to search for                    |
-| `-r`   | `--return`      | type name                                    | (don't match return)                            | Return type to search for                           |
-| `-t`   | `--throws`      | type name(s)                                 | (don't match throws)                            | Exception types that must be thrown                 |
-| `-@`   | `--annotation`  | annotation name(s)                           | (don't match annotations)                       | Annotations to filter on (class or method)          |
 | `-s`   | `--sort`        | `access`, `name`, `package`, `score`, `text` | `-s score -s access -s package -s name -s text` | Sort criteria                                       |
 | `-x`   | `--permute`     | (none)                                       | (don't permute)                                 | Match permutations of supplied parameters           |
 | `-f`   | `--format`      | `auto`, `colour`, `color`, `plain`           | `auto`                                          | Output format                                       |
 
-A declaration-style query can follow all arguments, so long as none of the
-`-a`, `-n`, `-p`, `-r`, `-t` or `-@` options have been specified.
+A declaration-style query can follow all arguments.
