@@ -4,7 +4,10 @@ import com.angellane.juggle.match.Accessibility;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,26 +25,39 @@ public record MemberCandidate(
         Set<Class<?>> annotationTypes,
         String declarationName,
         Class<?> returnType,
-        List<Class<?>> paramTypes,
+        List<Param> params,
         Set<Class<?>> throwTypes
 )
         implements Candidate {
 
     // Constructor used by factory methods
     private MemberCandidate(Member member, Set<Class<?>> annotationTypes,
-                            Class<?> returnType, List<Class<?>> paramTypes,
+                            Class<?> returnType, List<Param> params,
                             Set<Class<?>> throwTypes) {
         this(member, Accessibility.fromModifiers(member.getModifiers()),
                 member.getModifiers() & OTHER_MODIFIERS_MASK,
                 annotationTypes, member.getName(),
-                returnType, paramTypes, throwTypes);
+                returnType, params, throwTypes);
     }
 
     // This constructor is used by parameter permutation generator
-    public MemberCandidate(MemberCandidate other, List<Class<?>> params) {
+    public MemberCandidate(MemberCandidate other, List<Param> params) {
         this(other.member, other.accessibility, other.otherModifiers,
                 other.annotationTypes, other.declarationName,
                 other.returnType, params, other.throwTypes);
+    }
+
+    static Param paramFromParameter(Parameter p) {
+        return new Param(p.getType(), p.getName());
+    }
+    static Param paramFromField(Field f) {
+        return new Param(f.getType(), f.getName());
+    }
+
+    static List<Param> paramListFromParameters(Parameter[] ps) {
+        return Arrays.stream(ps)
+                .map(MemberCandidate::paramFromParameter)
+                .toList();
     }
 
     @Override
@@ -53,7 +69,7 @@ public record MemberCandidate(
         return new MemberCandidate(m,
                 annotationClasses(m.getDeclaringClass().getAnnotations(), m.getAnnotations()),
                 m.getReturnType(),
-                paramsWithImplicitThis(m, Arrays.asList(m.getParameterTypes())),
+                paramsWithImplicitThis(m, paramListFromParameters(m.getParameters())),
                 Set.of(m.getExceptionTypes())
         );
     }
@@ -62,7 +78,7 @@ public record MemberCandidate(
         return new MemberCandidate(c,
                 annotationClasses(c.getDeclaringClass().getAnnotations(), c.getAnnotations()),
                 c.getDeclaringClass(),
-                Arrays.asList(c.getParameterTypes()),
+                paramListFromParameters(c.getParameters()),
                 Set.of(c.getExceptionTypes())
         );
     }
@@ -70,8 +86,12 @@ public record MemberCandidate(
     public static List<MemberCandidate> membersFromField(Field f) {
         Set<Class<?>> as = annotationClasses(f.getDeclaringClass().getDeclaredAnnotations(), f.getDeclaredAnnotations());
 
-        var getter = new MemberCandidate(f, as, f.getType(), paramsWithImplicitThis(f, List.of()),            Set.of());
-        var setter = new MemberCandidate(f, as, Void.TYPE,   paramsWithImplicitThis(f, List.of(f.getType())), Set.of());
+        var getter = new MemberCandidate(f, as, f.getType(),
+                paramsWithImplicitThis(f,
+                        List.of()),                  Set.of());
+        var setter = new MemberCandidate(f, as, Void.TYPE,
+                paramsWithImplicitThis(f,
+                        List.of(paramFromField(f))), Set.of());
 
         return List.of(getter, setter);
     }
@@ -82,13 +102,13 @@ public record MemberCandidate(
                 .collect(Collectors.toSet());
     }
 
-    private static List<Class<?>> paramsWithImplicitThis(Member m, List<Class<?>> paramTypes) {
+    private static List<Param> paramsWithImplicitThis(Member m, List<Param> params) {
         if (Modifier.STATIC == (m.getModifiers() & Modifier.STATIC))
-            return paramTypes;
+            return params;
         else {
-            List<Class<?>> ret = new LinkedList<>();
-            ret.add(m.getDeclaringClass());
-            ret.addAll(paramTypes);
+            List<Param> ret = new LinkedList<>();
+            ret.add(new Param(m.getDeclaringClass(), "this"));
+            ret.addAll(params);
             return ret;
         }
     }

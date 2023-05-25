@@ -10,7 +10,7 @@ public class PermuteParams implements
         Function<MemberCandidate, Stream<MemberCandidate>> {
     @Override
     public Stream<MemberCandidate> apply(MemberCandidate candidate) {
-        return (new PermutationGenerator<>(candidate.paramTypes())).stream()
+        return (new PermutationGenerator<>(candidate.params())).stream()
                 .distinct()
                 .map(ps -> new MemberCandidate(candidate, ps)
                 );
