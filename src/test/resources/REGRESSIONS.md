@@ -28,6 +28,76 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #109](https://github.com/paul-bennett/juggle/issues/109): Reintroduce boxing conversions
+
+Here's a few functions that take four `int`s:
+````
+$ juggle '(int,int,int,int)'
+public static jdk.internal.icu.util.VersionInfo jdk.internal.icu.util.VersionInfo.getInstance(int,int,int,int)
+public jdk.internal.jimage.ImageHeader.<init>(int,int,int,int)
+public static java.time.LocalTime java.time.LocalTime.of(int,int,int,int)
+$
+````
+
+If we search for `Integer`s (or a mix of both types) we should get the same
+thing:
+
+````
+$ juggle '(int,Integer,int,Integer)'
+public static jdk.internal.icu.util.VersionInfo jdk.internal.icu.util.VersionInfo.getInstance(int,int,int,int)
+public jdk.internal.jimage.ImageHeader.<init>(int,int,int,int)
+public static java.time.LocalTime java.time.LocalTime.of(int,int,int,int)
+$
+````
+
+Similarly we should be able to go in the other direction too:
+````
+$ juggle '(Integer,Integer)'
+public int Integer.compareTo(Integer)
+$
+````
+````
+$ juggle '(int,int)'
+public int Integer.compareTo(Integer)
+$
+````
+
+Finally, we the conversions should also apply for return types:
+````
+$ juggle 'int (String)'
+public static Integer Integer.decode(String) throws NumberFormatException
+public static Integer Integer.getInteger(String)
+public Integer.<init>(String) throws NumberFormatException
+public static Integer Integer.valueOf(String) throws NumberFormatException
+public static Integer sun.security.action.GetIntegerAction.privilegedGetProperty(String)
+public static int Character.codePointOf(String)
+public int String.hashCode()
+public int String.length()
+public static int Integer.parseInt(String) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String) throws NumberFormatException
+public static int jdk.internal.org.objectweb.asm.Type.getArgumentsAndReturnSizes(String)
+public static final int javax.crypto.Cipher.getMaxAllowedKeyLength(String) throws java.security.NoSuchAlgorithmException
+public static int jdk.internal.jimage.ImageStringsReader.hashCode(String)
+$
+````
+````
+$ juggle 'Integer (String)'
+public static Integer Integer.decode(String) throws NumberFormatException
+public static Integer Integer.getInteger(String)
+public Integer.<init>(String) throws NumberFormatException
+public static Integer Integer.valueOf(String) throws NumberFormatException
+public static Integer sun.security.action.GetIntegerAction.privilegedGetProperty(String)
+public static int Character.codePointOf(String)
+public int String.hashCode()
+public int String.length()
+public static int Integer.parseInt(String) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String) throws NumberFormatException
+public static int jdk.internal.org.objectweb.asm.Type.getArgumentsAndReturnSizes(String)
+public static final int javax.crypto.Cipher.getMaxAllowedKeyLength(String) throws java.security.NoSuchAlgorithmException
+public static int jdk.internal.jimage.ImageStringsReader.hashCode(String)
+$
+````
+
 ### [GitHub Issue #85](https://github.com/paul-bennett/juggle/issues/85): Handle nested classes in queries
 
 Prior to fixing, this used to throw an exception saying that it couldn't
