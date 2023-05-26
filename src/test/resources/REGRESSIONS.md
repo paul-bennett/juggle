@@ -106,9 +106,7 @@ Prior to fixing #99, this query was resulting in an uncaught exception.
 ````
 $ juggle "private java.util.Optional /^lambda/"
 private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
-private java.util.Optional<T> jdk.internal.logger.SimpleConsoleLogger.CallerFinder.lambda$get$0(java.util.stream.Stream<T>)
 private static java.util.Optional<T> java.util.Currency.lambda$getValidCurrencyData$0(java.util.Properties,java.util.regex.Pattern,String)
-private java.util.Optional<T> jdk.internal.loader.Loader.lambda$initRemotePackageMap$2(java.lang.module.ResolvedModule,ModuleLayer)
 private static java.util.Optional<T> java.util.stream.Collectors.lambda$reducing$48(java.util.stream.Collectors$1OptionalBox)
 $
 ````
