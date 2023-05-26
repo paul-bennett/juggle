@@ -15,6 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+
 <!--
   This document contains sample invocations of Juggle.
   
@@ -146,7 +147,6 @@ public native int Object.hashCode()
 public static native int System.identityHashCode(Object)
 public static native int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 public static int java.util.Objects.hashCode(Object)
-public static int sun.invoke.util.ValueConversions.widenSubword(Object)
 $
 ````
 
@@ -184,13 +184,13 @@ data in the query.  If multiple annotations are supplied, they must all be
 present on the class or method.
 ````
 $ juggle @FunctionalInterface int
+public abstract int java.util.Comparator<T>.compare(T,T)
 public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
 public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
 public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
 public abstract int java.util.function.LongToIntFunction.applyAsInt(long)
 public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
 public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
-public abstract int java.util.Comparator<T>.compare(T,T)
 public abstract int java.util.function.IntSupplier.getAsInt()
 $
 ````
@@ -217,15 +217,7 @@ the closing slash results in a case-insensitive match.
 ````
 $ juggle String /package/i
 public String Class<T>.getPackageName()
-public static final String jdk.internal.module.ClassFileConstants.MODULE_PACKAGES
-public static final String sun.reflect.misc.ReflectUtil.PROXY_PACKAGE
-public String sun.util.locale.provider.LocaleProviderAdapter.Type.getTextResourcesPackage()
-public String sun.util.locale.provider.LocaleProviderAdapter.Type.getUtilResourcesPackage()
-public String jdk.internal.org.objectweb.asm.commons.Remapper.mapPackageName(String)
 public String java.lang.constant.ClassDesc.packageName()
-public String jdk.internal.org.objectweb.asm.ClassReader.readPackage(int,char[])
-public static String jdk.internal.module.Checks.requirePackageName(String)
-public static String jdk.internal.module.Resources.toPackageName(String)
 $
 ````
 
@@ -306,8 +298,6 @@ public java.io.ByteArrayOutputStream.<init>()
 public java.io.OutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
-public sun.net.www.http.PosterOutputStream.<init>()
-public sun.security.util.DerOutputStream.<init>()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
 $
 ````
@@ -372,13 +362,11 @@ partially-known types.
 A simple `?` wildcard can stand for any type.  So here are all the members
 that take a `String`, an `int` and two other parameters of unknown type:
 ````
-juggle '(String,int,?,?)'
+$ juggle '(String,int,?,?)'
 public java.net.Socket.<init>(String,int,java.net.InetAddress,int) throws java.io.IOException
 public java.text.StringCharacterIterator.<init>(String,int,int,int)
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,int,int)
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,String[],int)
-public static java.util.Map<K,V> sun.util.locale.provider.CalendarDataUtility.retrieveFieldValueNames(String,int,int,java.util.Locale)
-public static java.util.Map<K,V> sun.util.locale.provider.CalendarDataUtility.retrieveJavaTimeFieldValueNames(String,int,int,java.util.Locale)
 $
 ````
 

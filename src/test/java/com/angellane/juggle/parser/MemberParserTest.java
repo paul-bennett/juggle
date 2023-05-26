@@ -17,15 +17,14 @@
  */
 package com.angellane.juggle.parser;
 
-import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.Juggler;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.parser.DeclParser.MemberDeclContext;
 import com.angellane.juggle.query.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -342,21 +341,4 @@ public class MemberParserTest {
 
         assertEquals(expectedQuery, actualQuery);
     }
-
-    @Disabled
-    @Test
-    public void testThrowsClassPlusEllipsis() {
-        MemberQuery actualQuery = memberQueryFor(
-                "() throws NullPointerException, ...");
-
-        MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.exceptions =
-                Set.of(BoundedType.exactType(NullPointerException.class)
-//                , MemberQuery.Ellipsis
-                );
-
-        assertEquals(expectedQuery, actualQuery);
-    }
-
-
 }

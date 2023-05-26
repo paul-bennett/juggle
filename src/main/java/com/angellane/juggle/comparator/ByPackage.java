@@ -51,6 +51,10 @@ public class ByPackage<
         int m2Pri = getPriorityOrDefault(
                 m2.candidate().packageName(), Integer.MAX_VALUE);
 
-        return Integer.compare(m1Pri, m2Pri);
+        int priorityComparison = Integer.compare(m1Pri, m2Pri);
+
+        return priorityComparison != 0
+                ? priorityComparison
+                : m1.candidate().packageName().compareTo(m2.candidate().packageName());
     }
 }

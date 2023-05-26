@@ -15,6 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+
 # Regressions
 
 This file contains regression tests for Juggle; curiosities that show
@@ -98,6 +99,40 @@ public static int jdk.internal.jimage.ImageStringsReader.hashCode(String)
 $
 ````
 
+### [GitHub Issue #105](https://github.com/paul-bennett/juggle/issues/105): `-s package` should sort by package name
+
+Modified `package` comparator now sorts packages alphabetically if they 
+weren't mentioned in the import list, and the implicit `java.lang` has
+been moved to the end of that list rather than the start.
+````
+$ juggle -i java.net class /Class/
+public class URLClassLoader extends java.security.SecureClassLoader implements java.io.Closeable
+public final class Class<T> implements java.io.Serializable, java.lang.reflect.GenericDeclaration, java.lang.reflect.Type, java.lang.reflect.AnnotatedElement, java.lang.invoke.TypeDescriptor.OfField<F>, java.lang.constant.Constable
+public class ClassCastException extends RuntimeException
+public class ClassCircularityError extends LinkageError
+public class ClassFormatError extends LinkageError
+public abstract class ClassLoader
+public class ClassNotFoundException extends ReflectiveOperationException
+public abstract class ClassValue<T>
+public class IncompatibleClassChangeError extends LinkageError
+public class NoClassDefFoundError extends LinkageError
+public class UnsupportedClassVersionError extends ClassFormatError
+public class java.io.InvalidClassException extends java.io.ObjectStreamException
+public class java.io.ObjectStreamClass implements java.io.Serializable
+public class java.security.SecureClassLoader extends ClassLoader
+$
+````
+
+### [GitHub Issue #72](https://github.com/paul-bennett/juggle/issues/72): Don't show JDK implementation classes
+
+Prior to fixing, this used to include two further results from non-exported packages
+in `jdk.internals.*`:
+````
+$ juggle '(int,int,int,int)'
+public static java.time.LocalTime java.time.LocalTime.of(int,int,int,int)
+$
+````
+
 ### [GitHub Issue #85](https://github.com/paul-bennett/juggle/issues/85): Handle nested classes in queries
 
 Prior to fixing, this used to throw an exception saying that it couldn't
@@ -174,10 +209,8 @@ $
 Prior to fixing #99, this query was resulting in an uncaught exception.
 ````
 $ juggle "private java.util.Optional /^lambda/"
-private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
-private java.util.Optional<T> jdk.internal.logger.SimpleConsoleLogger.CallerFinder.lambda$get$0(java.util.stream.Stream<T>)
 private static java.util.Optional<T> java.util.Currency.lambda$getValidCurrencyData$0(java.util.Properties,java.util.regex.Pattern,String)
-private java.util.Optional<T> jdk.internal.loader.Loader.lambda$initRemotePackageMap$2(java.lang.module.ResolvedModule,ModuleLayer)
+private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
 private static java.util.Optional<T> java.util.stream.Collectors.lambda$reducing$48(java.util.stream.Collectors$1OptionalBox)
 $
 ````
@@ -228,13 +261,13 @@ public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public synchronized int java.util.Stack<E>.search(Object)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 $
 ````
 
 
-Omitting parentheses as above indicates that we don't want to filter on 
+Omitting parentheses as above indicates that we don't want to filter on
 parameters at all.  Including parentheses but nothing between them matches
 zero-arg methods.  There are none that match the name filter in this case:
 
@@ -269,8 +302,8 @@ public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public synchronized int java.util.Stack<E>.search(Object)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 $
 ````
 
@@ -474,7 +507,7 @@ $
 Results aren't deduplicated
 
 ````
-% juggle -n asSubclass -m java.base,java.base
+# juggle -n asSubclass -m java.base,java.base
 $ juggle /asSubclass/ -m java.base,java.base
 public <U> Class<T> Class<T>.asSubclass(Class<T>)
 $
@@ -493,7 +526,7 @@ So the following two executions should return the same results.  (Prior to the f
 the second -- `-m java.se` -- showed no results.)
 
 ````
-% juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
+# juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
 $ juggle -m java.sql -i java.sql ResultSet '(? super PreparedStatement)'
 public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
 public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
@@ -502,7 +535,7 @@ $
 ````
 
 ````
-% juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
+# juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
 $ juggle -m java.se -i java.sql ResultSet '(? super PreparedStatement)'
 public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
 public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
@@ -515,11 +548,8 @@ $
 Searching (with -p or -r) for an array of a primitive type falls back to Object
 
 ````
-% juggle -p double[],int,int,double -r void
+# juggle -p double[],int,int,double -r void
 $ juggle void '(double[],int,int,double)'
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
-
-
-
