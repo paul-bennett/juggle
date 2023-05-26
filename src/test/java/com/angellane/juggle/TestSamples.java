@@ -70,13 +70,18 @@ public class TestSamples {
         try (InputStreamReader isr = new InputStreamReader(url.openStream());
              LineNumberReader br = new LineNumberReader(isr))
         {
+            final String DISABLED_CMD = "% juggle ";
+            final String DISABLED_EOT = "%";
+
             final String JUGGLE_CMD = "$ juggle ";
             final String CONTINUE = "\\";
             final String EOT = "$";
 
             State state = SKIP;
 
+            boolean enabledTest   = false;
             int startLine = 0;
+
             StringBuilder command = new StringBuilder();
             StringBuilder output  = new StringBuilder();
 
@@ -84,42 +89,61 @@ public class TestSamples {
             while (null != (line = br.readLine()))
                 // Note: line doesn't include a terminating \r, \n or \r\n
 
-                  switch (state) {
-                      case SKIP:
-                          if (!line.startsWith(JUGGLE_CMD))
+                switch (state) {
+                    case SKIP:
+                        if (line.startsWith(JUGGLE_CMD))
+                            enabledTest = true;
+                        else if (line.startsWith(DISABLED_CMD))
+                            enabledTest = false;
+                        else
                             break;
 
-                          output  = new StringBuilder();
-                          command = new StringBuilder();
-                          startLine = br.getLineNumber();
+                        if (!line.startsWith(JUGGLE_CMD) &&
+                                !line.startsWith(DISABLED_CMD))
+                            break;
 
-                          // fall through
-                      case CMD:
-                          if (line.endsWith(CONTINUE)) {
-                              state = CMD;
-                              line = line.substring(0, line.length() - CONTINUE.length());
-                          }
-                          else
-                              state = OUT;
-                          command.append(line);
-                          break;
+                        output  = new StringBuilder();
+                        command = new StringBuilder();
+                        startLine = br.getLineNumber();
 
-                      case OUT:
-                          if (!line.equals(EOT))
+                        // fall through
+                    case CMD:
+                        if (line.endsWith(CONTINUE)) {
+                            state = CMD;
+                            line = line.substring(0, line.length() - CONTINUE.length());
+                        }
+                        else
+                            state = OUT;
+                        command.append(line);
+                        break;
+
+                    case OUT:
+                        if (enabledTest && line.equals(EOT)) {
+                            String cmdStr = command.toString();
+                            assertTrue(cmdStr.startsWith(JUGGLE_CMD));
+                            String args = command.substring(JUGGLE_CMD.length());
+                            String expected = output.toString();
+
+                            String testName = "#" + startLine + ": " + args;
+                            URI testURI = URI.create("classpath:/" + filename + "?line=" + startLine);
+
+                            ret.add(DynamicTest.dynamicTest(testName, testURI,
+                                    () -> runTest(args, expected)));
+                            state = SKIP;
+                        }
+                        else if (!enabledTest && line.equals(DISABLED_EOT)) {
+                            String args = command.substring(DISABLED_CMD.length());
+
+                            String testName = "#" + startLine + ": " + args;
+                            URI testURI = URI.create("classpath:/" + filename + "?line=" + startLine);
+
+                            ret.add(DynamicTest.dynamicTest(testName, testURI,
+                                    () -> Assumptions.abort("Test disabled with %")));
+                        }
+                        else
                             output.append(line).append('\n');
-                          else {
-                              String cmdStr = command.toString();
-                              assertTrue(cmdStr.startsWith(JUGGLE_CMD));
-                              String args = command.substring(JUGGLE_CMD.length());
-                              String expected = output.toString();
-                              ret.add(DynamicTest.dynamicTest(
-                                      "#" + startLine + ": " + args,
-                                      URI.create("classpath:/" + filename + "?line=" + startLine),
-                                      () -> runTest(args, expected)));
-                              state = SKIP;
-                          }
-                          break;
-                  }
+                        break;
+                }
         } catch (IOException e) {
             fail(e);
         }
