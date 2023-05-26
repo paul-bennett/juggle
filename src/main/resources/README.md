@@ -362,13 +362,11 @@ partially-known types.
 A simple `?` wildcard can stand for any type.  So here are all the members
 that take a `String`, an `int` and two other parameters of unknown type:
 ````
-juggle '(String,int,?,?)'
+$ juggle '(String,int,?,?)'
 public java.net.Socket.<init>(String,int,java.net.InetAddress,int) throws java.io.IOException
 public java.text.StringCharacterIterator.<init>(String,int,int,int)
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,int,int)
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,String[],int)
-public static java.util.Map<K,V> sun.util.locale.provider.CalendarDataUtility.retrieveFieldValueNames(String,int,int,java.util.Locale)
-public static java.util.Map<K,V> sun.util.locale.provider.CalendarDataUtility.retrieveJavaTimeFieldValueNames(String,int,int,java.util.Locale)
 $
 ````
 

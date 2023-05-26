@@ -209,6 +209,7 @@ public Object.<init>()
 $
 ````
 
+
 ## Methods with no modifiers
 
 Curiously this test fails here, but works in README.md.  See GitHub issue #39.
@@ -224,10 +225,11 @@ com.angellane.juggle.testinput.lib.Lib.<init>()
 ````
 $ juggle --dry-run --show-query record
 QUERY: ClassQuery{flavour=RECORD, annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, declarationPattern=null, supertype=null, superInterfaces=null, permittedSubtypes=null, recordComponents=null}
-$ 
+$
 ````
 ````
-$ juggle --dry-run --show-query '()'      
+$ juggle --dry-run --show-query '()'
 QUERY: DeclQuery{annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, returnType=null, declarationPattern=null, params=[], exceptions=null}
-$ 
+$
 ````
+

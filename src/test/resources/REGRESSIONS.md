@@ -437,7 +437,7 @@ $
 Results aren't deduplicated
 
 ````
-% juggle -n asSubclass -m java.base,java.base
+# juggle -n asSubclass -m java.base,java.base
 $ juggle /asSubclass/ -m java.base,java.base
 public <U> Class<T> Class<T>.asSubclass(Class<T>)
 $
@@ -456,7 +456,7 @@ So the following two executions should return the same results.  (Prior to the f
 the second -- `-m java.se` -- showed no results.)
 
 ````
-% juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
+# juggle -m java.sql -i java.sql -r ResultSet -p PreparedStatement
 $ juggle -m java.sql -i java.sql ResultSet '(? super PreparedStatement)'
 public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
 public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
@@ -465,7 +465,7 @@ $
 ````
 
 ````
-% juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
+# juggle -m java.se -i java.sql -r ResultSet -p PreparedStatement
 $ juggle -m java.se -i java.sql ResultSet '(? super PreparedStatement)'
 public abstract ResultSet PreparedStatement.executeQuery() throws SQLException
 public abstract ResultSet Statement.getGeneratedKeys() throws SQLException
@@ -478,11 +478,8 @@ $
 Searching (with -p or -r) for an array of a primitive type falls back to Object
 
 ````
-% juggle -p double[],int,int,double -r void
+# juggle -p double[],int,int,double -r void
 $ juggle void '(double[],int,int,double)'
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ````
-
-
-
