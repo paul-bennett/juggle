@@ -21,6 +21,66 @@ This file contains invocations designed to increase code coverage of the test su
 don't actually do anything useful, but instead the combination of command-line parameters have been carefully
 selected in order to drive up the JaCoCo coverage metrics.
 
+
+## Command-line Parsing
+
+If we pass an invalid argument, we should get an error and the help text:
+
+````
+$ juggle --fiddle-de-dee
+Unknown option: '--fiddle-de-dee'
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
+              [-i=packageName] [-j=jarFilePath] [-m=moduleName]
+              [-s=<addSortCriteria>] [declaration...]
+An API search tool for Java
+      [declaration...]       A Java-style declaration to match against
+      --dry-run              Dry run only
+  -f, --format=auto|plain|colour|color
+                             Output format
+  -h, --help                 Show this help message and exit.
+  -i, --import=packageName   Imported package names
+  -j, --jar=jarFilePath      JAR file to include in search
+  -m, --module=moduleName    Modules to search
+  -s, --sort=<addSortCriteria>
+                             Sort criteria
+      --show-query           Show query
+  -V, --version              Print version information and exit.
+  -x, --[no-]permute         Also match permutations of parameters
+$
+````
+
+Of course, we can explicitly ask for help:
+
+````
+$ juggle --help
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
+              [-i=packageName] [-j=jarFilePath] [-m=moduleName]
+              [-s=<addSortCriteria>] [declaration...]
+An API search tool for Java
+      [declaration...]       A Java-style declaration to match against
+      --dry-run              Dry run only
+  -f, --format=auto|plain|colour|color
+                             Output format
+  -h, --help                 Show this help message and exit.
+  -i, --import=packageName   Imported package names
+  -j, --jar=jarFilePath      JAR file to include in search
+  -m, --module=moduleName    Modules to search
+  -s, --sort=<addSortCriteria>
+                             Sort criteria
+      --show-query           Show query
+  -V, --version              Print version information and exit.
+  -x, --[no-]permute         Also match permutations of parameters
+$
+````
+
+We can ask for the version of the application, but when run from an unpacked
+source tree it doesn't show anything useful:
+````
+$ juggle --version
+Unknown
+$
+````
+
 ## No parameters in the query
 
 ````
