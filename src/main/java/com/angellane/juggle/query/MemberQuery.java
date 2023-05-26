@@ -19,12 +19,16 @@ package com.angellane.juggle.query;
 
 import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.match.Match;
+import com.angellane.juggle.match.TypeMatcher;
 
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.List;
+import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
+import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
+import static com.angellane.juggle.match.TypeMatcher.NO_MATCH;
 
 /**
  * This class represents a declaration query -- the result of parsing a
@@ -32,10 +36,8 @@ import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
  * to match.
  */
 public final class MemberQuery extends Query<MemberCandidate> {
-    public BoundedType      returnType  = null;
-
-    public List<ParamSpec>  params      = null;
-    public Set<BoundedType> exceptions  = null;
+    public BoundedType returnType = null;
+    public Set<BoundedType> exceptions = null;
 
     @Override
     public boolean equals(Object other) {
@@ -45,9 +47,8 @@ public final class MemberQuery extends Query<MemberCandidate> {
             return false;
         else
             return super.equals(q)
-                    && Objects.equals(returnType,   q.returnType)
-                    && Objects.equals(params,       q.params)
-                    && Objects.equals(exceptions,   q.exceptions)
+                    && Objects.equals(returnType, q.returnType)
+                    && Objects.equals(exceptions, q.exceptions)
                     ;
     }
 
@@ -55,7 +56,6 @@ public final class MemberQuery extends Query<MemberCandidate> {
     public int hashCode() {
         return Objects.hash(super.hashCode()
                 , returnType
-                , params
                 , exceptions
         );
     }
@@ -75,133 +75,66 @@ public final class MemberQuery extends Query<MemberCandidate> {
     }
 
     @Override
-    public
-    <Q extends Query<MemberCandidate>, M extends Match<MemberCandidate,Q>>
-    Stream<M> match(MemberCandidate candidate) {
-        OptionalInt  optScore = scoreCandidate(candidate);
+    public boolean hasBoundedWildcards() {
+        boolean boundedParams = params != null && params.stream()
+                .flatMap(ps -> ps instanceof SingleParam sp
+                        ? Stream.of(sp) : Stream.empty())
+                .anyMatch(sp -> sp.paramType().isBoundedWildcard());
+        boolean boundedReturn =
+                returnType != null && returnType.isBoundedWildcard();
+        boolean boundedThrows =
+                exceptions != null && exceptions.stream()
+                        .anyMatch(BoundedType::isBoundedWildcard);
 
-        if (optScore.isPresent()) {
+        return boundedParams || boundedReturn || boundedThrows;
+    }
+
+    @Override
+    public <Q extends Query<MemberCandidate>, M extends Match<MemberCandidate, Q>>
+    Stream<M> match(TypeMatcher tm, MemberCandidate candidate) {
+        OptionalInt score = scoreCandidate(tm, candidate);
+
+        if (score.isPresent()) {
             @SuppressWarnings("unchecked")
-            M m = (M)new Match<>(candidate, this, optScore.getAsInt());
+            M m = (M) new Match<>(candidate, this, score.getAsInt());
             return Stream.of(m);
-        }
-        else
+        } else
             return Stream.empty();
     }
 
-    OptionalInt  scoreCandidate(MemberCandidate cm) {
+    OptionalInt scoreCandidate(TypeMatcher tm, MemberCandidate cm) {
         return totalScore(List.of(
                 scoreAnnotations(cm.annotationTypes())
                 , scoreAccessibility(cm.accessibility())
                 , scoreModifiers(cm.otherModifiers())
-                , scoreReturn(cm.returnType())
+                , scoreReturn(tm, cm.returnType())
                 , scoreName(cm.declarationName())
-                , scoreParams(cm.paramTypes())
-                , scoreExceptions(cm.throwTypes())
-                ));
+                , scoreParams(tm, cm.paramTypes())
+                , scoreExceptions(tm, cm.throwTypes())
+        ));
     }
 
-    OptionalInt scoreReturn(Class<?> returnType) {
-        return this.returnType == null
-                || this.returnType.matchesClass(returnType)
-                ? OptionalInt.of(0) : OptionalInt.empty();
+    OptionalInt scoreReturn(TypeMatcher tm, Class<?> returnType) {
+        if (this.returnType == null)
+            return EXACT_MATCH;
+        else
+            return tm.scoreTypeMatch(this.returnType, returnType);
     }
 
-    OptionalInt scoreExceptions(Set<Class<?>> candidateExceptions) {
+    OptionalInt scoreExceptions(TypeMatcher tm,
+                                Set<Class<?>> candidateExceptions) {
         // Need to check both ways:
         //  1. Is everything thrown by the query also thrown by the candidate?
         //  2. Is everything thrown by the candidate also thrown by the query?
         return this.exceptions == null
                 || this.exceptions.stream()
-                .allMatch(ex -> candidateExceptions.stream()
-                        .anyMatch(ex::matchesClass)
+                .allMatch(qx -> candidateExceptions.stream().anyMatch(
+                        cx -> tm.scoreTypeMatch(qx, cx).isPresent())
                 )
                 && candidateExceptions.stream()
-                .allMatch(ex1 -> this.exceptions.stream()
-                        .anyMatch(ex2 -> ex2.matchesClass(ex1))
+                .allMatch(cx -> this.exceptions.stream().anyMatch(
+                        qx -> tm.scoreTypeMatch(qx, cx).isPresent())
                 )
-                ? OptionalInt.of(0) : OptionalInt.empty();
-    }
-
-    OptionalInt scoreParams(List<Class<?>> candidateParams) {
-        if (params == null)
-            return OptionalInt.of(0);
-
-        // params :: [ParamSpec]
-        // type ParamSpec = ZeroOrMoreParams | SingleParam name type
-
-        // Intent is to construct a number of alternative queries of type
-        // List<SingleParam> by replacing the ZeroOrMoreParams objects with
-        // a number of wildcard SingleParam objects.
-
-        int numParamSpecs = (int)params.stream()
-                .filter(p -> p instanceof SingleParam).count();
-        int numEllipses = params.size() - numParamSpecs;
-        int spareParams = candidateParams.size() - numParamSpecs;
-
-        if (spareParams == 0)
-            // No ellipses, correct #params
-            return scoreParamSpecs(
-                    params.stream()
-                            .filter(ps -> ps instanceof SingleParam)
-                            .map(ps -> (SingleParam)ps)
-                            .toList(),
-                    candidateParams
-            );
-        else if (numEllipses == 0)
-            // No ellipses over which to distribute spare params
-            return OptionalInt.empty();
-        else if (spareParams < 0)
-            // More specified params than candidate params
-            return OptionalInt.empty();
-        else {
-            // Nasty: using a 1-element array so we can set inside lambda
-            final OptionalInt [] ret = new OptionalInt[]{ OptionalInt.empty() };
-
-            decomposeIntoParts(spareParams, numEllipses, distribution -> {
-                int ix = 0;  // index into distribution
-                List<SingleParam> queryParams = new ArrayList<>();
-
-                for (ParamSpec ps : params) {
-                    if (ps instanceof SingleParam singleParam)
-                        queryParams.add(singleParam);
-                    else
-                        for (int numWildcards = distribution[ix++];
-                             numWildcards > 0; numWildcards--)
-                            queryParams.add(ParamSpec.wildcard());
-                }
-
-                OptionalInt  thisScore =
-                        scoreParamSpecs(queryParams, candidateParams);
-
-                ret[0] = IntStream.concat(ret[0].stream(), thisScore.stream())
-                        .max();
-            });
-
-            return ret[0];
-        }
-    }
-
-    private OptionalInt scoreParamSpecs(
-            List<SingleParam> queryParams,
-            List<Class<?>>    candidateParams
-    ) {
-        if (queryParams.size() != candidateParams.size())
-            return OptionalInt.empty();
-        else {
-            Iterator<? extends Class<?>> actualParamIter =
-                    candidateParams.iterator();
-
-            return totalScore(
-                    queryParams.stream()
-                            .map(ps -> {
-                                BoundedType bounds = ps.paramType();
-                                Class<?> actualType = actualParamIter.next();
-                                return bounds.scoreMatch(actualType);
-                            })
-                            .toList()
-            );
-        }
+                ? EXACT_MATCH : NO_MATCH;
     }
 }
-

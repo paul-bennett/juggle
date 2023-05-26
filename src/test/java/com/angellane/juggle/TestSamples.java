@@ -38,6 +38,21 @@ public class TestSamples {
                 "public static java.time.LocalTime java.time.LocalTime.now(java.time.Clock)\n");
     }
 
+    // This method is present to facilitate debugging... pop in appropriate
+    // values for the query and expectedResults, then debug explicitly from
+    // an IDE.
+    @Test
+    public void useThisTestForDebugging() {
+        String query = "/search$/i (? extends java.util.Collection,...)";
+        String expectedResults = """
+                public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+                public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+                public synchronized int java.util.Stack<E>.search(Object)
+                """;
+
+        runTest(query, expectedResults);
+    }
+
     @TestFactory
     public Stream<DynamicNode> testSampleFiles() {
         ClassLoader cl = getClass().getClassLoader();
@@ -147,6 +162,13 @@ public class TestSamples {
     }
 
 
+    private String sortedLines(String text) {
+        return text.lines().map(s -> s + "\n").sorted()
+                .collect(StringBuilder::new,
+                        StringBuilder::append,
+                        StringBuilder::append).toString();
+    }
+
     private void runTest(String inputLine, String expectedOutput) {
         ShellParser p = new ShellParser();
         String[] args = p.parse(inputLine);
@@ -163,19 +185,13 @@ public class TestSamples {
 
             String actualOutput = bs.toString();
 
-            assertEquals(
-                    expectedOutput.lines().map(s -> s + "\n").sorted()
-                            .collect(StringBuilder::new,
-                                    StringBuilder::append,
-                                    StringBuilder::append).toString(),
-                    actualOutput.lines().map(s -> s + "\n").sorted()
-                            .collect(StringBuilder::new,
-                                    StringBuilder::append,
-                                    StringBuilder::append).toString(),
-                    "Sorted output should match"
-            );
             assertEquals(expectedOutput, actualOutput,
-                    "Actual output should match");
+                    () -> "Actual output should match"
+                            + " (sorted output "
+                            + (sortedLines(expectedOutput)
+                                .equals(sortedLines(actualOutput))
+                                ? "matches" : "does not match")
+                            + ")");
         }
         catch (IOException ex) {
             fail(ex);

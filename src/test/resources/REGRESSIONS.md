@@ -29,14 +29,187 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #58](https://github.com/paul-bennett/juggle/issues/58): Add `--conversions` option
+
+The new `--conversions` option lets us dictate when Juggle automatically
+applies relevant boxing and reference conversions for us.
+
+Here are four methods that we'll play with. We can find them using explicit wildcards.
+(This query worked before the fix.)
+````
+$ juggle '? extends CharSequence (? super String,int,int)'
+public CharSequence String.subSequence(int,int)
+public abstract CharSequence CharSequence.subSequence(int,int)
+public String String.substring(int,int)
+public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
+$
+````
+
+If we don't specify any wildcards in the query, Juggle infers them for us:
+````
+$ juggle 'CharSequence (String,int,int)'
+public CharSequence String.subSequence(int,int)
+public abstract CharSequence CharSequence.subSequence(int,int)
+public String String.substring(int,int)
+public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
+$
+````
+
+This is the same as asking for `all` conversions:
+````
+$ juggle --conversions=all 'CharSequence (String,int,int)'
+public CharSequence String.subSequence(int,int)
+public abstract CharSequence CharSequence.subSequence(int,int)
+public String String.substring(int,int)
+public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
+$
+````
+
+And in this case, because we don't have any explicit wildcards in the query,
+it's equivalent to `auto` conversions:
+````
+$ juggle --conversions=auto 'CharSequence (String,int,int)'
+public CharSequence String.subSequence(int,int)
+public abstract CharSequence CharSequence.subSequence(int,int)
+public String String.substring(int,int)
+public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
+$
+````
+
+If we didn't want Juggle to apply any conversions we can ask for `none`:
+(This is what Juggle used to respond with prior to fixing #58.)
+````
+$ juggle --conversions=none 'CharSequence (String,int,int)'
+public CharSequence String.subSequence(int,int)
+$
+````
+
+Something similar happens with boxing conversions.  If we apply `auto`
+conversions and use no wildcards, that's equivalent to `all`:
+````
+$ juggle 'Integer(String,int)'
+public static Integer Integer.getInteger(String,int)
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public int String.codePointAt(int)
+public int String.codePointBefore(int)
+public static Integer Integer.getInteger(String,Integer)
+public int String.indexOf(int)
+public int String.lastIndexOf(int)
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static int Character.codePointAt(CharSequence,int)
+public static int Character.codePointBefore(CharSequence,int)
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public volatile int String.compareTo(Object)
+public abstract int Comparable<T>.compareTo(T)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
+$
+````
+````
+$ juggle -c=auto 'Integer(String,int)'
+public static Integer Integer.getInteger(String,int)
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public int String.codePointAt(int)
+public int String.codePointBefore(int)
+public static Integer Integer.getInteger(String,Integer)
+public int String.indexOf(int)
+public int String.lastIndexOf(int)
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static int Character.codePointAt(CharSequence,int)
+public static int Character.codePointBefore(CharSequence,int)
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public volatile int String.compareTo(Object)
+public abstract int Comparable<T>.compareTo(T)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
+$
+````
+````
+$ juggle -c=all 'Integer(String,int)'
+public static Integer Integer.getInteger(String,int)
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public int String.codePointAt(int)
+public int String.codePointBefore(int)
+public static Integer Integer.getInteger(String,Integer)
+public int String.indexOf(int)
+public int String.lastIndexOf(int)
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static int Character.codePointAt(CharSequence,int)
+public static int Character.codePointBefore(CharSequence,int)
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public volatile int String.compareTo(Object)
+public abstract int Comparable<T>.compareTo(T)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
+$
+````
+
+If we tell Juggle not to apply any conversions, boxing is disabled as well.
+(This is equivalent to pre-fix Juggle.)
+````
+$ juggle -c=none 'Integer(String,int)'
+public static Integer Integer.getInteger(String,int)
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+$
+````
+
+Further tests I've used during development of this feature:
+````
+$ juggle -c=none 'java.lang.reflect.Executable(?)'
+public java.lang.reflect.Executable java.lang.reflect.Parameter.getDeclaringExecutable()
+$
+````
+
+````
+$ juggle 'java.lang.reflect.Executable(?)'
+public java.lang.reflect.Executable java.lang.reflect.Parameter.getDeclaringExecutable()
+public java.lang.reflect.Constructor<T> Class<T>.getEnclosingConstructor() throws SecurityException
+public java.lang.reflect.Method Class<T>.getEnclosingMethod() throws SecurityException
+public java.lang.reflect.Method java.lang.annotation.AnnotationTypeMismatchException.element()
+public java.lang.reflect.Method java.lang.reflect.RecordComponent.getAccessor()
+$
+````
+
+Conversions also apply to exceptions. We used to have to include upper
+bounds explicitly:
+````
+$ juggle '? encode throws ? extends java.io.IOException'
+public static String java.net.URLEncoder.encode(String,String) throws java.io.UnsupportedEncodingException
+public final java.nio.ByteBuffer java.nio.charset.CharsetEncoder.encode(java.nio.CharBuffer) throws java.nio.charset.CharacterCodingException
+public abstract void java.security.cert.Extension.encode(java.io.OutputStream) throws java.io.IOException
+$
+````
+
+But now, with `-c auto`, the bounds are set implicitly:
+````
+$ juggle '? encode throws java.io.IOException' 
+public static String java.net.URLEncoder.encode(String,String) throws java.io.UnsupportedEncodingException
+public final java.nio.ByteBuffer java.nio.charset.CharsetEncoder.encode(java.nio.CharBuffer) throws java.nio.charset.CharacterCodingException
+public abstract void java.security.cert.Extension.encode(java.io.OutputStream) throws java.io.IOException
+$
+````
+
+To show just the methods that throw a specific exception we need `-c none`:
+````
+$ juggle -c none '? encode throws java.io.IOException' 
+public abstract void java.security.cert.Extension.encode(java.io.OutputStream) throws java.io.IOException
+$
+````
+
+
 ### [GitHub Issue #109](https://github.com/paul-bennett/juggle/issues/109): Reintroduce boxing conversions
 
-Here's a few functions that take four `int`s:
+Here's a few functions that could take four `int`s:
 ````
 $ juggle '(int,int,int,int)'
-public static jdk.internal.icu.util.VersionInfo jdk.internal.icu.util.VersionInfo.getInstance(int,int,int,int)
-public jdk.internal.jimage.ImageHeader.<init>(int,int,int,int)
 public static java.time.LocalTime java.time.LocalTime.of(int,int,int,int)
+public java.util.IntSummaryStatistics.<init>(long,int,int,long) throws IllegalArgumentException
+public static java.time.temporal.ValueRange java.time.temporal.ValueRange.of(long,long,long,long)
+public java.util.DoubleSummaryStatistics.<init>(long,double,double,double) throws IllegalArgumentException
+public java.util.LongSummaryStatistics.<init>(long,long,long,long) throws IllegalArgumentException
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
+public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ````
 
@@ -45,57 +218,153 @@ thing:
 
 ````
 $ juggle '(int,Integer,int,Integer)'
-public static jdk.internal.icu.util.VersionInfo jdk.internal.icu.util.VersionInfo.getInstance(int,int,int,int)
-public jdk.internal.jimage.ImageHeader.<init>(int,int,int,int)
 public static java.time.LocalTime java.time.LocalTime.of(int,int,int,int)
+public java.util.IntSummaryStatistics.<init>(long,int,int,long) throws IllegalArgumentException
+public static java.time.temporal.ValueRange java.time.temporal.ValueRange.of(long,long,long,long)
+public java.util.DoubleSummaryStatistics.<init>(long,double,double,double) throws IllegalArgumentException
+public java.util.LongSummaryStatistics.<init>(long,long,long,long) throws IllegalArgumentException
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
+public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ````
 
 Similarly we should be able to go in the other direction too:
 ````
-$ juggle '(Integer,Integer)'
+$ juggle 'int (Integer,Integer)'
 public int Integer.compareTo(Integer)
+public volatile int Integer.compareTo(Object)
+public abstract int Comparable<T>.compareTo(T)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static int Math.addExact(int,int)
+public static int StrictMath.addExact(int,int)
+public static int Integer.compare(int,int)
+public static int Integer.compareUnsigned(int,int)
+public static int Character.digit(int,int)
+public static int Integer.divideUnsigned(int,int)
+public static int Math.floorDiv(int,int)
+public static int StrictMath.floorDiv(int,int)
+public static int Math.floorMod(int,int)
+public static int StrictMath.floorMod(int,int)
+public static int Integer.max(int,int)
+public static int Math.max(int,int)
+public static int StrictMath.max(int,int)
+public static int Integer.min(int,int)
+public static int Math.min(int,int)
+public static int StrictMath.min(int,int)
+public static int Math.multiplyExact(int,int)
+public static int StrictMath.multiplyExact(int,int)
+public static int Integer.remainderUnsigned(int,int)
+public static int Integer.rotateLeft(int,int)
+public static int Integer.rotateRight(int,int)
+public static int Math.subtractExact(int,int)
+public static int StrictMath.subtractExact(int,int)
+public static int Integer.sum(int,int)
+public static native byte java.lang.reflect.Array.getByte(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native char java.lang.reflect.Array.getChar(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native short java.lang.reflect.Array.getShort(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static int java.util.Objects.checkIndex(int,int)
+public static int Math.floorMod(long,int)
+public static int StrictMath.floorMod(long,int)
+public static char Character.forDigit(int,int)
+public static int Double.compare(double,double)
+public static int Float.compare(float,float)
+public static int Long.compare(long,long)
+public static int Long.compareUnsigned(long,long)
 $
 ````
 ````
-$ juggle '(int,int)'
+$ juggle 'int (int,int)'
+public static int Math.addExact(int,int)
+public static int StrictMath.addExact(int,int)
+public static int Integer.compare(int,int)
+public static int Integer.compareUnsigned(int,int)
+public static int Character.digit(int,int)
+public static int Integer.divideUnsigned(int,int)
+public static int Math.floorDiv(int,int)
+public static int StrictMath.floorDiv(int,int)
+public static int Math.floorMod(int,int)
+public static int StrictMath.floorMod(int,int)
+public static int Integer.max(int,int)
+public static int Math.max(int,int)
+public static int StrictMath.max(int,int)
+public static int Integer.min(int,int)
+public static int Math.min(int,int)
+public static int StrictMath.min(int,int)
+public static int Math.multiplyExact(int,int)
+public static int StrictMath.multiplyExact(int,int)
+public static int Integer.remainderUnsigned(int,int)
+public static int Integer.rotateLeft(int,int)
+public static int Integer.rotateRight(int,int)
+public static int Math.subtractExact(int,int)
+public static int StrictMath.subtractExact(int,int)
+public static int Integer.sum(int,int)
+public static int java.util.Objects.checkIndex(int,int)
+public static int Math.floorMod(long,int)
+public static int StrictMath.floorMod(long,int)
+public static char Character.forDigit(int,int)
+public static int Double.compare(double,double)
+public static int Float.compare(float,float)
+public static int Long.compare(long,long)
+public static int Long.compareUnsigned(long,long)
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
 public int Integer.compareTo(Integer)
+public static native byte java.lang.reflect.Array.getByte(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native char java.lang.reflect.Array.getChar(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native short java.lang.reflect.Array.getShort(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public volatile int Integer.compareTo(Object)
+public abstract int Comparable<T>.compareTo(T)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
 $
 ````
 
 Finally, we the conversions should also apply for return types:
 ````
-$ juggle 'int (String)'
-public static Integer Integer.decode(String) throws NumberFormatException
-public static Integer Integer.getInteger(String)
-public Integer.<init>(String) throws NumberFormatException
-public static Integer Integer.valueOf(String) throws NumberFormatException
-public static Integer sun.security.action.GetIntegerAction.privilegedGetProperty(String)
-public static int Character.codePointOf(String)
-public int String.hashCode()
-public int String.length()
-public static int Integer.parseInt(String) throws NumberFormatException
-public static int Integer.parseUnsignedInt(String) throws NumberFormatException
-public static int jdk.internal.org.objectweb.asm.Type.getArgumentsAndReturnSizes(String)
-public static final int javax.crypto.Cipher.getMaxAllowedKeyLength(String) throws java.security.NoSuchAlgorithmException
-public static int jdk.internal.jimage.ImageStringsReader.hashCode(String)
+$ juggle 'Integer(String,int)'
+public static Integer Integer.getInteger(String,int)
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public int String.codePointAt(int)
+public int String.codePointBefore(int)
+public static Integer Integer.getInteger(String,Integer)
+public int String.indexOf(int)
+public int String.lastIndexOf(int)
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static int Character.codePointAt(CharSequence,int)
+public static int Character.codePointBefore(CharSequence,int)
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public volatile int String.compareTo(Object)
+public abstract int Comparable<T>.compareTo(T)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
 $
 ````
 ````
-$ juggle 'Integer (String)'
-public static Integer Integer.decode(String) throws NumberFormatException
-public static Integer Integer.getInteger(String)
-public Integer.<init>(String) throws NumberFormatException
-public static Integer Integer.valueOf(String) throws NumberFormatException
-public static Integer sun.security.action.GetIntegerAction.privilegedGetProperty(String)
-public static int Character.codePointOf(String)
-public int String.hashCode()
-public int String.length()
-public static int Integer.parseInt(String) throws NumberFormatException
-public static int Integer.parseUnsignedInt(String) throws NumberFormatException
-public static int jdk.internal.org.objectweb.asm.Type.getArgumentsAndReturnSizes(String)
-public static final int javax.crypto.Cipher.getMaxAllowedKeyLength(String) throws java.security.NoSuchAlgorithmException
-public static int jdk.internal.jimage.ImageStringsReader.hashCode(String)
+$ juggle 'int(String,int)'
+public int String.codePointAt(int)
+public int String.codePointBefore(int)
+public int String.indexOf(int)
+public int String.lastIndexOf(int)
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public char String.charAt(int)
+public static int Character.codePointAt(CharSequence,int)
+public static int Character.codePointBefore(CharSequence,int)
+public static byte Byte.parseByte(String,int) throws NumberFormatException
+public static short Short.parseShort(String,int) throws NumberFormatException
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public abstract char CharSequence.charAt(int)
+public static Integer Integer.getInteger(String,int)
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public static native byte java.lang.reflect.Array.getByte(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native char java.lang.reflect.Array.getChar(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native short java.lang.reflect.Array.getShort(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public volatile int String.compareTo(Object)
+public static Byte Byte.valueOf(String,int) throws NumberFormatException
+public static Short Short.valueOf(String,int) throws NumberFormatException
+public abstract int Comparable<T>.compareTo(T)
+public static Integer Integer.getInteger(String,Integer)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
 $
 ````
 
@@ -130,6 +399,13 @@ in `jdk.internals.*`:
 ````
 $ juggle '(int,int,int,int)'
 public static java.time.LocalTime java.time.LocalTime.of(int,int,int,int)
+public java.util.IntSummaryStatistics.<init>(long,int,int,long) throws IllegalArgumentException
+public static java.time.temporal.ValueRange java.time.temporal.ValueRange.of(long,long,long,long)
+public java.util.DoubleSummaryStatistics.<init>(long,double,double,double) throws IllegalArgumentException
+public java.util.LongSummaryStatistics.<init>(long,long,long,long) throws IllegalArgumentException
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
+public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ````
 
@@ -309,7 +585,7 @@ $
 
 Now let's just specify the first parameter. That drops us down to three candidates:
 ````
-$ juggle '/search$/i (? extends java.util.Collection,...)'                                                
+$ juggle '/search$/i (? extends java.util.Collection,...)'                                              
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
 public synchronized int java.util.Stack<E>.search(Object)
@@ -329,10 +605,18 @@ Here's the same but with the last parameter:
 $ juggle '/search$/i (...,double)'                                                
 public static int java.util.Arrays.binarySearch(double[],double)
 public static int java.util.Arrays.binarySearch(double[],int,int,double)
+public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
+public static int java.util.Arrays.binarySearch(Object[],Object)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
 ````
 $ juggle '/search$/i (..., String)'                                                
+public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
+public static int java.util.Arrays.binarySearch(Object[],Object)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
 
@@ -340,6 +624,7 @@ Let's put the ellipsis in the middle, missing out all but the first and last arg
 ````
 $ juggle '/search$/i (java.util.List, ..., java.util.Comparator)'                                                
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 $
 ````
 
@@ -348,14 +633,23 @@ And now the opposite: a param in the middle:
 $ juggle '/search$/i (..., int, ...)'                                                
 public static int java.util.Arrays.binarySearch(byte[],int,int,byte)
 public static int java.util.Arrays.binarySearch(char[],int,int,char)
-public static int java.util.Arrays.binarySearch(double[],int,int,double)
-public static int java.util.Arrays.binarySearch(float[],int,int,float)
 public static int java.util.Arrays.binarySearch(int[],int)
 public static int java.util.Arrays.binarySearch(int[],int,int,int)
+public static int java.util.Arrays.binarySearch(short[],int,int,short)
+public static int java.util.Arrays.binarySearch(double[],double)
+public static int java.util.Arrays.binarySearch(double[],int,int,double)
+public static int java.util.Arrays.binarySearch(float[],float)
+public static int java.util.Arrays.binarySearch(float[],int,int,float)
+public static int java.util.Arrays.binarySearch(long[],int,int,long)
+public static int java.util.Arrays.binarySearch(long[],long)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
 public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<T>)
-public static int java.util.Arrays.binarySearch(long[],int,int,long)
-public static int java.util.Arrays.binarySearch(short[],int,int,short)
+public static int java.util.Arrays.binarySearch(Object[],Object)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public synchronized int java.util.Stack<E>.search(Object)
 $
 ````
 
@@ -363,8 +657,11 @@ Finally, ellipses all over the place:
 ````
 $ juggle '/search$/i (..., long[], ..., int, ...)'                                                
 public static int java.util.Arrays.binarySearch(long[],int,int,long)
+public static int java.util.Arrays.binarySearch(long[],long)
 $
 ````
+(The second result here is included because `int` can be promoted to `long`.)
+
 
 ### [GitHub Issue #48](https://github.com/paul-bennett/juggle/issues/48): Implemented-By Index
 
@@ -499,6 +796,8 @@ public volatile AbstractStringBuilder StringBuilder.deleteCharAt(int)
 public volatile void StringBuilder.ensureCapacity(int)
 public volatile void StringBuilder.setLength(int)
 public volatile String StringBuilder.substring(int)
+public volatile Appendable AbstractStringBuilder.append(char) throws java.io.IOException
+public volatile Appendable AbstractStringBuilder.append(CharSequence) throws java.io.IOException
 $
 ````
 

@@ -17,7 +17,6 @@
  */
 package com.angellane.juggle.query;
 
-import java.util.OptionalInt;
 import java.util.Set;
 
 public record BoundedType(
@@ -54,26 +53,29 @@ public record BoundedType(
                 (upperBound == null || upperBound.stream().allMatch(b -> b.isAssignableFrom(candidate)));
     }
 
-    public OptionalInt scoreMatch(Class<?> candidate) {
-        // Ugh, this is ugly... but does it work?
-        if (candidate == null)
-            return OptionalInt.of(0);
-        else {
-            int score = 0;
-            if (lowerBound != null && lowerBound != candidate) {
-                if (candidate.isAssignableFrom(lowerBound))
-                    score++;
-                else
-                    return OptionalInt.empty();
-            }
-            if (upperBound != null && !upperBound.equals(Set.of(candidate))) {
-                if (upperBound.stream().allMatch(b -> b.isAssignableFrom(candidate)))
-                    score++;
-                else
-                    return OptionalInt.empty();
-            }
+    public boolean isPrimitive() {
+        return lowerBound() != null
+                && upperBound() != null
+                && lowerBound().isPrimitive()
+                && upperBound().stream().allMatch(Class::isPrimitive);
+    }
 
-            return OptionalInt.of(score);
-        }
+    public boolean isExactType() {
+        return lowerBound() != null
+                && upperBound() != null
+                && upperBound().equals(Set.of(lowerBound()));
+    }
+
+    public boolean isBoundedWildcard() {
+        return upperBound() == null && lowerBound() != null
+                || upperBound() != null && lowerBound() == null;
+    }
+
+    public boolean isUnboundedWildcard() {
+        return upperBound() == null && lowerBound() == null;
+    }
+
+    public static boolean isUnboundedWildcard(BoundedType bt) {
+        return bt == null || bt.isUnboundedWildcard();
     }
 }

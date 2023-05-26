@@ -29,11 +29,14 @@ If we pass an invalid argument, we should get an error and the help text:
 ````
 $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
-Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
-              [-i=packageName] [-j=jarFilePath] [-m=moduleName]
-              [-s=access|name|package|score|text] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
+              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
+              [-m=moduleName] [-s=access|name|package|score|text]
+              [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
+  -c, --conversions=none|all|auto
+                             Which conversions to apply
       --dry-run              Dry run only
   -f, --format=auto|plain|colour|color
                              Output format
@@ -53,11 +56,14 @@ Of course, we can explicitly ask for help:
 
 ````
 $ juggle --help
-Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
-              [-i=packageName] [-j=jarFilePath] [-m=moduleName]
-              [-s=access|name|package|score|text] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
+              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
+              [-m=moduleName] [-s=access|name|package|score|text]
+              [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
+  -c, --conversions=none|all|auto
+                             Which conversions to apply
       --dry-run              Dry run only
   -f, --format=auto|plain|colour|color
                              Output format
@@ -168,6 +174,8 @@ followed.
 
 ````
 $ juggle '(String,ClassLoader,boolean)'
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
 ````
 
@@ -176,6 +184,8 @@ $ juggle -x '(String,ClassLoader,boolean)'
 public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
 public void ClassLoader.setPackageAssertionStatus(String,boolean)
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
 ````
 
@@ -187,11 +197,15 @@ $ juggle --permute '(String,ClassLoader,boolean)'
 public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
 public void ClassLoader.setPackageAssertionStatus(String,boolean)
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
 ````
 
 ````
 $ juggle --no-permute '(String,ClassLoader,boolean)'
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
 ````
 
@@ -201,13 +215,14 @@ The (contrived) App class from testApp uses the Lib class from testLib in its in
 dependent classes in the JAR (it's not an uberjar).  This means trying to load the App class fails.  
 
 ````
-$ juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
+% juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
 *** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 *** Couldn't find type: com.angellane.juggle.testinput.app.App; using class java.lang.Object instead
 *** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 public Object.<init>()
-$
+%
 ````
+(Commenting-out this test because nowadays it matches thousands of methods.)
 
 
 ## Methods with no modifiers

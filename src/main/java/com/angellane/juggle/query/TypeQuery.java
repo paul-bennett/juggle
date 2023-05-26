@@ -19,21 +19,23 @@ package com.angellane.juggle.query;
 
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.Match;
+import com.angellane.juggle.match.TypeMatcher;
 
 import java.lang.reflect.RecordComponent;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
+import static com.angellane.juggle.match.TypeMatcher.NO_MATCH;
+
 public final class TypeQuery extends Query<TypeCandidate> {
     public TypeFlavour          flavour             = null;
-
     public BoundedType          supertype           = null;
     public Set<BoundedType>     superInterfaces     = null;
     public Set<BoundedType>     permittedSubtypes   = null;
-    public List<ParamSpec>      recordComponents    = null;
 
     public TypeQuery() {}
     public TypeQuery(TypeFlavour flavour) { this.flavour = flavour; }
@@ -50,7 +52,6 @@ public final class TypeQuery extends Query<TypeCandidate> {
                     && Objects.equals(supertype,         q.supertype)
                     && Objects.equals(superInterfaces,   q.superInterfaces)
                     && Objects.equals(permittedSubtypes, q.permittedSubtypes)
-                    && Objects.equals(recordComponents,  q.recordComponents)
                     ;
     }
 
@@ -61,7 +62,6 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 , supertype
                 , superInterfaces
                 , permittedSubtypes
-                , recordComponents
         );
     }
 
@@ -77,34 +77,57 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 + ", supertype="          + supertype
                 + ", superInterfaces="    + superInterfaces
                 + ", permittedSubtypes="  + permittedSubtypes
-                + ", recordComponents="   + recordComponents
+                + ", recordComponents="   + params
                 + '}';
+    }
+
+    @Override
+    public boolean hasBoundedWildcards() {
+        boolean boundedSupertype =
+                supertype != null && supertype.isBoundedWildcard();
+        boolean boundedSuperInterfaces =
+                superInterfaces != null && superInterfaces.stream()
+                        .anyMatch(BoundedType::isBoundedWildcard);
+        boolean boundedPermittedSubtypes =
+                permittedSubtypes != null && permittedSubtypes.stream()
+                        .anyMatch(BoundedType::isBoundedWildcard);
+        boolean boundedRecordComponents =
+                params != null && params.stream()
+                        .flatMap(ps -> ps instanceof SingleParam sp
+                                ? Stream.of(sp) : Stream.empty())
+                        .anyMatch(sp -> sp.paramType().isBoundedWildcard());
+
+        return boundedSupertype || boundedSuperInterfaces
+                || boundedPermittedSubtypes || boundedRecordComponents;
     }
 
     @Override
     public
     <Q extends Query<TypeCandidate>, M extends Match<TypeCandidate, Q>>
-    Stream<M> match(TypeCandidate candidate) {
-        if (isMatchForCandidate(candidate)) {
+    Stream<M> match(TypeMatcher tm, TypeCandidate candidate) {
+        OptionalInt score = scoreCandidate(tm, candidate);
+
+        if (score.isPresent()) {
             @SuppressWarnings("unchecked")
-            M m = (M)new Match<>(candidate, this, 0);
+            M m = (M)new Match<>(candidate, this, score.getAsInt());
             return Stream.of(m);
         }
         else
             return Stream.empty();
     }
 
-    public boolean isMatchForCandidate(TypeCandidate ct) {
-        return matchesAnnotations(ct.annotationTypes())
-                && matchesAccessibility(ct.accessibility())
-                && matchesModifiers(ct.otherModifiers())
-                && matchesName(ct.declarationName())
-                && matchesFlavour(ct.flavour())
-                && matchesSupertype(ct.superClass())
-                && matchesSuperInterfaces(ct.superInterfaces())
-                && matchesPermittedSubtypes(ct.permittedSubtypes())
-                && matchesRecordComponents(ct.recordComponents())
-                ;
+    public OptionalInt scoreCandidate(TypeMatcher tm, TypeCandidate ct) {
+        return totalScore(List.of(
+                scoreAnnotations(ct.annotationTypes())
+                , scoreAccessibility(ct.accessibility())
+                , scoreModifiers(ct.otherModifiers())
+                , scoreName(ct.declarationName())
+                , scoreFlavour(ct.flavour())
+                , scoreSupertype(ct.superClass())
+                , scoreSuperInterfaces(ct.superInterfaces())
+                , scorePermittedSubtypes(ct.permittedSubtypes())
+                , scoreRecordComponents(tm, ct.recordComponents())
+        ));
     }
 
     public void setSupertype(BoundedType supertype) {
@@ -120,49 +143,37 @@ public final class TypeQuery extends Query<TypeCandidate> {
     }
 
     public void setRecordComponents(List<ParamSpec> components) {
-        this.recordComponents = components;
+        this.params = components;
     }
 
-    private boolean matchesFlavour(TypeFlavour f) {
-        return flavour == null || flavour.equals(f);
+    private OptionalInt scoreFlavour(TypeFlavour f) {
+        return flavour == null || flavour.equals(f)
+                ? EXACT_MATCH : NO_MATCH;
     }
 
-    private boolean matchesSupertype(Class<?> c) {
+    private OptionalInt scoreSupertype(Class<?> c) {
         return supertype == null ||
-                supertype.matchesClass(c);
+                supertype.matchesClass(c)
+                ? EXACT_MATCH : NO_MATCH;
     }
 
-    private boolean matchesSuperInterfaces(Set<Class<?>> cs) {
+    private OptionalInt scoreSuperInterfaces(Set<Class<?>> cs) {
         return superInterfaces == null ||
                 superInterfaces.stream()
-                        .allMatch(bt -> cs.stream().anyMatch(bt::matchesClass));
+                        .allMatch(bt -> cs.stream().anyMatch(bt::matchesClass))
+                ? EXACT_MATCH : NO_MATCH;
     }
 
-    private boolean matchesPermittedSubtypes(Set<Class<?>> cs) {
+    private OptionalInt scorePermittedSubtypes(Set<Class<?>> cs) {
         return permittedSubtypes == null
                 || permittedSubtypes.stream()
-                .allMatch(bt -> cs.stream().anyMatch(bt::matchesClass));
+                .allMatch(bt -> cs.stream().anyMatch(bt::matchesClass))
+                ? EXACT_MATCH : NO_MATCH;
     }
 
-    private boolean matchesRecordComponents(List<RecordComponent> rcs) {
-        if (recordComponents == null)
-            return true;
-        else if (recordComponents.size() != rcs.size())
-            return false;
-        else {
-            Iterator<RecordComponent> actualIter = rcs.iterator();
-            return recordComponents.stream().allMatch(ps -> {
-                if (!(ps instanceof SingleParam p))
-                    return false;
-                else {
-                    RecordComponent rc = actualIter.next();
-
-                    boolean nameMatches = p.paramName().matcher(rc.getName()).find();
-                    boolean typeMatches = p.paramType().matchesClass(rc.getType());
-                    return
-                            nameMatches && typeMatches;
-                }
-            });
-        }
+    OptionalInt scoreRecordComponents(TypeMatcher tm, List<RecordComponent> rcs) {
+        List<? extends Class<?>> params = rcs.stream().map(RecordComponent::getType).toList();
+        return scoreParams(tm, params);
     }
 }
+

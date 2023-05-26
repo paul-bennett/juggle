@@ -19,6 +19,7 @@ package com.angellane.juggle.query;
 
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.candidate.TypeCandidate;
+import com.angellane.juggle.match.TypeMatcher;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
@@ -26,9 +27,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TypeQueryTest {
+    TypeMatcher tm = new TypeMatcher(false);
+
     @Test
     public void testClassQuery() {
         TypeCandidate ct =
@@ -46,7 +50,7 @@ public class TypeQueryTest {
                 BoundedType.exactType(java.lang.constant.Constable.class),
                 BoundedType.exactType(java.lang.constant.ConstantDesc.class));
 
-        assertTrue(q.isMatchForCandidate(ct));
+        assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }
 
     @Test
@@ -61,7 +65,7 @@ public class TypeQueryTest {
         q.superInterfaces   = Set.of(
                 BoundedType.exactType(java.util.Collection.class));
 
-        assertTrue(q.isMatchForCandidate(ct));
+        assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }
 
     @Test
@@ -74,7 +78,7 @@ public class TypeQueryTest {
         q.modifiers         = Modifier.STATIC;  // also FINAL
         q.declarationPattern = Pattern.compile("State", Pattern.LITERAL);
 
-        assertTrue(q.isMatchForCandidate(ct));
+        assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }
 
     @Test
@@ -87,12 +91,12 @@ public class TypeQueryTest {
         TypeQuery q = new TypeQuery();
         q.modifiers         = Modifier.FINAL;
         q.declarationPattern = Pattern.compile("Unix");
-        q.recordComponents  = List.of(
+        q.params            = List.of(
                 ParamSpec.param("user", java.nio.file.attribute.UserPrincipal.class),
                 ParamSpec.param("group", java.nio.file.attribute.GroupPrincipal.class)
         );
 
-        assertTrue(q.isMatchForCandidate(ct));
+        assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }
 
     @Test
@@ -109,6 +113,6 @@ public class TypeQueryTest {
         q.modifiers         = Modifier.FINAL | Modifier.ABSTRACT;
         q.declarationPattern = Pattern.compile("int", Pattern.LITERAL);
 
-        assertTrue(q.isMatchForCandidate(ct));
+        assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }
 }

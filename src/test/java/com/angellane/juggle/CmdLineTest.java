@@ -17,7 +17,9 @@
  */
 package com.angellane.juggle;
 
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.BoundedType;
+import com.angellane.juggle.query.MemberQuery;
 import com.angellane.juggle.query.ParamSpec;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
@@ -90,5 +92,26 @@ public class CmdLineTest {
                 app.juggler.memberQuery.params.get(0));
         assertEquals(ParamSpec.unnamed(BoundedType.exactType(Integer.class)),
                 app.juggler.memberQuery.params.get(1));
+    }
+
+    // Does "int(int,int)" parse into the MemberQuery we expect?
+    // See also MemberQueryTest where we try to score the result
+    @Test
+    public void testIntIntToInt() {
+        String[] args = {"int(int,int))"};
+        Main app = new Main();
+        ParseResult result = new CommandLine(app).parseArgs(args);
+        app.parseDeclarationQuery(app.getQueryString());
+
+        MemberQuery q = new MemberQuery();
+        q.setAccessibility(Accessibility.PUBLIC);
+        q.returnType = BoundedType.exactType(Integer.TYPE);
+        q.params = List.of(
+                ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE)),
+                ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE))
+        );
+
+        assertEquals(List.of(), result.unmatched());
+        assertEquals(q, app.juggler.memberQuery);
     }
 }

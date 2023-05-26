@@ -17,108 +17,232 @@
  */
 package com.angellane.juggle.match;
 
+import com.angellane.juggle.query.BoundedType;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 
 /**
- * An encapsulation of Java's type-matching & conversion rules.
+ * <p>Is the target type compatible with the expression type?</p>
+ * <p>
+ *     This record checks whether or not two types are compatible.
+ *     If #applyConversions is false, the type check is based on type
+ *     fit to specified bounds.  If conversions are allowed, (un)boxing
+ *     is allowed, and reference types are checked with inferred bounds
+ *     when not specified.  This is equivalent to to the "loose invocation
+ *     context" (which itself is the same as the "assignment context" in
+ *     section 5 of the JLS.
+ * </p>
+ * <p>
+ *     The score for a match allowed under the Strict Invocation Context
+ *     will always be lower (better) than those allowed under the Loose
+ *     Invocation Context.
+ * </p>
  *
  * @param applyConversions whether to apply conversions when matching
  */
 public record TypeMatcher(boolean applyConversions) {
-    static final int IDENTITY_SCORE = 0;
-    static final int WIDENING_SCORE = 1;
-    static final int BOXING_SCORE   = 2;
+    static final int IDENTITY_COST  = 0;
+    static final int WIDENING_COST  = 1;
+    static final int BOXING_COST    = 2;
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static final OptionalInt NO_MATCH       = OptionalInt.empty();
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static final OptionalInt EXACT_MATCH    = OptionalInt.of(IDENTITY_COST);
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static final OptionalInt WIDENED_MATCH  = OptionalInt.of(WIDENING_COST);
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static final OptionalInt BOXED_MATCH    = OptionalInt.of(BOXING_COST);
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static final OptionalInt UNBOXED_MATCH  = OptionalInt.of(BOXING_COST);
 
     /**
-     * <p>Is the target type compatible with the expression type?</p>
      * <p>
-     *     This class checks whether or not the two types are compatible.
-     *     If #applyConversions is false, the type check is based on type
-     *     equality.  If conversions are allowed, the check is equivalent
-     *     to the "loose invocation context" (which itself is the same as
-     *     the "assignment context" in section 5 of the JLS.
+     *     Can an expression whose type is within the bounds of exprType be
+     *     assigned to a variable of specific type targetType?
      * </p>
      * <p>
-     *     The score for a match allowed under the Strict Invocation Context
-     *     will always be lower (better) than those allowed under the Loose
-     *     Invocation Context.
+     *     This is used within Juggle queries to match parameter types.
      * </p>
-     * @param targetType the target type (LHS of assignment)
-     * @param exprType the expression type (RHS of assignment)
-     * @return A score for the match, or empty if the types are incompatible
+     *
+     * @param targetType the specific type of the LHS of an assignment
+     * @param exprType the bounds of the type of the RHS of assignment
+     * @return The score of the match, or empty if no match possible
      */
-    OptionalInt scoreTypeMatch(Class<?> targetType, Class<?> exprType) {
-        if (targetType.equals(exprType))
-            return OptionalInt.of(IDENTITY_SCORE);
+    public OptionalInt scoreTypeMatch(Class<?> targetType,
+                                      BoundedType exprType) {
+        if (BoundedType.isUnboundedWildcard(exprType))
+            return EXACT_MATCH;
         else if (!applyConversions)
-            return OptionalInt.empty();
-        else if (exprType.isPrimitive()) {
-            if (targetType.isPrimitive())
-                return scorePrimitiveToPrimitive(targetType, exprType);
-            else
-                return scorePrimitiveToReference(targetType, exprType);
-        }
+            return scoreBoundedType(exprType, targetType);
         else {
-            if (targetType.isPrimitive())
-                return scoreReferenceToPrimitive(targetType, exprType);
-            else
-                return scoreReferenceToReference(targetType, exprType);
+            Class<?> lowerBound = exprType.lowerBound();
+
+            if (exprType.isPrimitive()) {
+                if (targetType.isPrimitive())
+                    return scorePrimitiveToPrimitive(targetType, lowerBound);
+                else
+                    return scorePrimitiveToReference(targetType, lowerBound);
+            }
+            else {
+                if (targetType.isPrimitive())
+                    return scoreReferenceToPrimitive(targetType, lowerBound);
+                else
+                    if (!exprType.isExactType())
+                        return scoreBoundedType(exprType, targetType);
+                    else
+                        // Try with the target type's lower bound eliminated
+                        return scoreBoundedType(
+                                BoundedType.supertypeOf(lowerBound),
+                                targetType);
+            }
+        }
+    }
+
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue"})
+    static OptionalInt matchSum(OptionalInt a, OptionalInt b) {
+        return a.isEmpty() || b.isEmpty()
+                ? NO_MATCH : OptionalInt.of(a.getAsInt() + b.getAsInt());
+    }
+
+    /**
+     * <p>
+     *     Is there a type within the bounds of targetType that can be used
+     *     as the target for assignment of an expression of specific type
+     *     exprType?
+     * </p>
+     * <p>
+     *     This is used within Juggle queries to match return types and
+     *     thrown exceptions.
+     * </p>
+     *
+     * @param targetType the bounds of the LHS of an assignment
+     * @param exprType the specific type of the RHS of assignment
+     * @return The score of the match, or empty if no match possible
+     */
+    public OptionalInt scoreTypeMatch(BoundedType targetType,
+                                      Class<?> exprType) {
+        if (BoundedType.isUnboundedWildcard(targetType))
+            return EXACT_MATCH;
+        else if (!applyConversions)
+            return scoreBoundedType(targetType, exprType);
+        else {
+            Class<?> lowerBound = targetType.lowerBound();
+
+            if (exprType.isPrimitive()) {
+                if (targetType.isPrimitive())
+                    return scorePrimitiveToPrimitive(lowerBound, exprType);
+                else
+                    return scorePrimitiveToReference(lowerBound, exprType);
+            }
+            else {
+                if (targetType.isPrimitive())
+                    return scoreReferenceToPrimitive(lowerBound, exprType);
+                else
+                    if (!targetType.isExactType())
+                        return scoreBoundedType(targetType, exprType);
+                    else
+                        // Try with the target type's upper bound eliminated
+                        return scoreBoundedType(
+                               /* lowerBound == null
+                                        ? BoundedType.unboundedWildcardType()
+                                        :*/ BoundedType.subtypeOf(lowerBound),
+                                exprType);
+            }
         }
     }
 
     private static OptionalInt scorePrimitiveToPrimitive(
             Class<?> targetType, Class<?> exprType) {
         // PRIMITIVE -> PRIMITIVE
-        // Allows: Widening Primitive
-        return Optional.ofNullable(
-                wideningPrimitiveConversions.get(exprType)
-        ).orElse(Set.of()).contains(targetType)
-                ? OptionalInt.of(WIDENING_SCORE)
-                : OptionalInt.empty();
+        // Optional Widening Primitive
+        if (targetType.equals(exprType))
+            return EXACT_MATCH;
+        else
+            return Optional.ofNullable(
+                    wideningPrimitiveConversions.get(exprType)
+            ).orElse(Set.of()).contains(targetType)
+                    ? WIDENED_MATCH
+                    : NO_MATCH;
     }
 
     private static OptionalInt scorePrimitiveToReference(
             Class<?> targetType, Class<?> exprType) {
         // PRIMITIVE -> REFERENCE
-        // Allows: Boxing, then optional Widening Reference
+        // Boxing, then optional Widening Reference
         Class<?> boxedType = boxingConversions.get(exprType);
         if (boxedType == null)
-            return OptionalInt.empty();
+            return NO_MATCH;
+        else if (targetType == null)
+            return BOXED_MATCH;
         else if (targetType.equals(boxedType))
-            return OptionalInt.of(BOXING_SCORE);
+            return BOXED_MATCH;
         else
             return targetType.isAssignableFrom(boxedType)
-                    ? OptionalInt.of(BOXING_SCORE + WIDENING_SCORE)
-                    : OptionalInt.empty();
+                    ? matchSum(BOXED_MATCH, WIDENED_MATCH)
+                    : NO_MATCH;
     }
 
     private static OptionalInt scoreReferenceToPrimitive(
             Class<?> targetType, Class<?> exprType) {
         // REFERENCE -> PRIMITIVE
-        // Allowed: Unboxing, then optional Widening Primitive
+        // Unboxing, then optional Widening Primitive
         Class<?> unboxedType = unboxingConversions.get(exprType);
         if (unboxedType == null)
-            return OptionalInt.empty();
+            return NO_MATCH;
         else if (targetType.equals(unboxedType))
-            return OptionalInt.of(BOXING_SCORE);
+            return UNBOXED_MATCH;
         else
             return Optional.ofNullable(
                     wideningPrimitiveConversions.get(unboxedType)
             ).orElse(Set.of()).contains(targetType)
-                    ? OptionalInt.of(BOXING_SCORE + WIDENING_SCORE)
-                    : OptionalInt.empty();
+                    ? matchSum(UNBOXED_MATCH, WIDENED_MATCH)
+                    : NO_MATCH;
     }
 
-    private static OptionalInt scoreReferenceToReference(
-            Class<?> targetType, Class<?> exprType) {
+    /**
+     * Tries to match a candidate against a bounded type.  Returns empty()
+     * if the types are incompatible, or a score value otherwise.
+     *
+     * @param bt The bounded type to try and match the candidate against
+     * @param candidate The candidate type
+     * @return MATCH_FAILED if no match was possible, a score value
+     * otherwise.
+     */
+    public static OptionalInt scoreBoundedType(
+            BoundedType bt, Class<?> candidate
+    ) {
         // REFERENCE -> REFERENCE
-        // Allowed: Widening Reference
-        return targetType.isAssignableFrom(exprType)
-                ? OptionalInt.of(WIDENING_SCORE)
-                : OptionalInt.empty();
+        // Optional Widening Reference
+
+        // This method is a bit different to the other scorers since it
+        // takes <BoundedType,Class> rather than <Class,Class>.  It's also
+        // agnostic about directionality.
+
+        int score = IDENTITY_COST;    // Innocent until proven guilty
+
+        if (bt.lowerBound() != null
+                && bt.lowerBound() != candidate
+        ) {
+            if (candidate.isAssignableFrom(bt.lowerBound()))
+                score += WIDENING_COST;
+            else
+                return NO_MATCH;
+        }
+        if (bt.upperBound() != null
+                && !bt.upperBound().equals(Set.of(candidate))
+        ) {
+            if (bt.upperBound().stream()
+                    .allMatch(b -> b.isAssignableFrom(candidate)))
+                score += WIDENING_COST;
+            else
+                return NO_MATCH;
+        }
+
+        return OptionalInt.of(score);
     }
 
 
