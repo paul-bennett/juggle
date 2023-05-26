@@ -29,6 +29,17 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #65](https://github.com/paul-bennett/juggle/issues/65): Handle nested classes in queries
+
+Prior to fixing, this used to throw an exception saying that it couldn't
+find the `Authenticator.RequestorType` class.
+````
+$ juggle -i java.net 'PasswordAuthentication (Authenticator,String,InetAddress,int,String,String,String,URL,Authenticator.RequestorType)'
+public static PasswordAuthentication Authenticator.requestPasswordAuthentication(Authenticator,String,InetAddress,int,String,String,String,URL,Authenticator.RequestorType)
+public PasswordAuthentication Authenticator.requestPasswordAuthenticationInstance(String,InetAddress,int,String,String,String,URL,Authenticator.RequestorType)
+$
+````
+
 ### [GitHub Issue #62](https://github.com/paul-bennett/juggle/issues/62): Add ellipsis support to throws clauses
 
 We don't need to implement this because using a wildcard in the `throws` clause does the trick.

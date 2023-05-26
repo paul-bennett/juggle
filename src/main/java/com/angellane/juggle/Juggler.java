@@ -71,21 +71,47 @@ public class Juggler {
     public void addImportedPackageName(String name) { importedPackageNames.add(name); }
     public List<String> getImportedPackageNames()   { return importedPackageNames; }
 
-
-
     public Optional<Class<?>> loadClassByName(String className) {
-        try {
-            Class<?> cls = loader.loadClass(className);
-            loader.linkClass(cls);
-            return Optional.of(cls);
-        } catch (ClassNotFoundException ex) {
-            return Optional.empty();
-        } catch (NoClassDefFoundError e) {
-            // This might be thrown if the class file references other classes that can't be loaded.
-            // Maybe it depends on another JAR that hasn't been specified on the command-line with -j.
-            System.err.println("*** Ignoring class " + className + ": " + e);
-            return Optional.empty();
+        String[] nameComponents = className.split("\\.");
+
+        // className might refer to an inner class.  We need to convert it
+        // to a "binary name" (JLS 13.1) before passing on to the ClassLoader.
+        // That involves finding the boundary between the outer and inner
+        // class name components, and replacing it (a dot) and all component
+        // separators to its right with dollar signs.
+        //
+        // The most likely case is that there is no inner class, so we'll
+        // start from the right and work our way left.
+
+        for (int numOuterComponents = nameComponents.length;
+             numOuterComponents > 0;
+             --numOuterComponents)
+        {
+            String[] outerComps = Arrays.copyOfRange(
+                    nameComponents, 0, numOuterComponents
+            );
+            String[] innerComps = Arrays.copyOfRange(
+                    nameComponents, numOuterComponents, nameComponents.length
+            );
+
+            String binaryName = String.join(".", outerComps) +
+                    (numOuterComponents == nameComponents.length
+                            ? "" : "$" +  String.join("$", innerComps));
+
+            try {
+                Class<?> cls = loader.loadClass(binaryName);
+                loader.linkClass(cls);
+                return Optional.of(cls);
+            } catch (ClassNotFoundException ex) {
+                // Carry on with next iteration
+            } catch (NoClassDefFoundError e) {
+                // This might be thrown if the class file references other classes that can't be loaded.
+                // Maybe it depends on another JAR that hasn't been specified on the command-line with -j.
+                System.err.println("*** Ignoring class " + className + ": " + e);
+                return Optional.empty();
+            }
         }
+        return Optional.empty();
     }
 
     private static final Map<String, Class<?>> primitiveMap = Stream.of(
