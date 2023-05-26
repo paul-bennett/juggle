@@ -29,6 +29,16 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #72](https://github.com/paul-bennett/juggle/issues/72): Don't show JDK implementation classes
+
+Prior to fixing, this used to include two further results from non-exported packages
+in `jdk.internals.*`:
+````
+$ juggle '(int,int,int,int)'
+public static java.time.LocalTime java.time.LocalTime.of(int,int,int,int)
+$
+````
+
 ### [GitHub Issue #85](https://github.com/paul-bennett/juggle/issues/85): Handle nested classes in queries
 
 Prior to fixing, this used to throw an exception saying that it couldn't
