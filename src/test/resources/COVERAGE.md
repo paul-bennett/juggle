@@ -104,7 +104,6 @@ $
 $ juggle 'boolean (ThisTypeDoesNotExist)'
 *** Couldn't find type: ThisTypeDoesNotExist; using class java.lang.Object instead
 public static native boolean Thread.holdsLock(Object)
-public static boolean jdk.internal.vm.vector.VectorSupport.isNonCapturingLambda(Object)
 public static boolean java.util.Objects.isNull(Object)
 public static boolean java.lang.invoke.MethodHandleProxies.isWrapperInstance(Object)
 public static boolean java.util.Objects.nonNull(Object)
@@ -118,7 +117,6 @@ $ juggle 'String (? super java.io.InputStream) throws'
 public String Object.toString()
 public static String String.valueOf(Object)
 public static String java.util.Objects.toString(Object)
-public static String sun.invoke.util.BytecodeDescriptor.unparse(Object)
 $
 ````
 
@@ -147,8 +145,6 @@ at runtime due to type erasure, in which case it may be worth stripping this met
 ````
 $ juggle -m '' /getUpperBound/
 public abstract java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
-public java.lang.reflect.Type[] sun.reflect.generics.reflectiveObjects.WildcardTypeImpl.getUpperBounds()
-public sun.reflect.generics.tree.FieldTypeSignature[] sun.reflect.generics.tree.Wildcard.getUpperBounds()
 $
 ````
 
@@ -210,15 +206,6 @@ $ juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'
 *** Couldn't find type: com.angellane.juggle.testinput.app.App; using class java.lang.Object instead
 *** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 public Object.<init>()
-public static final Object sun.security.validator.ValidatorException.T_ALGORITHM_DISABLED
-public static final Object sun.security.validator.ValidatorException.T_CA_EXTENSIONS
-public static final Object sun.security.validator.ValidatorException.T_CERT_EXPIRED
-public static final Object sun.security.validator.ValidatorException.T_EE_EXTENSIONS
-public static final Object sun.security.validator.ValidatorException.T_NAME_CHAINING
-public static final Object sun.security.validator.ValidatorException.T_NO_TRUST_ANCHOR
-public static final Object sun.security.validator.ValidatorException.T_SIGNATURE_ERROR
-public static final Object sun.security.validator.ValidatorException.T_UNTRUSTED_CERT
-public static Object sun.security.jca.Providers.startJarVerification()
 $
 ````
 

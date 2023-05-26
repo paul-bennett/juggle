@@ -146,7 +146,6 @@ public native int Object.hashCode()
 public static native int System.identityHashCode(Object)
 public static native int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 public static int java.util.Objects.hashCode(Object)
-public static int sun.invoke.util.ValueConversions.widenSubword(Object)
 $
 ````
 
@@ -217,15 +216,7 @@ the closing slash results in a case-insensitive match.
 ````
 $ juggle String /package/i
 public String Class<T>.getPackageName()
-public static final String jdk.internal.module.ClassFileConstants.MODULE_PACKAGES
-public static final String sun.reflect.misc.ReflectUtil.PROXY_PACKAGE
-public String sun.util.locale.provider.LocaleProviderAdapter.Type.getTextResourcesPackage()
-public String sun.util.locale.provider.LocaleProviderAdapter.Type.getUtilResourcesPackage()
-public String jdk.internal.org.objectweb.asm.commons.Remapper.mapPackageName(String)
 public String java.lang.constant.ClassDesc.packageName()
-public String jdk.internal.org.objectweb.asm.ClassReader.readPackage(int,char[])
-public static String jdk.internal.module.Checks.requirePackageName(String)
-public static String jdk.internal.module.Resources.toPackageName(String)
 $
 ````
 
@@ -306,8 +297,6 @@ public java.io.ByteArrayOutputStream.<init>()
 public java.io.OutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
-public sun.net.www.http.PosterOutputStream.<init>()
-public sun.security.util.DerOutputStream.<init>()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
 $
 ````

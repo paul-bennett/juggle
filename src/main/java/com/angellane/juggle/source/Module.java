@@ -77,7 +77,10 @@ public class Module extends Source {
                                 .filter(s -> !s.equals(MODULE_INFO))
                                 .map(s -> s.replace('/', '.'))
                                 .map(n -> getJuggler().loadClassByName(n))
-                                .flatMap(Optional::stream);
+                                .flatMap(Optional::stream)
+                                // Ignore classes in packages that aren't exported
+                                .filter(c -> c.getModule().isExported(c.getPackageName()))
+                        ;
                     }
                     catch (IOException ignored) {}
                     return ret;
