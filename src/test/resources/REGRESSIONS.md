@@ -15,7 +15,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
 # Regressions
 
 This file contains regression tests for Juggle; curiosities that show
@@ -28,6 +27,17 @@ But in essence, add a test by copying one of the code blocks.
 ## Previously fixed bugs
 
 (Most recently fixed first.)
+
+### [GitHub Issue #85](https://github.com/paul-bennett/juggle/issues/85): Handle nested classes in queries
+
+Prior to fixing, this used to throw an exception saying that it couldn't
+find the `Authenticator.RequestorType` class.
+````
+$ juggle -i java.net 'PasswordAuthentication (Authenticator,String,InetAddress,int,String,String,String,URL,Authenticator.RequestorType)'
+public static PasswordAuthentication Authenticator.requestPasswordAuthentication(Authenticator,String,InetAddress,int,String,String,String,URL,Authenticator.RequestorType)
+public PasswordAuthentication Authenticator.requestPasswordAuthenticationInstance(String,InetAddress,int,String,String,String,URL,Authenticator.RequestorType)
+$
+````
 
 ### [GitHub Issue #62](https://github.com/paul-bennett/juggle/issues/62): Add ellipsis support to throws clauses
 
@@ -154,7 +164,7 @@ $
 ````
 
 
-Omitting parentheses as above indicates that we don't want to filter on
+Omitting parentheses as above indicates that we don't want to filter on 
 parameters at all.  Including parentheses but nothing between them matches
 zero-arg methods.  There are none that match the name filter in this case:
 
