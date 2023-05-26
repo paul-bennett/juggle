@@ -29,6 +29,30 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #105](https://github.com/paul-bennett/juggle/issues/105): `-s package` should sort by package name
+
+Modified `package` comparator now sorts packages alphabetically if they 
+weren't mentioned in the import list, and the implicit `java.lang` has
+been moved to the end of that list rather than the start.
+````
+$ juggle -i java.net class /Class/
+public class URLClassLoader extends java.security.SecureClassLoader implements java.io.Closeable
+public final class Class<T> implements java.io.Serializable, java.lang.reflect.GenericDeclaration, java.lang.reflect.Type, java.lang.reflect.AnnotatedElement, java.lang.invoke.TypeDescriptor.OfField<F>, java.lang.constant.Constable
+public class ClassCastException extends RuntimeException
+public class ClassCircularityError extends LinkageError
+public class ClassFormatError extends LinkageError
+public abstract class ClassLoader
+public class ClassNotFoundException extends ReflectiveOperationException
+public abstract class ClassValue<T>
+public class IncompatibleClassChangeError extends LinkageError
+public class NoClassDefFoundError extends LinkageError
+public class UnsupportedClassVersionError extends ClassFormatError
+public class java.io.InvalidClassException extends java.io.ObjectStreamException
+public class java.io.ObjectStreamClass implements java.io.Serializable
+public class java.security.SecureClassLoader extends ClassLoader
+$
+````
+
 ### [GitHub Issue #72](https://github.com/paul-bennett/juggle/issues/72): Don't show JDK implementation classes
 
 Prior to fixing, this used to include two further results from non-exported packages
@@ -115,8 +139,8 @@ $
 Prior to fixing #99, this query was resulting in an uncaught exception.
 ````
 $ juggle "private java.util.Optional /^lambda/"
-private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
 private static java.util.Optional<T> java.util.Currency.lambda$getValidCurrencyData$0(java.util.Properties,java.util.regex.Pattern,String)
+private static java.util.Optional<T> java.util.spi.ToolProvider.lambda$findFirst$1(ClassLoader,String)
 private static java.util.Optional<T> java.util.stream.Collectors.lambda$reducing$48(java.util.stream.Collectors$1OptionalBox)
 $
 ````
@@ -167,8 +191,8 @@ public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public synchronized int java.util.Stack<E>.search(Object)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 $
 ````
 
@@ -208,8 +232,8 @@ public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 public synchronized int java.util.Stack<E>.search(Object)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
 $
 ````
 

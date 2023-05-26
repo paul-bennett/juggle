@@ -69,7 +69,6 @@ public class Main implements Runnable {
     @Option(names={"-i", "--import"}, paramLabel="packageName", description="Imported package names")
     public void addImport(String importName) { juggler.addImportedPackageName(importName); }
 
-
     @SuppressWarnings("unused")
     @Option(names={"-j", "--jar"}, paramLabel="jarFilePath", description="JAR file to include in search")
     public void addJar(String jarName) { juggler.addSource(new JarFile(jarName)); }
@@ -84,7 +83,9 @@ public class Main implements Runnable {
     }
 
     @SuppressWarnings("unused")
-    @Option(names={"-s", "--sort"}, description="Sort criteria")
+    @Option(names={"-s", "--sort"},
+            paramLabel="access|name|package|score|text",
+            description="Sort criteria")
     public void addSortCriteria(SortCriteria criteria) {
         juggler.addSortCriteria(criteria);
     }

@@ -42,12 +42,12 @@ import java.util.function.Function;
  */
 
 enum SortCriteria {
-    SCORE   (j -> new ByScore<>(), j -> new ByScore<>()),
-    ACCESS  (j -> new ByAccessibility<>(), j -> new ByAccessibility<>()),
+    SCORE   (j -> new ByScore<>(),              j -> new ByScore<>()),
+    ACCESS  (j -> new ByAccessibility<>(),      j -> new ByAccessibility<>()),
     PACKAGE (j -> new ByPackage<>(j.getImportedPackageNames()),
              j -> new ByPackage<>(j.getImportedPackageNames())),
-    TEXT    (j -> new ByString<>(), j -> new ByString<>()),
-    NAME    (j -> new ByDeclarationName<>(), j -> new ByDeclarationName<>());
+    TEXT    (j -> new ByString<>(),             j -> new ByString<>()),
+    NAME    (j -> new ByDeclarationName<>(),    j -> new ByDeclarationName<>());
 
     private final Function<
             Juggler,

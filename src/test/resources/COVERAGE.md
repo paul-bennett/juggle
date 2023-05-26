@@ -31,7 +31,7 @@ $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
               [-i=packageName] [-j=jarFilePath] [-m=moduleName]
-              [-s=<addSortCriteria>] [declaration...]
+              [-s=access|name|package|score|text] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
       --dry-run              Dry run only
@@ -41,7 +41,7 @@ An API search tool for Java
   -i, --import=packageName   Imported package names
   -j, --jar=jarFilePath      JAR file to include in search
   -m, --module=moduleName    Modules to search
-  -s, --sort=<addSortCriteria>
+  -s, --sort=access|name|package|score|text
                              Sort criteria
       --show-query           Show query
   -V, --version              Print version information and exit.
@@ -55,7 +55,7 @@ Of course, we can explicitly ask for help:
 $ juggle --help
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-f=auto|plain|colour|color]
               [-i=packageName] [-j=jarFilePath] [-m=moduleName]
-              [-s=<addSortCriteria>] [declaration...]
+              [-s=access|name|package|score|text] [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
       --dry-run              Dry run only
@@ -65,7 +65,7 @@ An API search tool for Java
   -i, --import=packageName   Imported package names
   -j, --jar=jarFilePath      JAR file to include in search
   -m, --module=moduleName    Modules to search
-  -s, --sort=<addSortCriteria>
+  -s, --sort=access|name|package|score|text
                              Sort criteria
       --show-query           Show query
   -V, --version              Print version information and exit.
@@ -104,8 +104,8 @@ $
 $ juggle 'boolean (ThisTypeDoesNotExist)'
 *** Couldn't find type: ThisTypeDoesNotExist; using class java.lang.Object instead
 public static native boolean Thread.holdsLock(Object)
-public static boolean java.util.Objects.isNull(Object)
 public static boolean java.lang.invoke.MethodHandleProxies.isWrapperInstance(Object)
+public static boolean java.util.Objects.isNull(Object)
 public static boolean java.util.Objects.nonNull(Object)
 $
 ````

@@ -32,15 +32,15 @@ First, just looking for the return type:
 $ juggle java.io.OutputStream
 public abstract java.io.OutputStream Process.getOutputStream()
 public java.io.OutputStream ProcessImpl.getOutputStream()
+public java.io.OutputStream.<init>()
+public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public abstract java.io.OutputStream java.net.CacheRequest.getBody() throws java.io.IOException
 public java.io.OutputStream java.net.Socket.getOutputStream() throws java.io.IOException
 public java.io.OutputStream java.net.URLConnection.getOutputStream() throws java.io.IOException
-public java.io.OutputStream.<init>()
-public transient java.io.OutputStream java.nio.file.spi.FileSystemProvider.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.AsynchronousByteChannel)
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.WritableByteChannel)
 public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
-public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
+public transient java.io.OutputStream java.nio.file.spi.FileSystemProvider.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
 public java.io.OutputStream java.util.Base64.Encoder.wrap(java.io.OutputStream)
 $
 ````
@@ -48,10 +48,10 @@ $
 Now let's do the same, but just show the `static` matches:
 ````
 $ juggle static java.io.OutputStream
+public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.AsynchronousByteChannel)
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.WritableByteChannel)
 public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
-public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 $
 ````
 
@@ -168,8 +168,8 @@ public final void ThreadGroup.checkAccess()
 public void SecurityManager.checkAccess(Thread)
 public void SecurityManager.checkAccess(ThreadGroup)
 public abstract boolean java.io.FileSystem.checkAccess(java.io.File,int)
-public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
 public native boolean java.io.UnixFileSystem.checkAccess(java.io.File,int)
+public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
 $
 ````
 
@@ -181,8 +181,8 @@ public final void ThreadGroup.checkAccess()
 public void SecurityManager.checkAccess(Thread)
 public void SecurityManager.checkAccess(ThreadGroup)
 public abstract boolean java.io.FileSystem.checkAccess(java.io.File,int)
-public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
 public native boolean java.io.UnixFileSystem.checkAccess(java.io.File,int)
+public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
 $
 ````
 
@@ -191,16 +191,16 @@ $
 Are there any functions that return an array of arrays of `String`s?
 ````
 $ juggle 'String[][]'           
-public String[][] javax.security.auth.PrivateCredentialPermission.getPrincipals()
 public String[][] java.text.DateFormatSymbols.getZoneStrings()
+public String[][] javax.security.auth.PrivateCredentialPermission.getPrincipals()
 $
 ````
 
 This can also be expressed using an ellipsis (even though that's not valid Java):
 ````
 $ juggle 'String[]...'           
-public String[][] javax.security.auth.PrivateCredentialPermission.getPrincipals()
 public String[][] java.text.DateFormatSymbols.getZoneStrings()
+public String[][] javax.security.auth.PrivateCredentialPermission.getPrincipals()
 $
 ````
 
@@ -297,38 +297,38 @@ Which methods meet the general contract of the `Comparator` interface?
 ````
 $ juggle "int (?,? extends Object, ? extends Object)"
 public volatile int String.CaseInsensitiveComparator.compare(Object,Object)
-public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
-public abstract int java.util.Comparator<T>.compare(T,T)
 public volatile int java.net.CookieManager.CookieComparator.compare(Object,Object)
 public int java.text.Collator.compare(Object,Object)
+public abstract int java.util.Comparator<T>.compare(T,T)
 public int java.util.Arrays.NaturalOrder.compare(Object,Object)
 public volatile int java.util.Collections.ReverseComparator.compare(Object,Object)
 public int java.util.Collections.ReverseComparator2<T>.compare(T,T)
 public volatile int java.util.Comparators.NaturalOrderComparator.compare(Object,Object)
 public int java.util.Comparators.NullComparator<T>.compare(T,T)
+public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
 public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
 public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
 public static <T> int java.util.Objects.compare(T,T,java.util.Comparator<T>)
-public final int java.util.concurrent.atomic.AtomicIntegerFieldUpdater<T>.getAndUpdate(T,java.util.function.IntUnaryOperator)
 public int java.util.concurrent.SubmissionPublisher<T>.offer(T,java.util.function.BiPredicate<T,U>)
+public final int java.util.concurrent.atomic.AtomicIntegerFieldUpdater<T>.getAndUpdate(T,java.util.function.IntUnaryOperator)
 public final int java.util.concurrent.atomic.AtomicIntegerFieldUpdater<T>.updateAndGet(T,java.util.function.IntUnaryOperator)
 public int String.CaseInsensitiveComparator.compare(String,String)
 public abstract int java.io.FileSystem.compare(java.io.File,java.io.File)
-public abstract int java.text.Collator.compare(String,String)
 public int java.io.UnixFileSystem.compare(java.io.File,java.io.File)
 public int java.net.CookieManager.CookieComparator.compare(java.net.HttpCookie,java.net.HttpCookie)
+public abstract int java.nio.channels.DatagramChannel.send(java.nio.ByteBuffer,java.net.SocketAddress) throws java.io.IOException
+public abstract int java.nio.file.attribute.UserDefinedFileAttributeView.read(String,java.nio.ByteBuffer) throws java.io.IOException
+public abstract int java.nio.file.attribute.UserDefinedFileAttributeView.write(String,java.nio.ByteBuffer) throws java.io.IOException
+public abstract int java.text.Collator.compare(String,String)
+public synchronized int java.text.RuleBasedCollator.compare(String,String)
 public int java.util.Collections.ReverseComparator.compare(Comparable<T>,Comparable<T>)
 public int java.util.Comparators.NaturalOrderComparator.compare(Comparable<T>,Comparable<T>)
 public static <T> int java.util.Arrays.compare(T[],T[],java.util.Comparator<T>)
-public synchronized int java.text.RuleBasedCollator.compare(String,String)
 public int java.util.Base64.Decoder.decode(byte[],byte[])
-public final int javax.crypto.Cipher.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException,javax.crypto.IllegalBlockSizeException,javax.crypto.BadPaddingException
 public int java.util.Base64.Encoder.encode(byte[],byte[])
 public static <T> int java.util.Arrays.mismatch(T[],T[],java.util.Comparator<T>)
-public abstract int java.nio.file.attribute.UserDefinedFileAttributeView.read(String,java.nio.ByteBuffer) throws java.io.IOException
-public abstract int java.nio.channels.DatagramChannel.send(java.nio.ByteBuffer,java.net.SocketAddress) throws java.io.IOException
+public final int javax.crypto.Cipher.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException,javax.crypto.IllegalBlockSizeException,javax.crypto.BadPaddingException
 public final int javax.crypto.Cipher.update(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException
-public abstract int java.nio.file.attribute.UserDefinedFileAttributeView.write(String,java.nio.ByteBuffer) throws java.io.IOException
 $
 ````
 A fair few! Note that not all of these really qualify though, since to qualify

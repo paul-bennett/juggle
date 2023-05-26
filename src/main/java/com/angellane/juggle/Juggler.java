@@ -40,7 +40,7 @@ public class Juggler {
 
     public Juggler() {
         addSource(new Module(Object.class.getModule().getName()));  // "java.base" is always inspected
-        addImportedPackageName(Object.class.getPackageName());      // "java.lang" is always imported
+        importedPackageNames.add(Object.class.getPackageName());    // "java.lang" is always imported
     }
 
 
@@ -68,7 +68,10 @@ public class Juggler {
                 .toList();
     }
 
-    public void addImportedPackageName(String name) { importedPackageNames.add(name); }
+    public void addImportedPackageName(String name) {
+        // java.lang is always present and must remain the last element
+        importedPackageNames.add(importedPackageNames.size()-1, name);
+    }
     public List<String> getImportedPackageNames()   { return importedPackageNames; }
 
     public Optional<Class<?>> loadClassByName(String className) {
@@ -137,7 +140,7 @@ public class Juggler {
                     // Actually now want to try typename plainly, then prefixed by each import in turn
                     // Default to Object if we can't find any match
                     Optional<Class<?>> opt =
-                            Stream.of(Stream.of(""), importedPackageNames.stream().map(pkg -> pkg + "."))
+                            Stream.of(Stream.of(""), getImportedPackageNames().stream().map(pkg -> pkg + "."))
                                     .flatMap(Function.identity())
                                     .map(prefix -> juggler.loadClassByName(prefix + name))
                                     .flatMap(Optional::stream)

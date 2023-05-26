@@ -15,6 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+
 <!--
   This document contains sample invocations of Juggle.
   
@@ -183,13 +184,13 @@ data in the query.  If multiple annotations are supplied, they must all be
 present on the class or method.
 ````
 $ juggle @FunctionalInterface int
+public abstract int java.util.Comparator<T>.compare(T,T)
 public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
 public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
 public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
 public abstract int java.util.function.LongToIntFunction.applyAsInt(long)
 public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
 public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
-public abstract int java.util.Comparator<T>.compare(T,T)
 public abstract int java.util.function.IntSupplier.getAsInt()
 $
 ````
