@@ -82,6 +82,13 @@ public class Main implements Runnable {
                 .forEach(m -> juggler.addSource(new Module(m)));
     }
 
+    @Option(names={"-c", "--conversions"},
+            paramLabel="none|all|auto",
+            description="Which conversions to apply")
+    public void setConversions(Juggler.Conversions conversions) {
+        juggler.setConversions(conversions);
+    };
+
     @SuppressWarnings("unused")
     @Option(names={"-s", "--sort"},
             paramLabel="access|name|package|score|text",

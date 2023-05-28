@@ -22,6 +22,7 @@ import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.comparator.MultiComparator;
 import com.angellane.juggle.match.Match;
+import com.angellane.juggle.match.TypeMatcher;
 import com.angellane.juggle.query.*;
 import com.angellane.juggle.sink.Sink;
 import com.angellane.juggle.source.Module;
@@ -183,7 +184,6 @@ public class Juggler {
                 );
     }
 
-
     // Processors =====================================================================================================
 
     private final
@@ -271,6 +271,24 @@ public class Juggler {
     }
 
 
+    // Conversions ====================================================================================================
+
+    enum Conversions { AUTO, NONE, ALL }
+    private Conversions conversions = Conversions.AUTO;
+    public void setConversions(Conversions conversions) {
+        this.conversions = conversions;
+    }
+
+    public <C extends Candidate, Q extends Query<C>>
+    TypeMatcher getTypeMatcher(Q query) {
+        return new TypeMatcher(switch (conversions) {
+            case ALL -> true;
+            case NONE -> false;
+            case AUTO -> !query.hasBoundedWildcards();
+        });
+    }
+
+
     // Main Event =====================================================================================================
 
     MemberQuery memberQuery = new MemberQuery();
@@ -314,7 +332,7 @@ public class Juggler {
 
         source
                 .flatMap(candidateChain)
-                .<M>flatMap(query::match)
+                .<M>flatMap(c -> query.match(getTypeMatcher(query), c))
                 .flatMap(matchChain)
                 .distinct()
                 .sorted(comparator)

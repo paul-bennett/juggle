@@ -20,10 +20,16 @@ package com.angellane.juggle.query;
 import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.match.Match;
+import com.angellane.juggle.match.TypeMatcher;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
+import static com.angellane.juggle.match.TypeMatcher.NO_MATCH;
+import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
 
 public abstract sealed class Query<C extends Candidate>
         permits TypeQuery, MemberQuery {
@@ -33,12 +39,24 @@ public abstract sealed class Query<C extends Candidate>
     protected int           modifiers           = 0;
     protected Pattern       declarationPattern  = null;
 
+    // For TypeQuery, this specifies the recordComponents
+    public List<ParamSpec>  params              = null;
 
     private static final int OTHER_MODIFIERS_MASK =
             Candidate.OTHER_MODIFIERS_MASK;
 
 
     // ABSTRACT METHODS =======================================================
+
+    /**
+     * Does this query use bounded wildcards?  Juggler uses this information
+     * when evaluating type matches.  If a query doesn't use bounded wildcards
+     * (i.e. ? extends Foo, or ? super Bar) then Juggler will implicitly
+     * convert queries to take widening and boxing conversions into account.
+     *
+     * @return true iff all uses of wildcards in this query are bounded
+     */
+    public abstract boolean hasBoundedWildcards();
 
     /**
      * Tries to match the candidate against this query.
@@ -48,7 +66,7 @@ public abstract sealed class Query<C extends Candidate>
      */
     public abstract
     <Q extends Query<C>, M extends Match<C,Q>>
-    Stream<M> match(C candidate);
+    Stream<M> match(TypeMatcher tm, C candidate);
 
 
     // FRAMEWORK ==============================================================
@@ -65,6 +83,7 @@ public abstract sealed class Query<C extends Candidate>
                     && modifierMask                   == q.modifierMask
                     && modifiers                      == q.modifiers
                     && patternsEqual(declarationPattern, q.declarationPattern)
+                    && Objects.equals(params,            q.params)
                     ;
     }
 
@@ -75,6 +94,7 @@ public abstract sealed class Query<C extends Candidate>
                 , modifierMask
                 , modifiers
                 , declarationPattern
+                , params
         );
     }
 
@@ -190,5 +210,87 @@ public abstract sealed class Query<C extends Candidate>
                 ? OptionalInt.of(0) : OptionalInt.empty();
     }
 
+    protected OptionalInt scoreParams(
+            TypeMatcher tm, List<? extends Class<?>> candidateParams) {
+        if (params == null)
+            return EXACT_MATCH;
+
+        // params :: [ParamSpec]
+        // type ParamSpec = ZeroOrMoreParams | SingleParam name type
+
+        // Intent is to construct a number of alternative queries of type
+        // List<SingleParam> by replacing the ZeroOrMoreParams objects with
+        // a number of wildcard SingleParam objects.
+
+        int numParamSpecs = (int)params.stream()
+                .filter(p -> p instanceof SingleParam).count();
+        int numEllipses = params.size() - numParamSpecs;
+        int spareParams = candidateParams.size() - numParamSpecs;
+
+        if (spareParams == 0)
+            // No ellipses, correct #params
+            return scoreParamSpecs(tm,
+                    params.stream()
+                            .filter(ps -> ps instanceof SingleParam)
+                            .map(ps -> (SingleParam)ps)
+                            .toList(),
+                    candidateParams
+            );
+        else if (numEllipses == 0)
+            // No ellipses over which to distribute spare params
+            return NO_MATCH;
+        else if (spareParams < 0)
+            // More specified params than candidate params
+            return NO_MATCH;
+        else {
+            // Nasty: using a 1-element array so we can set inside lambda
+            final OptionalInt [] ret = new OptionalInt[]{ NO_MATCH };
+
+            decomposeIntoParts(spareParams, numEllipses, distribution -> {
+                int ix = 0;  // index into distribution
+                List<SingleParam> queryParams = new ArrayList<>();
+
+                for (ParamSpec ps : params) {
+                    if (ps instanceof SingleParam singleParam)
+                        queryParams.add(singleParam);
+                    else
+                        for (int numWildcards = distribution[ix++];
+                             numWildcards > 0; numWildcards--)
+                            queryParams.add(ParamSpec.wildcard());
+                }
+
+                OptionalInt  thisScore =
+                        scoreParamSpecs(tm, queryParams, candidateParams);
+
+                ret[0] = IntStream.concat(ret[0].stream(), thisScore.stream())
+                        .max();
+            });
+
+            return ret[0];
+        }
+    }
+
+    private static OptionalInt scoreParamSpecs(
+            TypeMatcher       tm,
+            List<SingleParam> queryParams,
+            List<? extends Class<?>>    candidateParams
+    ) {
+        if (queryParams.size() != candidateParams.size())
+            return NO_MATCH;
+        else {
+            Iterator<? extends Class<?>> actualParamIter =
+                    candidateParams.iterator();
+
+            return totalScore(
+                    queryParams.stream()
+                            .map(ps -> {
+                                BoundedType bounds = ps.paramType();
+                                Class<?> actualType = actualParamIter.next();
+                                return tm.scoreTypeMatch(actualType, bounds);
+                            })
+                            .toList()
+            );
+        }
+    }
 
 }

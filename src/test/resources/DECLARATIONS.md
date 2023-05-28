@@ -42,6 +42,59 @@ public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(ja
 public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
 public transient java.io.OutputStream java.nio.file.spi.FileSystemProvider.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
 public java.io.OutputStream java.util.Base64.Encoder.wrap(java.io.OutputStream)
+public static final java.io.PrintStream System.err
+public static final java.io.PrintStream System.out
+public java.io.PrintStream java.io.PrintStream.append(char)
+public java.io.PrintStream java.io.PrintStream.append(CharSequence)
+public java.io.PrintStream java.io.PrintStream.append(CharSequence,int,int)
+public transient java.io.PrintStream java.io.PrintStream.format(String,Object[])
+public transient java.io.PrintStream java.io.PrintStream.format(java.util.Locale,String,Object[])
+public java.io.BufferedOutputStream.<init>(java.io.OutputStream)
+public java.io.BufferedOutputStream.<init>(java.io.OutputStream,int)
+public java.io.ByteArrayOutputStream.<init>()
+public java.io.ByteArrayOutputStream.<init>(int)
+public java.io.DataOutputStream.<init>(java.io.OutputStream)
+public java.io.FileOutputStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(java.io.File,boolean) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(java.io.FileDescriptor)
+public java.io.FileOutputStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.FileOutputStream.<init>(String,boolean) throws java.io.FileNotFoundException
+public java.io.FilterOutputStream.<init>(java.io.OutputStream)
+public java.io.ObjectOutputStream.<init>(java.io.OutputStream) throws java.io.IOException
+public java.io.PipedOutputStream.<init>()
+public java.io.PipedOutputStream.<init>(java.io.PipedInputStream) throws java.io.IOException
+public java.io.PrintStream.<init>(java.io.File) throws java.io.FileNotFoundException
+public java.io.PrintStream.<init>(java.io.File,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.io.PrintStream.<init>(java.io.File,java.nio.charset.Charset) throws java.io.IOException
+public java.io.PrintStream.<init>(java.io.OutputStream)
+public java.io.PrintStream.<init>(java.io.OutputStream,boolean)
+public java.io.PrintStream.<init>(java.io.OutputStream,boolean,String) throws java.io.UnsupportedEncodingException
+public java.io.PrintStream.<init>(java.io.OutputStream,boolean,java.nio.charset.Charset)
+public java.io.PrintStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.PrintStream.<init>(String,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
+public java.io.PrintStream.<init>(String,java.nio.charset.Charset) throws java.io.IOException
+public transient java.io.PrintStream java.io.PrintStream.printf(String,Object[])
+public transient java.io.PrintStream java.io.PrintStream.printf(java.util.Locale,String,Object[])
+public java.security.DigestOutputStream.<init>(java.io.OutputStream,java.security.MessageDigest)
+public java.util.jar.JarOutputStream.<init>(java.io.OutputStream) throws java.io.IOException
+public java.util.jar.JarOutputStream.<init>(java.io.OutputStream,java.util.jar.Manifest) throws java.io.IOException
+public java.util.zip.CheckedOutputStream.<init>(java.io.OutputStream,java.util.zip.Checksum)
+public java.util.zip.DeflaterOutputStream.<init>(java.io.OutputStream)
+public java.util.zip.DeflaterOutputStream.<init>(java.io.OutputStream,boolean)
+public java.util.zip.DeflaterOutputStream.<init>(java.io.OutputStream,java.util.zip.Deflater)
+public java.util.zip.DeflaterOutputStream.<init>(java.io.OutputStream,java.util.zip.Deflater,boolean)
+public java.util.zip.DeflaterOutputStream.<init>(java.io.OutputStream,java.util.zip.Deflater,int)
+public java.util.zip.DeflaterOutputStream.<init>(java.io.OutputStream,java.util.zip.Deflater,int,boolean)
+public java.util.zip.GZIPOutputStream.<init>(java.io.OutputStream) throws java.io.IOException
+public java.util.zip.GZIPOutputStream.<init>(java.io.OutputStream,boolean) throws java.io.IOException
+public java.util.zip.GZIPOutputStream.<init>(java.io.OutputStream,int) throws java.io.IOException
+public java.util.zip.GZIPOutputStream.<init>(java.io.OutputStream,int,boolean) throws java.io.IOException
+public java.util.zip.InflaterOutputStream.<init>(java.io.OutputStream)
+public java.util.zip.InflaterOutputStream.<init>(java.io.OutputStream,java.util.zip.Inflater)
+public java.util.zip.InflaterOutputStream.<init>(java.io.OutputStream,java.util.zip.Inflater,int)
+public java.util.zip.ZipOutputStream.<init>(java.io.OutputStream)
+public java.util.zip.ZipOutputStream.<init>(java.io.OutputStream,java.nio.charset.Charset)
+public javax.crypto.CipherOutputStream.<init>(java.io.OutputStream,javax.crypto.Cipher)
 $
 ````
 
@@ -52,6 +105,8 @@ public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.AsynchronousByteChannel)
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.WritableByteChannel)
 public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
+public static final java.io.PrintStream System.err
+public static final java.io.PrintStream System.out
 $
 ````
 
@@ -119,10 +174,10 @@ syntax we need to be specific if we want to use an upper bound.
 For example, here are all the methods named `getByAddress` that return an `InetAddress` or one of its subclasses:
 ````
 $ juggle -i java.net '? extends InetAddress getByAddress' 
-public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
-public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
 public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
 public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
+public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
+public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
 $
 ````
 
@@ -131,6 +186,8 @@ If we omit the `? extends` wildcard, we only get the methods that return exactly
 $ juggle -i java.net InetAddress getByAddress 
 public static InetAddress InetAddress.getByAddress(byte[]) throws UnknownHostException
 public static InetAddress InetAddress.getByAddress(String,byte[]) throws UnknownHostException
+public static Inet6Address Inet6Address.getByAddress(String,byte[],int) throws UnknownHostException
+public static Inet6Address Inet6Address.getByAddress(String,byte[],NetworkInterface) throws UnknownHostException
 $
 ````
 
@@ -356,6 +413,24 @@ public int String.indexOf(int)
 public int String.lastIndexOf(int)
 public static int Integer.parseInt(String,int) throws NumberFormatException
 public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public char String.charAt(int)
+public static int Character.codePointAt(CharSequence,int)
+public static int Character.codePointBefore(CharSequence,int)
+public static byte Byte.parseByte(String,int) throws NumberFormatException
+public static short Short.parseShort(String,int) throws NumberFormatException
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public abstract char CharSequence.charAt(int)
+public static Integer Integer.getInteger(String,int)
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public static native byte java.lang.reflect.Array.getByte(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native char java.lang.reflect.Array.getChar(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native short java.lang.reflect.Array.getShort(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public volatile int String.compareTo(Object)
+public static Byte Byte.valueOf(String,int) throws NumberFormatException
+public static Short Short.valueOf(String,int) throws NumberFormatException
+public abstract int Comparable<T>.compareTo(T)
+public static Integer Integer.getInteger(String,Integer)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
 $
 ````
 
@@ -367,6 +442,15 @@ public int String.codePointAt(int)
 public int String.codePointBefore(int)
 public int String.indexOf(int)
 public int String.lastIndexOf(int)
+public char String.charAt(int)
+public static int Character.codePointAt(CharSequence,int)
+public static int Character.codePointBefore(CharSequence,int)
+public abstract char CharSequence.charAt(int)
+public static Integer Integer.getInteger(String,int)
+public volatile int String.compareTo(Object)
+public abstract int Comparable<T>.compareTo(T)
+public static Integer Integer.getInteger(String,Integer)
+public static int WeakPairMap.Pair<K1,K2>.hashCode(Object,Object)
 $
 ````
 
@@ -376,13 +460,35 @@ that particular type:
 $ juggle 'int (String,int) throws NumberFormatException'
 public static int Integer.parseInt(String,int) throws NumberFormatException
 public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static byte Byte.parseByte(String,int) throws NumberFormatException
+public static short Short.parseShort(String,int) throws NumberFormatException
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public static Byte Byte.valueOf(String,int) throws NumberFormatException
+public static Short Short.valueOf(String,int) throws NumberFormatException
 $
 ````
 
-As with return and parameter types, exception types are matched precisely
-which is why we see no results when we try to match on a superclass:
+As with return and parameter types, exception types are now matched precisely
+if we don't specify any bounded wildcards in the query:
 ````
 $ juggle 'int (String,int) throws RuntimeException'
+public static int Integer.parseInt(String,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static byte Byte.parseByte(String,int) throws NumberFormatException
+public static short Short.parseShort(String,int) throws NumberFormatException
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public static native byte java.lang.reflect.Array.getByte(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native char java.lang.reflect.Array.getChar(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native short java.lang.reflect.Array.getShort(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static Byte Byte.valueOf(String,int) throws NumberFormatException
+public static Short Short.valueOf(String,int) throws NumberFormatException
+$
+````
+
+If we use `-c none` to prevent conversions, we don't see any results:
+````
+$ juggle -c none 'int (String,int) throws RuntimeException'
 $
 ````
 
@@ -394,12 +500,24 @@ public static int Integer.parseInt(String,int) throws NumberFormatException
 public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
 $
 ````
+Because we've used a bounded wildcard in the query, Juggle doesn't perform any
+conversions for us (so we don't show results where the return type would've
+required a Widening Primitive conversion, e.g. `byte Byte.parseByte(String)`.)
 
 Or even a wildcard if we don't care what class might be thrown:
 ````
 $ juggle 'int (String,int) throws ?'
 public static int Integer.parseInt(String,int) throws NumberFormatException
 public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+public static byte Byte.parseByte(String,int) throws NumberFormatException
+public static short Short.parseShort(String,int) throws NumberFormatException
+public static native int java.lang.reflect.Array.getInt(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static Integer Integer.valueOf(String,int) throws NumberFormatException
+public static native byte java.lang.reflect.Array.getByte(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native char java.lang.reflect.Array.getChar(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static native short java.lang.reflect.Array.getShort(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
+public static Byte Byte.valueOf(String,int) throws NumberFormatException
+public static Short Short.valueOf(String,int) throws NumberFormatException
 $
 ````
 
@@ -410,6 +528,3 @@ public static int Integer.parseInt(String,int) throws NumberFormatException
 public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
 $
 ````
-
-
-

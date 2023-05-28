@@ -87,10 +87,20 @@ _any_ return type:
 $ juggle '(double[], int, int, double)' 
 public static int java.util.Arrays.binarySearch(double[],int,int,double)
 public static void java.util.Arrays.fill(double[],int,int,double)
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
+public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ````
+("What are those last three results?" you might be thinking, "They don't
+match!" You're right. They don't. But at the moment Juggle works on the
+_erased type_ of methods, so these looks like methods that take four
+`Object` parameters, and Juggle recognises that each of the types in
+the query - `double[]`, `int` and `double` can be passed as a parameter
+of type `Object`.)
 
-Similarly, omitting the parameter list shows methods that take _any
+In the same way that you can omit the return type from your query, you
+can also omit the parameter list, which will show methods that take _any
 number_ of arguments of _any type_.  This provides a means of listing
 all the ways of obtaining an object of a specific type:
 ````
@@ -120,7 +130,7 @@ While marginally interesting, the output is rather too long to be helpful!
 Juggle treats non-static methods as if they have a silent
 first parameter whose type is the class in question:
 ````
-$ juggle 'java.lang.String (? super java.util.regex.Matcher, java.lang.String)' 
+$ juggle 'java.lang.String (java.util.regex.Matcher, java.lang.String)' 
 public String java.util.regex.Matcher.group(String)
 public String java.util.regex.Matcher.replaceAll(String)
 public String java.util.regex.Matcher.replaceFirst(String)
@@ -141,7 +151,7 @@ no additional arguments and returns a value of the field's type).
 As with non-static methods, non-static fields have an additional implicit 
 `this` parameter:
 ````
-$ juggle 'int (? super java.io.InterruptedIOException)'
+$ juggle 'int (java.io.InterruptedIOException)'
 public int java.io.InterruptedIOException.bytesTransferred
 public native int Object.hashCode()
 public static native int System.identityHashCode(Object)
@@ -291,13 +301,13 @@ By default, Juggle will only show `public` members. Including an access
 modifier will set an alternative minimum level of accessibility
 (`public`, `package`,`protected`, or `private`).
 ````
-$ juggle 'protected ? extends java.io.OutputStream ()'
+$ juggle 'protected java.io.OutputStream ()'
+public java.io.OutputStream.<init>()
+public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static final java.io.PrintStream System.err
 public static final java.io.PrintStream System.out
 public java.io.ByteArrayOutputStream.<init>()
-public java.io.OutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
-public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
 $
 ````
@@ -367,6 +377,13 @@ public java.net.Socket.<init>(String,int,java.net.InetAddress,int) throws java.i
 public java.text.StringCharacterIterator.<init>(String,int,int,int)
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,int,int)
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,String[],int)
+public static int Integer.parseInt(CharSequence,int,int,int) throws NumberFormatException
+public static long Long.parseLong(CharSequence,int,int,int) throws NumberFormatException
+public static int Integer.parseUnsignedInt(CharSequence,int,int,int) throws NumberFormatException
+public static long Long.parseUnsignedLong(CharSequence,int,int,int) throws NumberFormatException
+public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
+public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
+public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ````
 
@@ -387,7 +404,9 @@ public synchronized String StringBuffer.substring(int)
 public synchronized String StringBuffer.substring(int,int)
 $
 ````
-As you might expect, with many shells we need to escape this special charater.
+As you might expect, with many shells we need to escape this special character.
+
+### Bounded Wildcards
 
 Juggle also supported bounded wildcards.  Lower bounds are specified as
 `? super Inet6Address`; this matches `Inet6Address` as well as its super
@@ -397,6 +416,57 @@ Upper bounds are specified `? extends InetAddress`, which would match
 `InetAddress` and any subclasses (i.e. `Inet4Address` and `Inet6Address`).
 Multiple upper bounds (a class and an interface, or multiple interfaces)
 are separated with an ampersand: `? extends InetAddress & Serializable`.
+
+Typically we might use lower-bounds on parameter specifications and upper
+bounds on return types.
+
+So for example, what could replace `UnknownMethod` in this code?
+````java
+String myString = "Hello";
+int i = 0, j = 2;
+CharSequence ch = UnknownMethod(myString, i, j);
+````
+
+We can ask Juggle. We need a method that takes a `String` (or any superclass
+of `String`) and two `int`s, and returns a `CharSequence` (or any subclass): 
+````
+$ juggle '? extends CharSequence (? super String,int,int)'
+public CharSequence String.subSequence(int,int)
+public abstract CharSequence CharSequence.subSequence(int,int)
+public String String.substring(int,int)
+public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
+$
+````
+
+Since Java normally applies these conversions automatically, Juggle does too.
+If we don't explicitly use a bounded wildcard in our query, Juggle considers
+each parameter type to be a lower bound for a wildcard, and return and exception
+types to be upper bounds.
+
+So we can write the query more naturally and get the same results:
+````
+$ juggle 'CharSequence (String,int,int)'
+public CharSequence String.subSequence(int,int)
+public abstract CharSequence CharSequence.subSequence(int,int)
+public String String.substring(int,int)
+public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
+$
+````
+
+### Controlling Conversion
+
+Sometimes these automatic conversions get in the way.  You can control whether
+Juggle performs conversions (replacing types with bounded wildcards) using
+the `-c` or `--conversions` option. 
+
+| Conversion | Description                                                                  |
+|------------|------------------------------------------------------------------------------|
+| `-c all`   | Treat plain params as lower bounded wildcards, and return as upper bounded   |
+| `-c none`  | Apply no conversions; all types are matched exactly                          |
+| `-c auto`  | Behave as `all` if no bounded wildcards appear in query, or `none` otherwise |
+
+The default is `-c auto`.
+
 
 ### Type Matches
 
@@ -434,7 +504,7 @@ returning an instance of the declaring class.  In the following example
 you'll see a couple of constructors and a static method, all with broadly
 similar signatures:
 ````
-$ juggle '? extends java.io.InputStream (? super String)'
+$ juggle 'java.io.InputStream (String)'
 public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
 public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
 public java.io.StringBufferInputStream.<init>(String)
@@ -451,6 +521,7 @@ Each command-line option has a long name equivalent. This table summarises all o
 
 | Option | Long Equivalent | Argument                                     | Default                                         | Description                                         |
 |--------|-----------------|----------------------------------------------|-------------------------------------------------|-----------------------------------------------------|
+| `-c`   | `--conversions` | `auto`, `none`, `all`                        | `-c auto`                                       | Whether to apply type conversions                   |
 | `-i`   | `--import`      | package name                                 |                                                 | Packages to import (`java.lang` is always searched) |
 | `-j`   | `--jar`         | file path                                    |                                                 | JAR files to search                                 |
 | `-m`   | `--module`      | module name(s)                               | `-m java.base`                                  | JMODs to search                                     |
