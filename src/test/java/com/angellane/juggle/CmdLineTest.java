@@ -66,7 +66,7 @@ public class CmdLineTest {
 
     @Test
     public void testOneParamsOption() {
-        String[] args = {"(Object))"};
+        String[] args = {"(Object)"};
         Main app = new Main();
         ParseResult result = new CommandLine(app).parseArgs(args);
         app.parseDeclarationQuery(app.getQueryString());
@@ -98,7 +98,7 @@ public class CmdLineTest {
     // See also MemberQueryTest where we try to score the result
     @Test
     public void testIntIntToInt() {
-        String[] args = {"int(int,int))"};
+        String[] args = {"int(int,int)"};
         Main app = new Main();
         ParseResult result = new CommandLine(app).parseArgs(args);
         app.parseDeclarationQuery(app.getQueryString());

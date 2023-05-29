@@ -57,6 +57,9 @@
  */
 grammar Decl;
 
+oneDecl
+    :   decl EOF ;
+
 decl
     :   classDecl
     |   interfaceDecl
@@ -115,7 +118,7 @@ recordDecl
 classModifier
     :   annotation
     |   'private' | 'protected' | 'package' | 'public'
-    |   'abstract' | 'static' | /*'sealed' | 'non-sealed' |*/ 'strictfp'
+    |   'abstract' | 'static' | 'final' | /*'sealed' | 'non-sealed' |*/ 'strictfp'
     ;
 
 interfaceModifier

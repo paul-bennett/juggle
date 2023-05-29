@@ -122,7 +122,8 @@ public class TestSamples {
                         // fall through
                     case CMD:
                         if (line.endsWith(CONTINUE))
-                            line = line.substring(0, line.length() - CONTINUE.length());
+                            line = line.substring(0,
+                                    line.length() - CONTINUE.length()) + '\n';
                         else
                             state = OUT;
                         command.append(line);

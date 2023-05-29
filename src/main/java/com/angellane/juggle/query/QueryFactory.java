@@ -17,15 +17,13 @@
  */
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.match.Accessibility;
+import com.angellane.juggle.JuggleError;
 import com.angellane.juggle.Juggler;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.parser.DeclBaseListener;
 import com.angellane.juggle.parser.DeclLexer;
 import com.angellane.juggle.parser.DeclParser;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -46,18 +44,71 @@ public class QueryFactory {
     public Query<?> createQuery(final String declString) {
         CharStream inputStream = CharStreams.fromString(declString);
 
-        DeclLexer lexer = new DeclLexer(inputStream);
+        Lexer lexer = new Lexer(inputStream);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         DeclParser parser = new DeclParser(tokenStream);
+        parser.setErrorHandler(new AbortErrorStrategy(declString));
 
-        DeclParser.DeclContext tree = parser.decl();
+        DeclParser.OneDeclContext tree = parser.oneDecl();
+        if (parser.getCurrentToken().getType() != Token.EOF)
+            throw new JuggleError("Extra input after query: " + parser.getCurrentToken());
 
         ParseTreeWalker walker = new ParseTreeWalker();
         Listener listener = new Listener();
 
-        walker.walk(listener, tree);
+        walker.walk(listener, tree.decl());
 
         return listener.tempQuery;
+    }
+
+    static class Lexer extends DeclLexer {
+        public Lexer(CharStream input) { super(input); }
+        public void recover(LexerNoViableAltException ex) {
+            throw new JuggleError("Couldn't parse query");
+
+        }
+    }
+
+    static class AbortErrorStrategy extends DefaultErrorStrategy {
+        String input;
+        AbortErrorStrategy(String input) { this.input = input; }
+
+        private String errorMessage(Parser parser) {
+            Token errorToken = parser.getCurrentToken();
+//            var expectedTokens = parser.getExpectedTokens();
+
+            int row = errorToken.getLine();
+            int col = errorToken.getCharPositionInLine();
+
+            StringBuilder msg = new StringBuilder(
+                    "Couldn't parse query at %d:%d\n".formatted(row,col));
+
+            List<String> inputLines = input.lines().toList();
+            for (int i = 0; i < inputLines.size(); ++i) {
+                msg.append(inputLines.get(i)).append("\n");
+                if (i == row - 1)
+                    msg.append(" ".repeat(col))
+                            .append("^".repeat(errorToken.getText().length()))
+                            .append("\n");
+            }
+//            msg.append("Expected: ").append(expectedTokens);
+            return msg.toString();
+        }
+
+        @Override
+        public void recover(Parser parser, RecognitionException ex) {
+            throw new JuggleError(errorMessage(parser));
+        }
+
+        @Override
+        public Token recoverInline(Parser parser) throws RecognitionException {
+            throw new JuggleError(errorMessage(parser));
+        }
+
+        @Override
+        public void sync(Parser parser) throws RecognitionException {
+            // Don't even try to recover from sub-rule problems!
+        }
     }
 
     Class<?> classForTypename(String className) {

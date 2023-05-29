@@ -29,6 +29,65 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #112](https://github.com/paul-bennett/juggle/issues/112): Fail on parse error
+
+This query uses a symbol that's doesn't pass the lexer:
+````
+$ juggle :
+line 1:0 token recognition error at: ':'
+*** Error: Couldn't parse query
+$
+````
+
+This query passes the lexer but fails the parser:
+````
+$ juggle \)
+*** Error: Couldn't parse query at 1:0
+)
+^
+
+$
+````
+
+And again:
+````
+$ juggle interface interface
+*** Error: Couldn't parse query at 1:10
+interface interface
+          ^^^^^^^^^
+
+$
+````
+
+Let's try splitting across a few lines:
+````
+$ juggle "public            \
+       class                \
+this should fail            \
+on the second word above"
+*** Error: Couldn't parse query at 3:5
+public            
+       class                
+this should fail            
+     ^^^^^^
+on the second word above
+
+$
+````
+(Unfortunately the parser in `TestSamples` doesn't propagate the newlines
+down into arguments.)
+
+This exercises a different branch of the error handling:
+````
+$ juggle 'int (int'
+line 1:8 no viable alternative at input 'int'
+*** Error: Couldn't parse query at 1:5
+int (int
+     ^^^
+
+$
+````
+
 ### [GitHub Issue #58](https://github.com/paul-bennett/juggle/issues/58): Add `--conversions` option
 
 The new `--conversions` option lets us dictate when Juggle automatically
