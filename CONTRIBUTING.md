@@ -16,7 +16,7 @@
     limitations under the License.
 -->
 
-# Constributions Welcome!
+# Contributions Welcome!
 
 Contributions are most certainly welcome!  Either submit a pull request, or
 email opensource@angellane.com
@@ -36,7 +36,7 @@ The most useful contributions at the moment would be:
 
 * Did Juggle barf?
   - Juggle should never throw an exception or provide unintelligible
-    output.  If it does I'd like to know.
+    output.  If it outputs junk I'd like to know.
   - What query did you use? What did you see?
 
 * Do you find the query syntax confusing or clumsy?
