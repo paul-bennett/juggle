@@ -106,9 +106,9 @@ static `getByAddress` methods on the `Inet6Address` class.
 
 Of course methods may return an instance of a subclass of their declared return
 type.  `Inet6Address` is a member of a small family of classes rooted in its
-parent `InetAddress` class, and it's possible that the runtime type of an 
-object returned by one of those methods is actually an `Inet6Address`, but
-Juggle deals in compile-time types.
+parent `InetAddress` class, and it's possible that the runtime type returned
+by one of those methods is actually `Inet6Address`, but Juggle deals in
+compile-time types.
 
 Another reason why Juggle won't list these methods-returning-a-superclass is
 that doing so would result in long and not particularly helpful outputs.
@@ -409,14 +409,16 @@ Upper bounds are specified `? extends InetAddress`, which would match
 Multiple upper bounds (a class and an interface, or multiple interfaces)
 are separated with an ampersand: `? extends InetAddress & Serializable`.
 
-Typically we might use lower-bounds on parameter specifications and upper
+Typically, we might use lower-bounds on parameter specifications and upper
 bounds on return types.
 
 So for example, what could replace `UnknownMethod` in this code?
 ````java
-String myString = "Hello";
-int i = 0, j = 2;
-CharSequence ch = UnknownMethod(myString, i, j);
+class Foo {
+    void f(String s, int i, int j) {
+        return UnknownMethod(myString, i, j);
+    }
+}
 ````
 
 We can ask Juggle. We need a method that takes a `String` (or any superclass
@@ -485,7 +487,7 @@ public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
 
-All of the other kinds of type are also supported: `enum`, `record`, 
+All the other kinds of type are also supported: `enum`, `record`, 
 `interface` and `@interface`. As with member queries, we can restrict the
 search by specifying annotations and other modifiers.
 

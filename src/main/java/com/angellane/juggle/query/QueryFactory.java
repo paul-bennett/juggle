@@ -183,7 +183,8 @@ public class QueryFactory {
                 case "strictfp"     -> tempQuery.addModifier(Modifier.STRICT);
 
                 default ->
-                        System.err.println("*** Unknown modifier `" + text + "'; ignoring");
+                        System.err.println("*** Warning: unknown modifier `"
+                                + text + "'; ignoring");
             }
         }
 

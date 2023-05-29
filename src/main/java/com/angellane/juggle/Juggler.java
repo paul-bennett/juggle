@@ -29,6 +29,7 @@ import com.angellane.juggle.source.Module;
 import com.angellane.juggle.util.ResolvingURLClassLoader;
 import com.angellane.juggle.source.Source;
 
+import java.lang.module.FindException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
@@ -54,12 +55,17 @@ public class Juggler {
     ResolvingURLClassLoader loader = new ResolvingURLClassLoader(new URL[] {});
 
     public void configureAllSources() {
-        URL[] urls = getSources().stream()
-                .map(Source::configure)
-                .flatMap(Optional::stream)
-                .toArray(URL[]::new);
+        try {
+            URL[] urls = getSources().stream()
+                    .map(Source::configure)
+                    .flatMap(Optional::stream)
+                    .toArray(URL[]::new);
 
-        this.loader = new ResolvingURLClassLoader(urls);
+            this.loader = new ResolvingURLClassLoader(urls);
+        }
+        catch (FindException ex) {
+            throw new JuggleError(ex.getLocalizedMessage());
+        }
     }
 
 
@@ -111,7 +117,7 @@ public class Juggler {
             } catch (NoClassDefFoundError e) {
                 // This might be thrown if the class file references other classes that can't be loaded.
                 // Maybe it depends on another JAR that hasn't been specified on the command-line with -j.
-                System.err.println("*** Ignoring class " + className + ": " + e);
+                System.err.println("*** Warning: related class " + className + ": " + e);
                 return Optional.empty();
             }
         }
@@ -150,10 +156,8 @@ public class Juggler {
                     if (opt.isPresent())
                         return opt.get();
                     else {
-                        Class<?> def = Object.class;
                         // If we get here, the class wasn't found, either naked or with any imported package prefix
-                        System.err.println("*** Couldn't find type: " + name + "; using " + def + " instead");
-                        return def;
+                        throw new JuggleError("Couldn't find type: " + name);
                     }
                 });
 

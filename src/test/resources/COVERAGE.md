@@ -100,7 +100,7 @@ $
 
 ````
 $ juggle -m this.module.does.not.exist
-*** Module this.module.does.not.exist not found
+*** Error: Module this.module.does.not.exist not found
 $
 ````
 
@@ -108,11 +108,7 @@ $
 
 ````
 $ juggle 'boolean (ThisTypeDoesNotExist)'
-*** Couldn't find type: ThisTypeDoesNotExist; using class java.lang.Object instead
-public static native boolean Thread.holdsLock(Object)
-public static boolean java.lang.invoke.MethodHandleProxies.isWrapperInstance(Object)
-public static boolean java.util.Objects.isNull(Object)
-public static boolean java.util.Objects.nonNull(Object)
+*** Error: Couldn't find type: ThisTypeDoesNotExist
 $
 ````
 
@@ -215,14 +211,11 @@ The (contrived) App class from testApp uses the Lib class from testLib in its in
 dependent classes in the JAR (it's not an uberjar).  This means trying to load the App class fails.  
 
 ````
-% juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
-*** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
-*** Couldn't find type: com.angellane.juggle.testinput.app.App; using class java.lang.Object instead
-*** Ignoring class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
-public Object.<init>()
-%
+$ juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
+*** Warning: related class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
+*** Error: Couldn't find type: com.angellane.juggle.testinput.app.App
+$
 ````
-(Commenting-out this test because nowadays it matches thousands of methods.)
 
 
 ## Methods with no modifiers

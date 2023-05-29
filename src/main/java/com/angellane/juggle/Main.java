@@ -35,7 +35,6 @@ import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-import java.lang.module.FindException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,12 +81,13 @@ public class Main implements Runnable {
                 .forEach(m -> juggler.addSource(new Module(m)));
     }
 
+    @SuppressWarnings("unused")
     @Option(names={"-c", "--conversions"},
             paramLabel="none|all|auto",
             description="Which conversions to apply")
     public void setConversions(Juggler.Conversions conversions) {
         juggler.setConversions(conversions);
-    };
+    }
 
     @SuppressWarnings("unused")
     @Option(names={"-s", "--sort"},
@@ -161,13 +161,7 @@ public class Main implements Runnable {
     public void run() {
         // Sources
 
-        try {
-            juggler.configureAllSources();      // Essential that sources are configured before getting param/return types
-        }
-        catch (FindException ex) {
-            System.err.println("*** " + ex.getLocalizedMessage());
-            return;
-        }
+        juggler.configureAllSources();      // Essential that sources are configured before getting param/return types
 
         // Processors
 
@@ -195,9 +189,14 @@ public class Main implements Runnable {
     }
 
     public static void main(String[] args) {
-        new CommandLine(new Main())
-                .setCaseInsensitiveEnumValuesAllowed(true)
-                .setOverwrittenOptionsAllowed(true)
-                .execute(args);
+        try {
+            new CommandLine(new Main())
+                    .setCaseInsensitiveEnumValuesAllowed(true)
+                    .setOverwrittenOptionsAllowed(true)
+                    .execute(args);
+        }
+        catch (JuggleError ex) {
+            System.err.println("*** Error: " + ex.getMessage());
+        }
     }
 }
