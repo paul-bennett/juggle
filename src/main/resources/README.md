@@ -56,14 +56,6 @@ Answer: yes, the `now()` method of the `java.time.LocalTime` class.
 Juggle shows the signature for the method, with the class and method
 names separated by a period.
 
-> **Note**
-> This document is a little inconsistent in its use of wildcards in queries.
-> Our intent is for Juggle to infer wildcards in most instances, at which
-> point many of the example queries in this document can be simplified.
-> 
-> We've not explained that in detail in the narrative, looking forward to
-> the day that GitHub issue #58 is implemented.
-
 
 ## What to look for
 
