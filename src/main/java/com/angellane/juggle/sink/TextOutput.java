@@ -21,6 +21,7 @@ import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.formatter.Formatter;
+import com.angellane.juggle.util.ClassUtils;
 
 import java.io.PrintStream;
 import java.lang.reflect.*;
@@ -55,7 +56,12 @@ public class TextOutput implements Sink {
     public String decode(Class<?> c) {
         StringBuilder ret = new StringBuilder();
 
-        ret.append(f.formatKeyword(decodeModifiers(c.getModifiers())));
+        StringBuilder mods = new StringBuilder();
+        mods.append(decodeModifiers(c.getModifiers()));
+        if (ClassUtils.classIsSealed(c))    mods.append("sealed ");
+        if (ClassUtils.classIsNonSealed(c)) mods.append("non-sealed ");
+
+        ret.append(f.formatKeyword(mods.toString()));
 
         ret.append(f.formatKeyword(decodeTypeKind(c)));
         ret.append(" ");
@@ -75,7 +81,22 @@ public class TextOutput implements Sink {
                     Arrays.stream(c.getInterfaces())
                             .map(this::decodeClass)
                             .map(f::formatType)
-                            .collect(Collectors.joining(f.formatKeyword(", ")))
+                            .collect(Collectors.joining(
+                                    f.formatPunctuation(", "))
+                            )
+            );
+        }
+
+        if (c.getPermittedSubclasses() != null
+                && c.getPermittedSubclasses().length > 0) {
+            ret.append(f.formatKeyword(" permits "));
+            ret.append(
+                    Arrays.stream(c.getPermittedSubclasses())
+                            .map(this::decodeClass)
+                            .map(f::formatType)
+                            .collect(Collectors.joining(
+                                    f.formatPunctuation(", "))
+                            )
             );
         }
 

@@ -470,7 +470,7 @@ types by providing the header of a type declaration.
 What types directly extend `AccessibleObject`?
 ````
 $ juggle class extends java.lang.reflect.AccessibleObject
-public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
 ````
@@ -481,7 +481,7 @@ extends the class in question.  This looks a little clumsy!
 ````
 $ juggle class extends \? extends java.lang.reflect.AccessibleObject
 public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
-public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $

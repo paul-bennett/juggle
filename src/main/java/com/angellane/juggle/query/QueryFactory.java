@@ -233,6 +233,10 @@ public class QueryFactory {
                 case "abstract"     -> tempQuery.addModifier(Modifier.ABSTRACT);
                 case "strictfp"     -> tempQuery.addModifier(Modifier.STRICT);
 
+                // The grammar restricts these to type queries only
+                case "sealed"       -> tempTypeQuery.setIsSealed(true);
+                case "non-sealed"   -> tempTypeQuery.setIsSealed(false);
+
                 default ->
                         System.err.println("*** Warning: unknown modifier `"
                                 + text + "'; ignoring");

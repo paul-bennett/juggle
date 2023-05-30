@@ -29,9 +29,33 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #86](https://github.com/paul-bennett/juggle/issues/86): Add support for sealed and non-sealed modifiers
+
+There's a handful of `sealed` interfaces in JDK 17:
+````
+$ juggle sealed interface
+public abstract sealed interface java.lang.constant.ClassDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfField<F> permits java.lang.constant.PrimitiveClassDescImpl, java.lang.constant.ReferenceClassDescImpl
+public abstract sealed interface java.lang.constant.ConstantDesc permits java.lang.constant.ClassDesc, java.lang.constant.MethodHandleDesc, java.lang.constant.MethodTypeDesc, Double, java.lang.constant.DynamicConstantDesc<T>, Float, Integer, Long, String
+public abstract sealed interface java.lang.constant.DirectMethodHandleDesc implements java.lang.constant.MethodHandleDesc permits java.lang.constant.DirectMethodHandleDescImpl
+public abstract sealed interface java.lang.constant.MethodHandleDesc implements java.lang.constant.ConstantDesc permits java.lang.constant.AsTypeMethodHandleDesc, java.lang.constant.DirectMethodHandleDesc
+public abstract sealed interface java.lang.constant.MethodTypeDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfMethod<F,M> permits java.lang.constant.MethodTypeDescImpl
+$
+````
+
+And there's only one `non-sealed` class:
+````
+$ juggle non-sealed class
+public abstract non-sealed class java.lang.constant.DynamicConstantDesc<T> implements java.lang.constant.ConstantDesc
+$
+````
+
+More recent JDKs have many more; these examples will need updating as the
+minimum requirements of Juggle increased.
+
+
 ### [GitHub Issue #112](https://github.com/paul-bennett/juggle/issues/112): Fail on parse error
 
-This query uses a symbol that's doesn't pass the lexer:
+This query uses a symbol that doesn't pass the lexer:
 ````
 $ juggle :
 line 1:0 token recognition error at: ':'
@@ -727,7 +751,7 @@ $
 Juggle can show you all classes that directly implement a specific interface:
 ````
 $ juggle class implements java.lang.reflect.Member                  
-public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
 ````
@@ -749,7 +773,7 @@ directly or indirectly implement an interface.
 Here's how to find the direct subclasses of a class:
 ````
 $ juggle class extends java.lang.reflect.AccessibleObject
-public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
 ````
@@ -767,7 +791,7 @@ To show all subclasses, including indirect ones we can specify a type bound:
 ````
 $ juggle class extends \? extends java.lang.reflect.AccessibleObject
 public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
-public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
+public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $

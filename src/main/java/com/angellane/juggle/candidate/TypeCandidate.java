@@ -71,5 +71,4 @@ implements Candidate
                 c.getSimpleName(), superClass, superInterfaces,
                 permittedSubtypes, recordComponents);
     }
-
 }

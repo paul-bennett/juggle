@@ -20,12 +20,10 @@ package com.angellane.juggle.query;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
+import com.angellane.juggle.util.ClassUtils;
 
 import java.lang.reflect.RecordComponent;
-import java.util.List;
-import java.util.Objects;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
@@ -35,6 +33,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
     public TypeFlavour          flavour             = null;
     public BoundedType          supertype           = null;
     public Set<BoundedType>     superInterfaces     = null;
+    public Boolean              isSealed            = null;
     public Set<BoundedType>     permittedSubtypes   = null;
 
     public TypeQuery() {}
@@ -51,6 +50,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                     && Objects.equals(flavour,           q.flavour)
                     && Objects.equals(supertype,         q.supertype)
                     && Objects.equals(superInterfaces,   q.superInterfaces)
+                    && Objects.equals(isSealed,          q.isSealed)
                     && Objects.equals(permittedSubtypes, q.permittedSubtypes)
                     ;
     }
@@ -61,6 +61,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 , flavour
                 , supertype
                 , superInterfaces
+                , isSealed
                 , permittedSubtypes
         );
     }
@@ -76,6 +77,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 + ", declarationPattern=" + declarationPattern
                 + ", supertype="          + supertype
                 + ", superInterfaces="    + superInterfaces
+                + ", isSealed="           + isSealed
                 + ", permittedSubtypes="  + permittedSubtypes
                 + ", recordComponents="   + params
                 + '}';
@@ -125,6 +127,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 , scoreFlavour(ct.flavour())
                 , scoreSupertype(ct.superClass())
                 , scoreSuperInterfaces(ct.superInterfaces())
+                , scoreIsSealed(ct.clazz())
                 , scorePermittedSubtypes(ct.permittedSubtypes())
                 , scoreRecordComponents(tm, ct.recordComponents())
         ));
@@ -136,6 +139,10 @@ public final class TypeQuery extends Query<TypeCandidate> {
 
     public void setSuperInterfaces(Set<BoundedType> superInterfaces) {
         this.superInterfaces = superInterfaces;
+    }
+
+    public void setIsSealed(Boolean isSealed) {
+        this.isSealed = isSealed;
     }
 
     public void setPermittedSubtypes(Set<BoundedType> permittedSubtypes) {
@@ -161,6 +168,14 @@ public final class TypeQuery extends Query<TypeCandidate> {
         return superInterfaces == null ||
                 superInterfaces.stream()
                         .allMatch(bt -> cs.stream().anyMatch(bt::matchesClass))
+                ? EXACT_MATCH : NO_MATCH;
+    }
+
+    private OptionalInt scoreIsSealed(Class<?> c) {
+        if (this.isSealed == null)
+            return EXACT_MATCH;
+        else return (this.isSealed && ClassUtils.classIsSealed(c))
+                || (!this.isSealed && ClassUtils.classIsNonSealed(c))
                 ? EXACT_MATCH : NO_MATCH;
     }
 

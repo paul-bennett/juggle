@@ -18,6 +18,7 @@
 package com.angellane.juggle.formatter;
 
 public interface Formatter {
+    String formatPunctuation(String s);
     String formatKeyword(String s);
     String formatPackageName(String s);
     String formatClassName(String s);

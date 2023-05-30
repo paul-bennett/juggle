@@ -118,13 +118,13 @@ recordDecl
 classModifier
     :   annotation
     |   'private' | 'protected' | 'package' | 'public'
-    |   'abstract' | 'static' | 'final' | /*'sealed' | 'non-sealed' |*/ 'strictfp'
+    |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
     ;
 
 interfaceModifier
     :   annotation
     |   'private' | 'protected' | 'package' | 'public'
-    |   'abstract' | 'static' | 'final' | /*'sealed' | 'non-sealed' |*/ 'strictfp'
+    |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
     ;
 
 annotationModifier
