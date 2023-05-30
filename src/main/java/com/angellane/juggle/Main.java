@@ -50,11 +50,21 @@ public class Main implements Runnable {
     public static class Version implements IVersionProvider {
         @Override
         public String[] getVersion() {
+            Package pkg = getClass().getPackage();
+            String[] pkgComps = pkg.getName().split("\\.");
+
             return new String[] {
                     Optional.ofNullable(
                             getClass().getPackage().getImplementationVersion()
                     )
-                            .orElse("Unknown")
+                            .orElse(pkgComps[pkgComps.length-1])
+                    + " " +
+                    Optional.ofNullable(
+                            getClass().getPackage().getImplementationVersion()
+                    )
+                            .orElse("(unreleased version)")
+                    ,
+                    "Java Runtime " + Runtime.version().toString()
             };
         }
     }

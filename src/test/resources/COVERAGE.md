@@ -83,7 +83,8 @@ We can ask for the version of the application, but when run from an unpacked
 source tree it doesn't show anything useful:
 ````
 $ juggle --version
-Unknown
+juggle (unreleased version)
+Java Runtime 17.0.6+9-LTS-190
 $
 ````
 
