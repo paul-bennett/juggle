@@ -29,6 +29,124 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #84](https://github.com/paul-bennett/juggle/issues/84): List all classes that directly or indirectly implement an interface
+
+We can now list all direct and indirect subclasses:
+````
+$ juggle -i java.lang.reflect class extends AccessibleObject
+public abstract sealed class Executable extends AccessibleObject implements Member, GenericDeclaration permits Constructor<T>, Method
+public final class Field extends AccessibleObject implements Member
+public final class Constructor<T> extends Executable
+public final class Method extends Executable
+$
+````
+
+As expected, omitting `--conversions` is equivalent to `--conversions=auto`:
+````
+$ juggle --conversions=auto -i java.lang.reflect class extends AccessibleObject
+public abstract sealed class Executable extends AccessibleObject implements Member, GenericDeclaration permits Constructor<T>, Method
+public final class Field extends AccessibleObject implements Member
+public final class Constructor<T> extends Executable
+public final class Method extends Executable
+$
+````
+
+And because we've not used any wildcards in the query, that's the same as
+`--conversions=all`:
+````
+$ juggle --conversions=all -i java.lang.reflect class extends AccessibleObject
+public abstract sealed class Executable extends AccessibleObject implements Member, GenericDeclaration permits Constructor<T>, Method
+public final class Field extends AccessibleObject implements Member
+public final class Constructor<T> extends Executable
+public final class Method extends Executable
+$
+````
+
+Specifying `--conversions=none` just matches classes that literally extend
+`AccessibleObject`:
+````
+$ juggle --conversions=none -i java.lang.reflect class extends AccessibleObject
+public abstract sealed class Executable extends AccessibleObject implements Member, GenericDeclaration permits Constructor<T>, Method
+public final class Field extends AccessibleObject implements Member
+$
+````
+
+The original clumsy syntax no longer just shows indirect subclasses, but I
+don't consider that to be a great loss:
+````
+$ juggle -i java.lang.reflect class extends \? extends AccessibleObject
+public abstract sealed class Executable extends AccessibleObject implements Member, GenericDeclaration permits Constructor<T>, Method
+public final class Field extends AccessibleObject implements Member
+public final class Constructor<T> extends Executable
+public final class Method extends Executable
+$
+````
+Because the query has a bounded wildcard, that's the same as
+`--conversions=none`:
+````
+$ juggle -c none -i java.lang.reflect class extends \? extends AccessibleObject
+public abstract sealed class Executable extends AccessibleObject implements Member, GenericDeclaration permits Constructor<T>, Method
+public final class Field extends AccessibleObject implements Member
+public final class Constructor<T> extends Executable
+public final class Method extends Executable
+$
+````
+````
+$ juggle -c all -i java.lang.reflect class extends AccessibleObject
+public abstract sealed class Executable extends AccessibleObject implements Member, GenericDeclaration permits Constructor<T>, Method
+public final class Field extends AccessibleObject implements Member
+public final class Constructor<T> extends Executable
+public final class Method extends Executable
+$
+````
+
+Here's a similar sequence with interfaces.  First, the direct descendents
+of `Collection`:
+````
+$ juggle -c none -i java.util interface extends Collection
+public abstract interface List<E> implements Collection<E>
+public abstract interface Queue<E> implements Collection<E>
+public abstract interface Set<E> implements Collection<E>
+$
+````
+
+Now all indirect descendents too:
+````
+$ juggle -i java.util interface extends Collection
+public abstract interface Deque<E> implements Queue<E>
+public abstract interface List<E> implements Collection<E>
+public abstract interface NavigableSet<E> implements SortedSet<E>
+public abstract interface Queue<E> implements Collection<E>
+public abstract interface Set<E> implements Collection<E>
+public abstract interface SortedSet<E> implements Set<E>
+public abstract interface java.util.concurrent.BlockingDeque<E> implements java.util.concurrent.BlockingQueue<E>, Deque<E>
+public abstract interface java.util.concurrent.BlockingQueue<E> implements Queue<E>
+public abstract interface java.util.concurrent.TransferQueue<E> implements java.util.concurrent.BlockingQueue<E>
+$
+````
+
+Finally, how about classes that implement interfaces?
+Direct implementation of an interface:
+````
+$ juggle -c none -i java.util class implements Collection
+public abstract class AbstractCollection<E> implements Collection<E>
+$
+````
+
+And indirect implementation via class:
+````
+$ juggle -i java.util class implements List
+public abstract class AbstractList<E> extends AbstractCollection<E> implements List<E>
+public abstract class AbstractSequentialList<E> extends AbstractList<E>
+public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+public class LinkedList<E> extends AbstractSequentialList<E> implements List<E>, Deque<E>, Cloneable, java.io.Serializable
+public class Stack<E> extends Vector<E>
+public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+public class java.util.concurrent.CopyOnWriteArrayList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+$
+````
+
+
 ### [GitHub Issue #86](https://github.com/paul-bennett/juggle/issues/86): Add support for sealed and non-sealed modifiers
 
 There's a handful of `sealed` interfaces in JDK 17:
@@ -750,16 +868,18 @@ $
 
 Juggle can show you all classes that directly implement a specific interface:
 ````
-$ juggle class implements java.lang.reflect.Member                  
+$ juggle -c none class implements java.lang.reflect.Member                  
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
 ````
 
-To show classes that indirectly implement an interface, use a type bound:
+To show classes that indirectly implement an interface, allow conversions:
 ````
-$ juggle class extends \? extends java.lang.reflect.Member
+$ juggle class implements java.lang.reflect.Member
 public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
+public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
+public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
@@ -772,7 +892,7 @@ directly or indirectly implement an interface.
 
 Here's how to find the direct subclasses of a class:
 ````
-$ juggle class extends java.lang.reflect.AccessibleObject
+$ juggle -c none class extends java.lang.reflect.AccessibleObject
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
@@ -787,12 +907,12 @@ public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
 
-To show all subclasses, including indirect ones we can specify a type bound:
+To show all subclasses, enable conversions (`-c auto` would do the same here):
 ````
-$ juggle class extends \? extends java.lang.reflect.AccessibleObject
-public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
+$ juggle -c all class extends java.lang.reflect.AccessibleObject
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
+public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
 public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````

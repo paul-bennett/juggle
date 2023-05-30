@@ -24,6 +24,7 @@ import com.angellane.juggle.util.ClassUtils;
 
 import java.lang.reflect.RecordComponent;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
@@ -125,8 +126,8 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 , scoreModifiers(ct.otherModifiers())
                 , scoreName(ct.declarationName())
                 , scoreFlavour(ct.flavour())
-                , scoreSupertype(ct.superClass())
-                , scoreSuperInterfaces(ct.superInterfaces())
+                , scoreSupertype(tm, ct.clazz())
+                , scoreSuperInterfaces(tm, ct.clazz())
                 , scoreIsSealed(ct.clazz())
                 , scorePermittedSubtypes(ct.permittedSubtypes())
                 , scoreRecordComponents(tm, ct.recordComponents())
@@ -158,17 +159,36 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 ? EXACT_MATCH : NO_MATCH;
     }
 
-    private OptionalInt scoreSupertype(Class<?> c) {
-        return supertype == null ||
-                supertype.matchesClass(c)
-                ? EXACT_MATCH : NO_MATCH;
+    private OptionalInt scoreSupertype(TypeMatcher tm, Class<?> c) {
+        if (this.supertype == null)
+            return EXACT_MATCH;
+        else if (c.getSuperclass() == null)
+            return NO_MATCH;
+        else
+            return tm.scoreTypeMatch(this.supertype, c.getSuperclass());
     }
 
-    private OptionalInt scoreSuperInterfaces(Set<Class<?>> cs) {
-        return superInterfaces == null ||
-                superInterfaces.stream()
-                        .allMatch(bt -> cs.stream().anyMatch(bt::matchesClass))
-                ? EXACT_MATCH : NO_MATCH;
+    private OptionalInt scoreSuperInterfaces(TypeMatcher tm, Class<?> c)
+    {
+        Set<Class<?>> candidateSupertypes =
+                Arrays.stream(c.getInterfaces()).collect(Collectors.toSet());
+        if (c.getSuperclass() != null)
+            candidateSupertypes.add(c.getSuperclass());
+
+        if (this.superInterfaces == null)
+            return EXACT_MATCH;
+        else {
+            // Does the candidate class implement all interfaces mentioned
+            // in the query?  Note: we don't do the reverse check, to ensure
+            // that all interfaces implemented by the candidate are listed
+            // in the query since that is unexpectedly restrictive.
+
+            return this.superInterfaces.stream()
+                    .allMatch(qi -> candidateSupertypes.stream().anyMatch(
+                            ci -> tm.scoreTypeMatch(qi, ci).isPresent())
+                    )
+                    ? EXACT_MATCH : NO_MATCH;
+        }
     }
 
     private OptionalInt scoreIsSealed(Class<?> c) {

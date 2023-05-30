@@ -29,7 +29,7 @@ $
 
 What about classes that implement `java.util.Collection`?
 ````
-$ juggle class implements java.util.Collection
+$ juggle -c none class implements java.util.Collection
 public abstract class java.util.AbstractCollection<E> implements java.util.Collection<E>
 $
 ````
@@ -101,6 +101,10 @@ Enumerations can implement interfaces.
 $ juggle enum implements java.time.temporal.TemporalAccessor
 public final enum java.time.DayOfWeek implements java.time.temporal.TemporalAccessor, java.time.temporal.TemporalAdjuster
 public final enum java.time.Month implements java.time.temporal.TemporalAccessor, java.time.temporal.TemporalAdjuster
+public final enum java.time.chrono.HijrahEra implements java.time.chrono.Era
+public final enum java.time.chrono.IsoEra implements java.time.chrono.Era
+public final enum java.time.chrono.MinguoEra implements java.time.chrono.Era
+public final enum java.time.chrono.ThaiBuddhistEra implements java.time.chrono.Era
 $
 ````
 

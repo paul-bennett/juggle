@@ -467,23 +467,22 @@ The default is `-c auto`.
 Juggle's most useful for finding members.  But you can also ask it about data
 types by providing the header of a type declaration.
 
-What types directly extend `AccessibleObject`?
+What types extend `AccessibleObject`?
 ````
 $ juggle class extends java.lang.reflect.AccessibleObject
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
+public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
+public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
-Note that this doesn't show indirect derived classes.  To do that we need
-to ask Juggle for the classes that extends an unknown class which itself
-extends the class in question.  This looks a little clumsy!
 
+Note that this show direct and indirect derived classes.   If we just wanted
+classes that directly extend a base class, we can turn off conversions:
 ````
-$ juggle class extends \? extends java.lang.reflect.AccessibleObject
-public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
+$ juggle -c none class extends java.lang.reflect.AccessibleObject
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
-public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ````
 
