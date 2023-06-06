@@ -29,6 +29,54 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #87](https://github.com/paul-bennett/juggle/issues/87): Add ability to list supertypes
+
+What are the superclasses of `StringBuilder`?
+````
+$ juggle class super StringBuilder
+public final class StringBuilder extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
+public class Object
+$
+````
+
+That doesn't look right! Where's the `AbstractStringBuilder` class?
+
+Turns out it's not `public`, so Juggle filtered it out.  Let's try again: 
+````
+$ juggle private class super StringBuilder
+public final class StringBuilder extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
+public class Object
+abstract class AbstractStringBuilder implements Appendable, CharSequence
+$
+````
+
+That's better!
+
+We can also show all the interfaces that `StringBuilder` implements:
+````
+$ juggle interface super StringBuilder
+public abstract interface Appendable
+public abstract interface CharSequence
+public abstract interface Comparable<T>
+public abstract interface java.io.Serializable
+$
+````
+
+As you might expect we can limit the output to direct superinterfaces only by
+turning off conversions:
+````
+$ juggle -c none interface super StringBuilder
+public abstract interface CharSequence
+public abstract interface Comparable<T>
+public abstract interface java.io.Serializable
+$
+````
+````
+$ juggle -c none private class super StringBuilder
+abstract class AbstractStringBuilder implements Appendable, CharSequence
+$
+````
+
 ### [GitHub Issue #84](https://github.com/paul-bennett/juggle/issues/84): List all classes that directly or indirectly implement an interface
 
 We can now list all direct and indirect subclasses:

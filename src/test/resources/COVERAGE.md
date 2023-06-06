@@ -233,7 +233,7 @@ com.angellane.juggle.testinput.lib.Lib.<init>()
 
 ````
 $ juggle --dry-run --show-query record
-QUERY: ClassQuery{flavour=RECORD, annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, declarationPattern=null, supertype=null, superInterfaces=null, isSealed=null, permittedSubtypes=null, recordComponents=null}
+QUERY: ClassQuery{flavour=RECORD, annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, declarationPattern=null, supertype=null, superInterfaces=null, subtype=null, isSealed=null, permittedSubtypes=null, recordComponents=null}
 $
 ````
 ````

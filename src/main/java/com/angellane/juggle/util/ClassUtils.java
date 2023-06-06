@@ -18,9 +18,7 @@ public final class ClassUtils {
         return !c.isSealed()
                 && !classIsFinal(c)
                 && Stream.concat(
-                        c.getSuperclass() == null
-                                ? Stream.of()
-                                : Stream.of(c.getSuperclass()),
+                        Stream.ofNullable(c.getSuperclass()),
                         Arrays.stream(c.getInterfaces())
                 ).anyMatch(Class::isSealed);
     }

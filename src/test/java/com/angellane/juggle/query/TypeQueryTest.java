@@ -54,6 +54,20 @@ public class TypeQueryTest {
     }
 
     @Test
+    public void testSuperclassQuery() {
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(java.lang.CharSequence.class);
+
+        TypeQuery q = new TypeQuery();
+        q.flavour           = TypeFlavour.INTERFACE;
+        q.accessibility     = Accessibility.PRIVATE;
+        q.subtype           =
+                BoundedType.exactType(java.lang.StringBuilder.class);
+
+        assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
+    }
+
+    @Test
     public void testInterfaceQuery() {
         TypeCandidate ct =
                 TypeCandidate.candidateForType(java.util.List.class);

@@ -72,9 +72,15 @@ decl
 classDecl
     :   classModifier*
         'class' declName?
+        (superClause? |
         classExtendsClause?
         implementsClause?
+        )
         permitsClause?
+    ;
+
+superClause
+    :   ('super' type)
     ;
 
 classExtendsClause
@@ -88,7 +94,7 @@ implementsClause
 interfaceDecl
     :   interfaceModifier*
         'interface' declName?
-        interfaceExtendsClause?
+        (superClause? | interfaceExtendsClause?)
         permitsClause?
     ;
 

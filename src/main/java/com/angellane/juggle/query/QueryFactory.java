@@ -310,6 +310,15 @@ public class QueryFactory {
         }
 
         @Override
+        public void exitSuperClause(DeclParser.SuperClauseContext ctx) {
+            // Yes, terminology is confusing here.  "class super Foo" is a
+            // query to show types that are supertypes of Foo, i.e. types
+            // that have Foo as a subtype.
+
+            tempTypeQuery.setSubtype(tempType);
+        }
+
+        @Override
         public void enterPermitsClause(DeclParser.PermitsClauseContext ctx) {
             tempTypeList.clear();
         }

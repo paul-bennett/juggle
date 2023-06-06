@@ -34,6 +34,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
     public TypeFlavour          flavour             = null;
     public BoundedType          supertype           = null;
     public Set<BoundedType>     superInterfaces     = null;
+    public BoundedType          subtype             = null;
     public Boolean              isSealed            = null;
     public Set<BoundedType>     permittedSubtypes   = null;
 
@@ -51,6 +52,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                     && Objects.equals(flavour,           q.flavour)
                     && Objects.equals(supertype,         q.supertype)
                     && Objects.equals(superInterfaces,   q.superInterfaces)
+                    && Objects.equals(subtype,           q.subtype)
                     && Objects.equals(isSealed,          q.isSealed)
                     && Objects.equals(permittedSubtypes, q.permittedSubtypes)
                     ;
@@ -62,6 +64,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 , flavour
                 , supertype
                 , superInterfaces
+                , subtype
                 , isSealed
                 , permittedSubtypes
         );
@@ -78,6 +81,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 + ", declarationPattern=" + declarationPattern
                 + ", supertype="          + supertype
                 + ", superInterfaces="    + superInterfaces
+                + ", subtype="            + subtype
                 + ", isSealed="           + isSealed
                 + ", permittedSubtypes="  + permittedSubtypes
                 + ", recordComponents="   + params
@@ -91,6 +95,8 @@ public final class TypeQuery extends Query<TypeCandidate> {
         boolean boundedSuperInterfaces =
                 superInterfaces != null && superInterfaces.stream()
                         .anyMatch(BoundedType::isBoundedWildcard);
+        boolean boundedSubtype =
+                subtype != null && subtype.isBoundedWildcard();
         boolean boundedPermittedSubtypes =
                 permittedSubtypes != null && permittedSubtypes.stream()
                         .anyMatch(BoundedType::isBoundedWildcard);
@@ -100,7 +106,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                                 ? Stream.of(sp) : Stream.empty())
                         .anyMatch(sp -> sp.paramType().isBoundedWildcard());
 
-        return boundedSupertype || boundedSuperInterfaces
+        return boundedSupertype || boundedSuperInterfaces || boundedSubtype
                 || boundedPermittedSubtypes || boundedRecordComponents;
     }
 
@@ -128,6 +134,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 , scoreFlavour(ct.flavour())
                 , scoreSupertype(tm, ct.clazz())
                 , scoreSuperInterfaces(tm, ct.clazz())
+                , scoreSubtype(tm, ct.clazz())
                 , scoreIsSealed(ct.clazz())
                 , scorePermittedSubtypes(ct.permittedSubtypes())
                 , scoreRecordComponents(tm, ct.recordComponents())
@@ -140,6 +147,10 @@ public final class TypeQuery extends Query<TypeCandidate> {
 
     public void setSuperInterfaces(Set<BoundedType> superInterfaces) {
         this.superInterfaces = superInterfaces;
+    }
+
+    public void setSubtype(BoundedType lowerBound) {
+        this.subtype = lowerBound;
     }
 
     public void setIsSealed(Boolean isSealed) {
@@ -188,6 +199,25 @@ public final class TypeQuery extends Query<TypeCandidate> {
                             ci -> tm.scoreTypeMatch(qi, ci).isPresent())
                     )
                     ? EXACT_MATCH : NO_MATCH;
+        }
+    }
+
+    private OptionalInt scoreSubtype(TypeMatcher tm, Class<?> c) {
+        if (this.subtype == null)
+            return EXACT_MATCH;
+        else {
+            Class<?> lowerBound = this.subtype.lowerBound();
+
+            if (tm.applyConversions())
+                return tm.scoreTypeMatch(BoundedType.supertypeOf(lowerBound), c);
+            else {
+                // Only allow direct matches
+                return Stream.concat(
+                        Stream.ofNullable(lowerBound.getSuperclass()),
+                        Arrays.stream(lowerBound.getInterfaces())
+                        )
+                        .anyMatch(c::equals) ? EXACT_MATCH : NO_MATCH;
+            }
         }
     }
 
