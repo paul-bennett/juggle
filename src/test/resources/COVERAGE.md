@@ -26,7 +26,7 @@ selected in order to drive up the JaCoCo coverage metrics.
 
 If we pass an invalid argument, we should get an error and the help text:
 
-````
+```shell
 $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
@@ -50,11 +50,11 @@ An API search tool for Java
   -V, --version              Print version information and exit.
   -x, --[no-]permute         Also match permutations of parameters
 $
-````
+```
 
 Of course, we can explicitly ask for help:
 
-````
+```shell
 $ juggle --help
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
               [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
@@ -77,51 +77,51 @@ An API search tool for Java
   -V, --version              Print version information and exit.
   -x, --[no-]permute         Also match permutations of parameters
 $
-````
+```
 
 We can ask for the version of the application, but when run from an unpacked
 source tree it doesn't show anything useful:
-````
+```shell
 $ juggle --version
 juggle (unreleased version)
 Java Runtime 17.0.6+9-LTS-190
 $
-````
+```
 
 ## No parameters in the query
 
-````
+```shell
 $ juggle NoSuchMethodException
 public NoSuchMethodException.<init>()
 public NoSuchMethodException.<init>(String)
 $
-````
+```
 
 ## Missing module
 
-````
+```shell
 $ juggle -m this.module.does.not.exist
 *** Error: Module this.module.does.not.exist not found
 $
-````
+```
 
 ## Unknown type
 
-````
+```shell
 $ juggle 'boolean (ThisTypeDoesNotExist)'
 *** Error: Couldn't find type: ThisTypeDoesNotExist
 $
-````
+```
 
 ## Methods that don't throw
 
-````
+```shell
 $ juggle 'String (? super java.io.InputStream) throws'
 public String Object.toString()
 public static String String.valueOf(Object)
 public static String java.util.Objects.toString(Object)
 $
-````
+```
 
 If it wasn't for the `throws` we'd expect the above query to also include 
 `String java.net.URLConnection.guessContentTypeFromStream(java.io.InputStream)` in its results.
@@ -133,11 +133,11 @@ The biggest area that presently lacks test coverage is `TextOutput.decodeWildcar
 doesn't seem to be called at all, even when I explicitly search for a method that the JavaDoc suggests
 returns a wildcard type:
 
-````
+```shell
 $ juggle /asSubclass/
 public <U> Class<T> Class<T>.asSubclass(Class<T>)
 $
-````
+```
 
 The `Class.asSubclass` method is declared to return `Class<? extends U>`. I suspect the wildcard is eliminated
 at runtime due to type erasure, in which case it may be worth stripping this method from the source altogether.
@@ -145,20 +145,20 @@ at runtime due to type erasure, in which case it may be worth stripping this met
 
 ## Empty -m
 
-````
+```shell
 $ juggle -m '' /getUpperBound/
 public abstract java.lang.reflect.Type[] java.lang.reflect.WildcardType.getUpperBounds()
 $
-````
+```
 
 
 ## Multiple -t options
 
-````
+```shell
 $ juggle throws java.io.NotActiveException, java.io.InvalidObjectException
 public void java.io.ObjectInputStream.registerValidation(java.io.ObjectInputValidation,int) throws java.io.NotActiveException,java.io.InvalidObjectException
 $
-````
+```
 
 ## Explicit value of -x
 
@@ -169,14 +169,14 @@ It feels wrong within the setter function to not use the value of the boolean pa
 will only ever take the value `true`.  That means JaCoCo will always present one path in an `if` statement as not
 followed.
 
-````
+```shell
 $ juggle '(String,ClassLoader,boolean)'
 public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
 public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
-````
+```
 
-````
+```shell
 $ juggle -x '(String,ClassLoader,boolean)'
 public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
@@ -184,12 +184,12 @@ public void ClassLoader.setPackageAssertionStatus(String,boolean)
 public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
 public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
-````
+```
 
 But there's a workaround... add `negatable=true` to the `@Option` annotation, and 
 suddenly the long option name can be prefixed with `no-` on the command-line.
 
-````
+```shell
 $ juggle --permute '(String,ClassLoader,boolean)'
 public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
@@ -197,48 +197,48 @@ public void ClassLoader.setPackageAssertionStatus(String,boolean)
 public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
 public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
-````
+```
 
-````
+```shell
 $ juggle --no-permute '(String,ClassLoader,boolean)'
 public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
 public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E)
 $
-````
+```
 
 ## Missing dependency
 
 The (contrived) App class from testApp uses the Lib class from testLib in its interface, but doesn't include these
 dependent classes in the JAR (it's not an uberjar).  This means trying to load the App class fails.  
 
-````
+```shell
 $ juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
 *** Warning: related class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 *** Error: Couldn't find type: com.angellane.juggle.testinput.app.App
 $
-````
+```
 
 
 ## Methods with no modifiers
 
 Curiously this test fails here, but works in README.md.  See GitHub issue #39.
-````
+```shell
 % juggle -j build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
 public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
 com.angellane.juggle.testinput.lib.Lib.<init>()
 %
-````
+```
 
 ## Dry-Run and Show-Query options
 
-````
+```shell
 $ juggle --dry-run --show-query record
 QUERY: ClassQuery{flavour=RECORD, annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, declarationPattern=null, supertype=null, superInterfaces=null, subtype=null, isSealed=null, permittedSubtypes=null, recordComponents=null}
 $
-````
-````
+```
+```shell
 $ juggle --dry-run --show-query '()'
 QUERY: DeclQuery{annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, returnType=null, declarationPattern=null, params=[], exceptions=null}
 $
-````
+```
 

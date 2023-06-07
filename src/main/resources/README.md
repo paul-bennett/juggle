@@ -47,11 +47,11 @@ a given declaration.
 
 For example, is there a method that when given a `java.time.Clock` returns a
 `java.time.LocalTime`?
-````
+```shell
 $ juggle "java.time.LocalTime (java.time.Clock)"
 public static java.time.LocalTime java.time.LocalTime.now(java.time.Clock)
 $
-````
+```
 Answer: yes, the `now()` method of the `java.time.LocalTime` class.
 Juggle shows the signature for the method, with the class and method
 names separated by a period.
@@ -67,15 +67,15 @@ we didn't know it.
 Most of the time Juggle searches for members -- constructors, fields
 and methods.  To search for a method, write its return type followed
 by a parentheses-wrapped comma-separated parameter list.
-````
+```shell
 $ juggle void '(double[], int, int, double)' 
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
-````
+```
 
 If no return type is specified, Juggle shows matching methods with
 _any_ return type:
-````
+```shell
 $ juggle '(double[], int, int, double)' 
 public static int java.util.Arrays.binarySearch(double[],int,int,double)
 public static void java.util.Arrays.fill(double[],int,int,double)
@@ -83,7 +83,7 @@ public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
 public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
 public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
-````
+```
 ("What are those last three results?" you might be thinking, "They don't
 match!" You're right. They don't. But at the moment Juggle works on the
 _erased type_ of methods, so these looks like methods that take four
@@ -95,12 +95,12 @@ In the same way that you can omit the return type from your query, you
 can also omit the parameter list, which will show methods that take _any
 number_ of arguments of _any type_.  This provides a means of listing
 all the ways of obtaining an object of a specific type:
-````
+```shell
 $ juggle java.net.Inet6Address
 public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],int) throws java.net.UnknownHostException
 public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,byte[],java.net.NetworkInterface) throws java.net.UnknownHostException
 $
-````
+```
 So the only way to get a `Inet6Address` appears to be either of the two
 static `getByAddress` methods on the `Inet6Address` class.   
 
@@ -121,14 +121,14 @@ While marginally interesting, the output is rather too long to be helpful!
 
 Juggle treats non-static methods as if they have a silent
 first parameter whose type is the class in question:
-````
+```shell
 $ juggle 'java.lang.String (java.util.regex.Matcher, java.lang.String)' 
 public String java.util.regex.Matcher.group(String)
 public String java.util.regex.Matcher.replaceAll(String)
 public String java.util.regex.Matcher.replaceFirst(String)
 public static String java.util.Objects.toString(Object,String)
 $
-````
+```
 In the above note how the first argument to `Objects.toString` is an `Object`,
 not a `Matcher`. Juggle includes this method in the result set because Java
 allows instances of a subclass to be passed to a function that is expecting
@@ -142,7 +142,7 @@ no additional arguments and returns a value of the field's type).
 
 As with non-static methods, non-static fields have an additional implicit 
 `this` parameter:
-````
+```shell
 $ juggle 'int (java.io.InterruptedIOException)'
 public int java.io.InterruptedIOException.bytesTransferred
 public native int Object.hashCode()
@@ -150,7 +150,7 @@ public static native int System.identityHashCode(Object)
 public static native int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 public static int java.util.Objects.hashCode(Object)
 $
-````
+```
 
 To list static methods which take no arguments use `()`.
 
@@ -160,7 +160,7 @@ by virtue of Juggle treating fields as having zero-arg pseudo-getters.)
 The `throws` clause allows you to filter by methods that might throw a
 specific exception type:
 
-````
+```shell
 $ juggle throws java.net.URISyntaxException
 public java.net.URI.<init>(String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String) throws java.net.URISyntaxException
@@ -170,7 +170,7 @@ public java.net.URI.<init>(String,String,String,String,String) throws java.net.U
 public java.net.URI java.net.URI.parseServerAuthority() throws java.net.URISyntaxException
 public java.net.URI java.net.URL.toURI() throws java.net.URISyntaxException
 $
-````
+```
 
 Juggle will list all methods that include the named exception (or a subclass
 of the named type) in their `throws` clause.  Specifying multiple exception
@@ -184,7 +184,7 @@ You can also ask Juggle to look for annotations.  Juggle will list methods
 that have the named annotations, but it's not possible to include annotation
 data in the query.  If multiple annotations are supplied, they must all be
 present on the class or method.
-````
+```shell
 $ juggle @FunctionalInterface int
 public abstract int java.util.Comparator<T>.compare(T,T)
 public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
@@ -195,11 +195,11 @@ public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
 public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
 public abstract int java.util.function.IntSupplier.getAsInt()
 $
-````
+```
 
 You can follow the return type with a member name to match only members
 with that name (case-sensitive, exact match):
-````
+```shell
 $ juggle String substring
 public String AbstractStringBuilder.substring(int)
 public String AbstractStringBuilder.substring(int,int)
@@ -210,7 +210,7 @@ public volatile String StringBuilder.substring(int,int)
 public synchronized String StringBuffer.substring(int)
 public synchronized String StringBuffer.substring(int,int)
 $
-````
+```
 
 It's also possible to match a member name using a regular expression
 by surrounding its partial name with slash characters.  An `i` after
@@ -227,24 +227,24 @@ $
 
 You can tell Juggle which JARs to include in the search by using the `-j`
 option:
-````
+```shell
 $ juggle -j build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
 public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
 com.angellane.juggle.testinput.lib.Lib.<init>()
 $
-````
+```
 
 The `-m` flag can be used to specify JMODs to search.  Juggle will also search
 any modules that this module requires transitively (sometimes referred to as
 "implied reads").
 
-````
+```shell
 $ juggle -m java.sql java.sql.CallableStatement
 public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String) throws java.sql.SQLException
 public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int) throws java.sql.SQLException
 public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int,int) throws java.sql.SQLException
 $
-````
+```
 
 At present there's no support for scanning an unpacked JAR, or a directory of
 class files.
@@ -292,7 +292,7 @@ is connected to a console or `plain` otherwise.
 By default, Juggle will only show `public` members. Including an access
 modifier will set an alternative minimum level of accessibility
 (`public`, `package`,`protected`, or `private`).
-````
+```shell
 $ juggle 'protected java.io.OutputStream ()'
 public java.io.OutputStream.<init>()
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
@@ -302,7 +302,7 @@ public java.io.ByteArrayOutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
 $
-````
+```
 
 Of course `private` members can't be used, so `protected` is likely the most
 nosey you should be.
@@ -321,18 +321,18 @@ not necessarily in the order you specified.
 For example, there are no methods that take a `double[]`, an `int`, a
 `double` and then an `int`:
 
-````
+```shell
 $ juggle "void (double[],int,double,int)"
 $
-````
+```
 
 However, if we allow Juggle to permute parameters, it locates a match:
 
-````
+```shell
 $ juggle -x "void (double[],int,double,int)"
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
-````
+```
 
 Note that parameter permutation can significantly increase runtime,
 so it's not enabled by default.
@@ -343,7 +343,7 @@ To make life easier, packages can be imported with `-i` so that fully qualified
 class names don't have to be written out each time. As you would expect,
 `java.lang` is always implicitly imported.  Juggle omits imported package 
 names in its output.
-````
+```shell
 % juggle                                                                \
     -j build/libs/juggle-1.0-SNAPSHOT.jar                               \
     -i com.angellane.juggle                                             \
@@ -352,7 +352,7 @@ names in its output.
 public CartesianProduct<T>.<init>(List<E>[])
 public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<E>[])
 %
-````
+```
 (Note that in this example, Juggle isn't yet unifying the type arguments;
 ideally it should output `CartesianProduct<T>.of(List<T>[])`.)
 
@@ -363,7 +363,7 @@ partially-known types.
 
 A simple `?` wildcard can stand for any type.  So here are all the members
 that take a `String`, an `int` and two other parameters of unknown type:
-````
+```shell
 $ juggle '(String,int,?,?)'
 public java.net.Socket.<init>(String,int,java.net.InetAddress,int) throws java.io.IOException
 public java.text.StringCharacterIterator.<init>(String,int,int,int)
@@ -377,14 +377,14 @@ public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
 public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
 public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
-````
+```
 
 Specifying a `?` as a return type is equivalent to leaving it out.  This
 helps us get around an ambiguity in Juggle's parser.  Juggle assumes that
 the first identifier in the query is the return type, so `juggle substring`
 causes it to look for a type called `substring` not a method name.  To find
 all members called `substring`, we can say:
-````
+```shell
 $ juggle \? substring
 public String AbstractStringBuilder.substring(int)
 public String AbstractStringBuilder.substring(int,int)
@@ -395,7 +395,7 @@ public volatile String StringBuilder.substring(int,int)
 public synchronized String StringBuffer.substring(int)
 public synchronized String StringBuffer.substring(int,int)
 $
-````
+```
 As you might expect, with many shells we need to escape this special character.
 
 ### Bounded Wildcards
@@ -413,24 +413,24 @@ Typically, we might use lower-bounds on parameter specifications and upper
 bounds on return types.
 
 So for example, what could replace `UnknownMethod` in this code?
-````java
+```java
 class Foo {
     void f(String s, int i, int j) {
         return UnknownMethod(myString, i, j);
     }
 }
-````
+```
 
 We can ask Juggle. We need a method that takes a `String` (or any superclass
 of `String`) and two `int`s, and returns a `CharSequence` (or any subclass): 
-````
+```shell
 $ juggle '? extends CharSequence (? super String,int,int)'
 public CharSequence String.subSequence(int,int)
 public abstract CharSequence CharSequence.subSequence(int,int)
 public String String.substring(int,int)
 public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
 $
-````
+```
 
 Since Java normally applies these conversions automatically, Juggle does too.
 If we don't explicitly use a bounded wildcard in our query, Juggle considers
@@ -438,14 +438,14 @@ each parameter type to be a lower bound for a wildcard, and return and exception
 types to be upper bounds.
 
 So we can write the query more naturally and get the same results:
-````
+```shell
 $ juggle 'CharSequence (String,int,int)'
 public CharSequence String.subSequence(int,int)
 public abstract CharSequence CharSequence.subSequence(int,int)
 public String String.substring(int,int)
 public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
 $
-````
+```
 
 ### Controlling Conversion
 
@@ -468,23 +468,23 @@ Juggle's most useful for finding members.  But you can also ask it about data
 types by providing the header of a type declaration.
 
 What types extend `AccessibleObject`?
-````
+```shell
 $ juggle class extends java.lang.reflect.AccessibleObject
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
 public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
-````
+```
 
 Note that this show direct and indirect derived classes.   If we just wanted
 classes that directly extend a base class, we can turn off conversions:
-````
+```shell
 $ juggle -c none class extends java.lang.reflect.AccessibleObject
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
-````
+```
 
 All the other kinds of type are also supported: `enum`, `record`, 
 `interface` and `@interface`. As with member queries, we can restrict the
@@ -496,13 +496,13 @@ Juggle treats constructors as if they were static methods called `<init>`
 returning an instance of the declaring class.  In the following example
 you'll see a couple of constructors and a static method, all with broadly
 similar signatures:
-````
+```shell
 $ juggle 'java.io.InputStream (String)'
 public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
 public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
 public java.io.StringBufferInputStream.<init>(String)
 $
-````
+```
 (We see another example of Reference Widening here too: `FileInputStream` 
 and `StringBufferInputStream` are both descendant classes of `InputStream`, 
 so objects of those first two types can be assigned to a variable of the 

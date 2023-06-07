@@ -20,4 +20,46 @@
 
 Juggle searches Java libraries for types and members that match a given declaration.
 
-More details in [src/main/resources/README.md](src/main/resources/README.md).
+## Installation
+
+Since _Juggle_ is aimed at Java developers, I don't provide a binary release; 
+I assume you're comfortable building and running Java applications.
+
+To install (you'll need to have JDK17 or later on your path):
+
+```shell
+$ git clone https://github.com/paul-bennett/juggle.git
+$ cd juggle
+$ ./gradlew jar
+$
+```
+
+This will result in a `juggle-*.jar` in the `build/libs` subdirectory.
+
+_Juggle_ ships with a helpful shell script that sets an alias in Bourne shell
+derivatives to provide simple execution.
+```shell
+$ source juggle-alias.sh
+$
+```
+
+Now, to execute a query just use the `juggle` alias:
+```shell
+$ juggle class InetAddress
+public sealed class java.net.InetAddress implements java.io.Serializable permits java.net.Inet4Address, java.net.Inet6Address
+$
+```
+
+## Examples
+
+For much more information, including lots of example invocations, see the full
+documentation at [src/main/resources/README.md](src/main/resources/README.md).
+
+## Feedback
+
+I love feedback. Please let me know if you find _Juggle_ useful or frustrating.
+Send it to [opensource@angellane.com](mailto:opensource@angellane.com).
+
+Thanks!
+
+-Paul

@@ -20,67 +20,67 @@
 This file contains samples of Juggle's new type search feature.
 
 Which classes directly extend `InetAddress`?
-````
+```shell
 $ juggle -i java.net class extends InetAddress
 public final class Inet4Address extends InetAddress
 public final class Inet6Address extends InetAddress
 $
-````
+```
 
 What about classes that implement `java.util.Collection`?
-````
+```shell
 $ juggle -c none class implements java.util.Collection
 public abstract class java.util.AbstractCollection<E> implements java.util.Collection<E>
 $
-````
+```
 
 ## Searching by type flavour
 
 There's only one record class in the JDK at the moment; it's in the `jdk.net` 
 module.  However, the JDK leaks some other classes.  Here's what I'd like to
 get to:
-````
+```shell
 $ juggle -m jdk.net -i jdk.net -i java.nio.file.attribute record /Unix/
 public final record UnixDomainPrincipal
 $
-````
+```
 
 In reality, Juggle presently says:
-````
+```shell
 $ juggle -m jdk.net -i jdk.net,java.nio.file.attribute record
 public final record jdk.net.UnixDomainPrincipal
 $
-````
+```
 
 ## Classes
 
 There should be no classes that are both `final` and `abstract`:
-````
+```shell
 $ juggle abstract final class
 $
-````
+```
 
 Here's a bit of a "Christmas Tree" query (all the bits turned on):
-````
+```shell
 $ juggle '@Deprecated package abstract static strictfp class /asd/'
 $
-````
+```
 
 ## Interfaces
 
 Another Christmas tree
-````
+```shell
 $ juggle "@Deprecated abstract public interface /Obs/"  
 public abstract interface java.util.Observer
 $
-````
+```
 
 ## Annotations
 
 So many of these are almost identical that there's little to be tested.
 However, not all annotations are themselves annotated `@Documented`, so
 that's a little thing we can prove.
-````
+```shell
 $ juggle '@java.lang.annotation.Documented @interface'       
 public abstract @interface Deprecated
 public abstract @interface FunctionalInterface
@@ -92,12 +92,12 @@ public abstract @interface java.lang.annotation.Repeatable
 public abstract @interface java.lang.annotation.Retention
 public abstract @interface java.lang.annotation.Target
 $
-````
+```
 
 ## Enums
 
 Enumerations can implement interfaces.
-````
+```shell
 $ juggle enum implements java.time.temporal.TemporalAccessor
 public final enum java.time.DayOfWeek implements java.time.temporal.TemporalAccessor, java.time.temporal.TemporalAdjuster
 public final enum java.time.Month implements java.time.temporal.TemporalAccessor, java.time.temporal.TemporalAdjuster
@@ -106,12 +106,12 @@ public final enum java.time.chrono.IsoEra implements java.time.chrono.Era
 public final enum java.time.chrono.MinguoEra implements java.time.chrono.Era
 public final enum java.time.chrono.ThaiBuddhistEra implements java.time.chrono.Era
 $
-````
+```
 
 ## Records
 
-````
+```shell
 $ juggle -m jdk.net -i jdk.net -i java.nio.file.attribute record "(UserPrincipal, GroupPrincipal)"
 public final record UnixDomainPrincipal
 $
-````
+```

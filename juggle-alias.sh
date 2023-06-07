@@ -17,8 +17,8 @@
 # Sets up an alias 'juggle' for the juggle command
 #
 # Run this by:
-#   bash$ . alias.sh
-#   zsh$ source alias.sh
+#   bash$ source juggle-alias.sh
+#   zsh$  source juggle-alias.sh
 
 juggle_dir=$(cd "$(dirname $0)" || exit; pwd)
 
