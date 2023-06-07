@@ -29,6 +29,40 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #115](https://github.com/paul-bennett/juggle/issues/115): Allow qnames in type clauses
+
+Prior to this fix, it wasn't possible to use qualified names to look up
+classes or interfaces, so including a package name gave a syntax error.
+
+Instead, the package had to be mentioned in an `--import` option:
+```shell
+$ juggle --import java.net class InetAddress
+public class InetAddress implements java.io.Serializable
+$
+```
+
+After this fix we can use the more natural query:
+```shell
+$ juggle class java.net.InetAddress
+public class java.net.InetAddress implements java.io.Serializable
+$
+```
+
+The same issue used to make it impossible to query inner classes,
+but after the fix we can now do so:
+```shell
+$ juggle interface java.util.Map.Entry
+public abstract static interface java.util.Map.Entry<K,V>
+$
+```
+
+A partial name can be specified using a regex:
+```shell
+$ juggle interface /Map.Entry/
+public abstract static interface java.util.Map.Entry<K,V>
+$
+```
+
 ### [GitHub Issue #87](https://github.com/paul-bennett/juggle/issues/87): Add ability to list supertypes
 
 What are the superclasses of `StringBuilder`?
@@ -637,6 +671,8 @@ public class NoClassDefFoundError extends LinkageError
 public class UnsupportedClassVersionError extends ClassFormatError
 public class java.io.InvalidClassException extends java.io.ObjectStreamException
 public class java.io.ObjectStreamClass implements java.io.Serializable
+public class java.lang.invoke.ClassSpecializer.Factory
+public abstract class java.lang.invoke.ClassSpecializer.SpeciesData
 public class java.security.SecureClassLoader extends ClassLoader
 $
 ```

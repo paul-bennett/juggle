@@ -108,7 +108,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
                 , scoreAccessibility(cm.accessibility())
                 , scoreModifiers(cm.otherModifiers())
                 , scoreReturn(tm, cm.returnType())
-                , scoreName(cm.declarationName())
+                , scoreName(cm.simpleName(), cm.canonicalName())
                 , scoreParams(tm, cm.paramTypes())
                 , scoreExceptions(tm, cm.throwTypes())
         ));

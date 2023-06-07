@@ -130,7 +130,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                 scoreAnnotations(ct.annotationTypes())
                 , scoreAccessibility(ct.accessibility())
                 , scoreModifiers(ct.otherModifiers())
-                , scoreName(ct.declarationName())
+                , scoreName(ct.simpleName(), ct.canonicalName())
                 , scoreFlavour(ct.flavour())
                 , scoreSupertype(tm, ct.clazz())
                 , scoreSuperInterfaces(tm, ct.clazz())

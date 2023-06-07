@@ -164,9 +164,10 @@ public abstract sealed class Query<C extends Candidate>
         return (mask & modifiers) == (mask & otherMods);
     }
 
-    protected boolean matchesName(String name) {
+    protected boolean matchesName(String simpleName, String canonicalName) {
         return this.declarationPattern == null
-                || this.declarationPattern.matcher(name).find();
+                || simpleName != null && this.declarationPattern.matcher(simpleName).find()
+                || canonicalName != null && this.declarationPattern.matcher(canonicalName).find();
     }
 
 
@@ -205,8 +206,8 @@ public abstract sealed class Query<C extends Candidate>
                 ? OptionalInt.of(0) : OptionalInt.empty();
     }
 
-    protected OptionalInt scoreName(String name) {
-        return matchesName(name)
+    protected OptionalInt scoreName(String simpleName, String canonicalName) {
+        return matchesName(simpleName, canonicalName)
                 ? OptionalInt.of(0) : OptionalInt.empty();
     }
 

@@ -216,12 +216,24 @@ It's also possible to match a member name using a regular expression
 by surrounding its partial name with slash characters.  An `i` after
 the closing slash results in a case-insensitive match.
 
-````
+```shell
 $ juggle String /package/i
+public String Package.getImplementationTitle()
+public String Package.getImplementationVendor()
+public String Package.getImplementationVersion()
+public String Package.getName()
 public String Class<T>.getPackageName()
+public String Package.getSpecificationTitle()
+public String Package.getSpecificationVendor()
+public String Package.getSpecificationVersion()
+public String Package.toString()
 public String java.lang.constant.ClassDesc.packageName()
 $
-````
+```
+Note how the member is considered to match if either of these two names match:
+1. The member's simple name (i.e. the declaration name)
+2. The member's canonical name (its declaration name prefixed with the
+   declaring package and class)  
 
 ## Where to look
 

@@ -71,7 +71,7 @@ decl
 
 classDecl
     :   classModifier*
-        'class' declName?
+        'class' typeDeclName?
         (superClause? |
         classExtendsClause?
         implementsClause?
@@ -93,7 +93,7 @@ implementsClause
 
 interfaceDecl
     :   interfaceModifier*
-        'interface' declName?
+        'interface' typeDeclName?
         (superClause? | interfaceExtendsClause?)
         permitsClause?
     ;
@@ -105,18 +105,18 @@ interfaceExtendsClause
 
 annotationDecl
     :   annotationModifier*
-        '@' 'interface' declName?
+        '@' 'interface' typeDeclName?
     ;
 
 enumDecl
     :   classModifier*
-        'enum' declName?
+        'enum' typeDeclName?
         implementsClause?
     ;
 
 recordDecl
     :   classModifier*
-        'record' declName?
+        'record' typeDeclName?
         params?
         implementsClause?
     ;
@@ -145,7 +145,7 @@ permitsClause
 memberDecl
     :   memberModifier*
         returnType?
-        declName?
+        memberDeclName?
         params?
         throwsClause?
     ;
@@ -165,7 +165,12 @@ returnType
     : type
     ;
 
-declName
+typeDeclName
+    : REGEX
+    | (IDENT DOT)* IDENT
+    ;
+
+memberDeclName
     : uname
     ;
 

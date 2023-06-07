@@ -258,7 +258,19 @@ public class QueryFactory {
         }
 
         @Override
-        public void exitDeclName(DeclParser.DeclNameContext ctx) {
+        public void exitTypeDeclName(DeclParser.TypeDeclNameContext ctx) {
+            if (ctx.REGEX() != null)
+                tempQuery.setNamePattern(patternFromRegex(ctx.REGEX().getText()));
+            else {
+                String nameText = ctx.IDENT().stream()
+                        .map(TerminalNode::getText)
+                        .collect(Collectors.joining("."));
+                tempQuery.setNamePattern(patternFromLiteral(nameText));
+            }
+        }
+
+        @Override
+        public void exitMemberDeclName(DeclParser.MemberDeclNameContext ctx) {
             tempQuery.setNamePattern(tempName);
         }
 

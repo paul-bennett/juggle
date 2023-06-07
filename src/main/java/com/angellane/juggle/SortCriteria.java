@@ -47,7 +47,7 @@ enum SortCriteria {
     PACKAGE (j -> new ByPackage<>(j.getImportedPackageNames()),
              j -> new ByPackage<>(j.getImportedPackageNames())),
     TEXT    (j -> new ByString<>(),             j -> new ByString<>()),
-    NAME    (j -> new ByDeclarationName<>(),    j -> new ByDeclarationName<>());
+    NAME    (j -> new BySimpleName<>(),         j -> new BySimpleName<>());
 
     private final Function<
             Juggler,

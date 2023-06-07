@@ -37,7 +37,8 @@ public record MemberCandidate(
         Accessibility accessibility,
         int otherModifiers,
         Set<Class<?>> annotationTypes,
-        String declarationName,
+        String simpleName,
+        String canonicalName,
         Class<?> returnType,
         List<Class<?>> paramTypes,
         Set<Class<?>> throwTypes
@@ -51,13 +52,15 @@ public record MemberCandidate(
         this(member, Accessibility.fromModifiers(member.getModifiers()),
                 member.getModifiers() & OTHER_MODIFIERS_MASK,
                 annotationTypes, member.getName(),
+                member.getDeclaringClass().getCanonicalName()
+                        + "." + member.getName(),
                 returnType, paramTypes, throwTypes);
     }
 
     // This constructor is used by parameter permutation generator
     public MemberCandidate(MemberCandidate other, List<Class<?>> params) {
         this(other.member, other.accessibility, other.otherModifiers,
-                other.annotationTypes, other.declarationName,
+                other.annotationTypes, other.simpleName, other.canonicalName,
                 other.returnType, params, other.throwTypes);
     }
 

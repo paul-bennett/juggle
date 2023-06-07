@@ -24,15 +24,15 @@ import com.angellane.juggle.query.Query;
 import java.util.Comparator;
 
 /**
- * Compares two Matches based on their Candidates' canonical name.
+ * Compares two Matches based on their Candidates' simple name.
  */
-public class ByDeclarationName<
+public class BySimpleName<
         C extends Candidate, Q extends Query<C>, M extends Match<C,Q>
         >
         implements Comparator<M> {
     @Override
     public int compare(M m1, M m2) {
-        return m1.candidate().declarationName()
-                .compareTo(m2.candidate().declarationName());
+        return m1.candidate().simpleName()
+                .compareTo(m2.candidate().simpleName());
     }
 }

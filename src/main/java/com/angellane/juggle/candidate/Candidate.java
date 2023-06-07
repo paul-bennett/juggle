@@ -47,6 +47,7 @@ public interface Candidate {
     Set<Class<?>>   annotationTypes();
     Accessibility   accessibility();
     int             otherModifiers();
-    String          declarationName();
+    String          simpleName();
+    String          canonicalName();
     String          packageName();
 }

@@ -58,7 +58,7 @@ public class TestMemberDecl {
         assertTrue(q.matchesAccessibility(cm.accessibility())
                 , "Match accessibility");
         assertEquals(OptionalInt.of(0), q.scoreReturn(tm, cm.returnType())      , "Match return type");
-        assertTrue(q.matchesName(cm.declarationName())   , "Match method name");
+        assertTrue(q.matchesName(cm.simpleName(), cm.canonicalName())           , "Match method name");
         assertEquals(OptionalInt.of(0), q.scoreParams(tm, cm.paramTypes())      , "Match parameters");
         assertEquals(OptionalInt.of(0), q.scoreExceptions(tm, cm.throwTypes())  , "Match exceptions");
 
@@ -229,7 +229,7 @@ public class TestMemberDecl {
     public void testWrongDeclarationName() {
         MemberQuery q = new MemberQuery();
         q.declarationPattern = Pattern.compile("^barf$");
-        assertFalse(q.matchesName(cm.declarationName()), "Match name");
+        assertFalse(q.matchesName(cm.simpleName(), cm.canonicalName()), "Match name");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
     }

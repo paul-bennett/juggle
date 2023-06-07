@@ -34,7 +34,8 @@ public record TypeCandidate(
         Set<Class<?>>           annotationTypes,
         Accessibility           accessibility,
         int                     otherModifiers,
-        String                  declarationName,
+        String                  simpleName,
+        String                  canonicalName,
 
         Class<?>                superClass,
         Set<Class<?>>           superInterfaces,
@@ -68,7 +69,8 @@ implements Candidate
                 : List.of(c.getRecordComponents());
 
         return new TypeCandidate(c, f, annotations, access, mods,
-                c.getSimpleName(), superClass, superInterfaces,
+                c.getSimpleName(), c.getCanonicalName(),
+                superClass, superInterfaces,
                 permittedSubtypes, recordComponents);
     }
 }
