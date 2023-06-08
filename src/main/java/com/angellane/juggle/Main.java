@@ -101,7 +101,7 @@ public class Main implements Runnable {
 
     @SuppressWarnings("unused")
     @Option(names={"-s", "--sort"},
-            paramLabel="access|name|package|score|text",
+            paramLabel="access|hierarchy|name|package|score|text",
             description="Sort criteria")
     public void addSortCriteria(SortCriteria criteria) {
         juggler.addSortCriteria(criteria);

@@ -201,8 +201,8 @@ public abstract interface NavigableSet<E> implements SortedSet<E>
 public abstract interface Queue<E> implements Collection<E>
 public abstract interface Set<E> implements Collection<E>
 public abstract interface SortedSet<E> implements Set<E>
-public abstract interface java.util.concurrent.BlockingDeque<E> implements java.util.concurrent.BlockingQueue<E>, Deque<E>
 public abstract interface java.util.concurrent.BlockingQueue<E> implements Queue<E>
+public abstract interface java.util.concurrent.BlockingDeque<E> implements java.util.concurrent.BlockingQueue<E>, Deque<E>
 public abstract interface java.util.concurrent.TransferQueue<E> implements java.util.concurrent.BlockingQueue<E>
 $
 ```
@@ -222,8 +222,8 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 public abstract class AbstractSequentialList<E> extends AbstractList<E>
 public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 public class LinkedList<E> extends AbstractSequentialList<E> implements List<E>, Deque<E>, Cloneable, java.io.Serializable
-public class Stack<E> extends Vector<E>
 public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+public class Stack<E> extends Vector<E>
 public class java.util.concurrent.CopyOnWriteArrayList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 $
 ```
@@ -234,10 +234,10 @@ $
 There's a handful of `sealed` interfaces in JDK 17:
 ```shell
 $ juggle sealed interface
-public abstract sealed interface java.lang.constant.ClassDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfField<F> permits java.lang.constant.PrimitiveClassDescImpl, java.lang.constant.ReferenceClassDescImpl
 public abstract sealed interface java.lang.constant.ConstantDesc permits java.lang.constant.ClassDesc, java.lang.constant.MethodHandleDesc, java.lang.constant.MethodTypeDesc, Double, java.lang.constant.DynamicConstantDesc<T>, Float, Integer, Long, String
-public abstract sealed interface java.lang.constant.DirectMethodHandleDesc implements java.lang.constant.MethodHandleDesc permits java.lang.constant.DirectMethodHandleDescImpl
+public abstract sealed interface java.lang.constant.ClassDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfField<F> permits java.lang.constant.PrimitiveClassDescImpl, java.lang.constant.ReferenceClassDescImpl
 public abstract sealed interface java.lang.constant.MethodHandleDesc implements java.lang.constant.ConstantDesc permits java.lang.constant.AsTypeMethodHandleDesc, java.lang.constant.DirectMethodHandleDesc
+public abstract sealed interface java.lang.constant.DirectMethodHandleDesc implements java.lang.constant.MethodHandleDesc permits java.lang.constant.DirectMethodHandleDescImpl
 public abstract sealed interface java.lang.constant.MethodTypeDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfMethod<F,M> permits java.lang.constant.MethodTypeDescImpl
 $
 ```
@@ -658,6 +658,7 @@ weren't mentioned in the import list, and the implicit `java.lang` has
 been moved to the end of that list rather than the start.
 ```shell
 $ juggle -i java.net class /Class/
+public class java.security.SecureClassLoader extends ClassLoader
 public class URLClassLoader extends java.security.SecureClassLoader implements java.io.Closeable
 public final class Class<T> implements java.io.Serializable, java.lang.reflect.GenericDeclaration, java.lang.reflect.Type, java.lang.reflect.AnnotatedElement, java.lang.invoke.TypeDescriptor.OfField<F>, java.lang.constant.Constable
 public class ClassCastException extends RuntimeException
@@ -673,7 +674,6 @@ public class java.io.InvalidClassException extends java.io.ObjectStreamException
 public class java.io.ObjectStreamClass implements java.io.Serializable
 public class java.lang.invoke.ClassSpecializer.Factory
 public abstract class java.lang.invoke.ClassSpecializer.SpeciesData
-public class java.security.SecureClassLoader extends ClassLoader
 $
 ```
 
@@ -961,8 +961,8 @@ $
 To show classes that indirectly implement an interface, allow conversions:
 ```shell
 $ juggle class implements java.lang.reflect.Member
-public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
+public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $

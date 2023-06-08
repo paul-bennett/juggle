@@ -43,6 +43,7 @@ import java.util.function.Function;
 
 enum SortCriteria {
     SCORE   (j -> new ByScore<>(),              j -> new ByScore<>()),
+    HIERARCHY (j -> new ByHierarchy(),          j -> (cm1,cm2) -> 0),
     ACCESS  (j -> new ByAccessibility<>(),      j -> new ByAccessibility<>()),
     PACKAGE (j -> new ByPackage<>(j.getImportedPackageNames()),
              j -> new ByPackage<>(j.getImportedPackageNames())),

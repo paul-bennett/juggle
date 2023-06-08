@@ -249,9 +249,9 @@ public class Juggler {
         return sortCriteria.size() != 0
                 ? sortCriteria
                 : List.of(
-                        SortCriteria.SCORE,   SortCriteria.ACCESS,
-                        SortCriteria.PACKAGE, SortCriteria.NAME,
-                        SortCriteria.TEXT
+                        SortCriteria.SCORE,   SortCriteria.HIERARCHY,
+                        SortCriteria.ACCESS,  SortCriteria.PACKAGE,
+                        SortCriteria.NAME,    SortCriteria.TEXT
                 );
     }
 

@@ -267,15 +267,16 @@ Juggle can sort its output in a number of ways. Specify sort criteria using
 `-s`. The first criteria sorts the results, with ties resolved by any
 subsequent criteria.
 
-| Option       | Description                                                     |
-|--------------|-----------------------------------------------------------------|
-| `-s access`  | Shows members by access, with `public` first and `private` last |
-| `-s name`    | Sorts results by name alphabetically                            |
-| `-s package` | Orders members from imported (`-i`) packages before others      |
-| `-s score`   | Shows best matches for a query first                            |
-| `-s text`    | Sort by output text (approximately)                             |
+| Option         | Description                                                             |
+|----------------|-------------------------------------------------------------------------|
+| `-s access`    | Shows members by access, with `public` first and `private` last         |
+| `-s hierarchy` | Classes higher in the `extends`/`implements` hierarchy are listed first | 
+| `-s name`      | Sorts results by name alphabetically                                    |
+| `-s package`   | Orders members from imported (`-i`) packages before others              |
+| `-s score`     | Shows best matches for a query first                                    |
+| `-s text`      | Sort by output text (approximately)                                     |
 
-The default sort is equivalent to `-s score -s access -s package -s name -s text`.
+The default sort is equivalent to `-s score -s hierarchy -s access -s package -s name -s text`.
 The intent is that this default causes Juggle to list the "best" matches first.
 If that's not what's happening in practice, I'd like to hear about it! 
 
@@ -524,14 +525,14 @@ latter type.)
 
 Each command-line option has a long name equivalent. This table summarises all options.
 
-| Option | Long Equivalent | Argument                                     | Default                                         | Description                                         |
-|--------|-----------------|----------------------------------------------|-------------------------------------------------|-----------------------------------------------------|
-| `-c`   | `--conversions` | `auto`, `none`, `all`                        | `-c auto`                                       | Whether to apply type conversions                   |
-| `-i`   | `--import`      | package name                                 |                                                 | Packages to import (`java.lang` is always searched) |
-| `-j`   | `--jar`         | file path                                    |                                                 | JAR files to search                                 |
-| `-m`   | `--module`      | module name(s)                               | `-m java.base`                                  | JMODs to search                                     |
-| `-s`   | `--sort`        | `access`, `name`, `package`, `score`, `text` | `-s score -s access -s package -s name -s text` | Sort criteria                                       |
-| `-x`   | `--permute`     | (none)                                       | (don't permute)                                 | Match permutations of supplied parameters           |
-| `-f`   | `--format`      | `auto`, `colour`, `color`, `plain`           | `auto`                                          | Output format                                       |
+| Option | Long Equivalent | Argument                                                  | Default                                                      | Description                                         |
+|--------|-----------------|-----------------------------------------------------------|--------------------------------------------------------------|-----------------------------------------------------|
+| `-c`   | `--conversions` | `auto`, `none`, `all`                                     | `-c auto`                                                    | Whether to apply type conversions                   |
+| `-i`   | `--import`      | package name                                              |                                                              | Packages to import (`java.lang` is always searched) |
+| `-j`   | `--jar`         | file path                                                 |                                                              | JAR files to search                                 |
+| `-m`   | `--module`      | module name(s)                                            | `-m java.base`                                               | JMODs to search                                     |
+| `-s`   | `--sort`        | `access`, `hierarchy`, `name`, `package`, `score`, `text` | `-s score -s hierarchy -s access -s package -s name -s text` | Sort criteria                                       |
+| `-x`   | `--permute`     | (none)                                                    | (don't permute)                                              | Match permutations of supplied parameters           |
+| `-f`   | `--format`      | `auto`, `colour`, `color`, `plain`                        | `auto`                                                       | Output format                                       |
 
 A declaration-style query can follow all arguments.

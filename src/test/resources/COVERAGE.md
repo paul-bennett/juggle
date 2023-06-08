@@ -31,7 +31,7 @@ $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
               [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-s=access|name|package|score|text]
+              [-m=moduleName] [-s=access|hierarchy|name|package|score|text]
               [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
@@ -44,7 +44,7 @@ An API search tool for Java
   -i, --import=packageName   Imported package names
   -j, --jar=jarFilePath      JAR file to include in search
   -m, --module=moduleName    Modules to search
-  -s, --sort=access|name|package|score|text
+  -s, --sort=access|hierarchy|name|package|score|text
                              Sort criteria
       --show-query           Show query
   -V, --version              Print version information and exit.
@@ -58,7 +58,7 @@ Of course, we can explicitly ask for help:
 $ juggle --help
 Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
               [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-s=access|name|package|score|text]
+              [-m=moduleName] [-s=access|hierarchy|name|package|score|text]
               [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
@@ -71,7 +71,7 @@ An API search tool for Java
   -i, --import=packageName   Imported package names
   -j, --jar=jarFilePath      JAR file to include in search
   -m, --module=moduleName    Modules to search
-  -s, --sort=access|name|package|score|text
+  -s, --sort=access|hierarchy|name|package|score|text
                              Sort criteria
       --show-query           Show query
   -V, --version              Print version information and exit.
