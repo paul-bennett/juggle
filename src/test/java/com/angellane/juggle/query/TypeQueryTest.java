@@ -106,8 +106,8 @@ public class TypeQueryTest {
         q.modifiers         = Modifier.FINAL;
         q.declarationPattern = Pattern.compile("Unix");
         q.params            = List.of(
-                ParamSpec.param("user", java.nio.file.attribute.UserPrincipal.class),
-                ParamSpec.param("group", java.nio.file.attribute.GroupPrincipal.class)
+                ParamSpec.param(java.nio.file.attribute.UserPrincipal.class, "user"),
+                ParamSpec.param(java.nio.file.attribute.GroupPrincipal.class, "group")
         );
 
         assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));

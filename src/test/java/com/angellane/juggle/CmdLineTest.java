@@ -74,7 +74,7 @@ public class CmdLineTest {
         assertEquals(List.of(), result.unmatched());
         assertNotNull(app.juggler.memberQuery.params);
         assertEquals(1, app.juggler.memberQuery.params.size());
-        assertEquals(ParamSpec.unnamed(BoundedType.exactType(Object.class)),
+        assertEquals(ParamSpec.param(null, 0, 0, BoundedType.exactType(Object.class), null),
                 app.juggler.memberQuery.params.get(0));
     }
 
@@ -88,9 +88,9 @@ public class CmdLineTest {
         assertEquals(List.of(), result.unmatched());
         assertNotNull(app.juggler.memberQuery.params);
         assertEquals(2, app.juggler.memberQuery.params.size());
-        assertEquals(ParamSpec.unnamed(BoundedType.exactType(String.class)),
+        assertEquals(ParamSpec.param(null, 0, 0, BoundedType.exactType(String.class), null),
                 app.juggler.memberQuery.params.get(0));
-        assertEquals(ParamSpec.unnamed(BoundedType.exactType(Integer.class)),
+        assertEquals(ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.class), null),
                 app.juggler.memberQuery.params.get(1));
     }
 
@@ -107,8 +107,8 @@ public class CmdLineTest {
         q.setAccessibility(Accessibility.PUBLIC);
         q.returnType = BoundedType.exactType(Integer.TYPE);
         q.params = List.of(
-                ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE)),
-                ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE))
+                ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null),
+                ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null)
         );
 
         assertEquals(List.of(), result.unmatched());

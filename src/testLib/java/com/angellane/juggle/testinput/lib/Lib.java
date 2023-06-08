@@ -17,6 +17,13 @@
  */
 package com.angellane.juggle.testinput.lib;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.SOURCE)  @interface SourceAnnotation  {}
+@Retention(RetentionPolicy.CLASS)   @interface ClassAnnotation   {}
+@Retention(RetentionPolicy.RUNTIME) @interface RuntimeAnnotation {}
+
 public class Lib {
   public static Lib libFactory() {
     return new Lib();
@@ -28,4 +35,9 @@ public class Lib {
   public String toString() {
     return "Lib";
   }
+
+  // This function lets us try various features of member queries
+  public static void someFunction(
+          @SourceAnnotation @ClassAnnotation @RuntimeAnnotation int foo,
+          final String bar) {}
 }

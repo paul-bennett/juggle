@@ -325,6 +325,30 @@ specification. That can result in some pseudo-private members or classes
 (such as `sun.security.util.DerOutputStream` above) leaking into output.
 Just because you _can_ call a method doesn't mean you _should_.
 
+### Parameter Metadata
+
+Juggle supports matching parameter metadata as well, but this isn't as useful
+as you might expect.  There are three types of parameter metadata:
+1. Annotations
+2. The `final` modifier
+3. Parameter name
+
+Of these, annotations can always be checked (but only those with a `RUNTIME`
+retention policy).  To match either of the other two, the metadata must be
+present in the class file.  This is achieved by passing the `parameters` flag
+to `javac` when compiling the original source.  This restriction also applies
+to classes in the JDK itself, and unfortunately I'm not aware of any JDKs that
+have been built in this way.
+
+(Note: if you want to build your own JDK to do this, it might be as simple
+as specifying exporting a `JAVAC_FLAGS=-parameters` environment variable before
+following the usual build instructions.)
+
+When checking a candidate against a query, if the candidate wasn't compiled with
+parameter metadata, then those elements of the query are ignored (i.e. the
+parameter is matched by annotations and type only).
+
+
 ### Permutation of Parameters
 
 Sometimes you might not know the order of parameters.  The `-x` option causes

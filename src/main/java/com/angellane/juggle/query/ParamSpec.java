@@ -25,22 +25,44 @@ public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
         return new ZeroOrMoreParams();
     }
 
+    static SingleParam wildcard(Set<Class<?>> annotations,
+                                int modifiers, int modifiersMask) {
+        return param(annotations, modifiers, modifiersMask, null, null);
+    }
+
     static SingleParam wildcard() {
-        return new SingleParam(
-                Pattern.compile(""), BoundedType.unboundedWildcardType());
+        return wildcard(null, 0, 0);
     }
 
-    static SingleParam unnamed(BoundedType bt) {
-        return new SingleParam(Pattern.compile(""), bt);
+    static SingleParam param(Set<Class<?>> annotations,
+                             int modifiers, int modifiersMask,
+                             BoundedType bt,
+                             Pattern pat) {
+        if (bt  == null) bt  = BoundedType.unboundedWildcardType();
+        if (pat == null) pat = Pattern.compile("");
+
+        return new SingleParam(annotations, modifiers, modifiersMask, bt, pat);
     }
 
-    static SingleParam untyped(Pattern pat) {
-        return new SingleParam(pat, BoundedType.unboundedWildcardType());
+    static SingleParam param(BoundedType bt, Pattern pat) {
+        return param(null, 0, 0, bt, pat);
     }
 
-    static SingleParam param(String name, Class<?> type) {
-        return new SingleParam(Pattern.compile("^" + name + "$"),
-                new BoundedType(Set.of(type), type));
+    static SingleParam param(Pattern pat) {
+        return param(null, 0, 0, null, pat);
+    }
+
+    static SingleParam param(BoundedType bt) {
+        return param(null, 0, 0, bt, null);
+    }
+
+    static SingleParam param(Class<?> type) {
+        return param(BoundedType.exactType(type));
+    }
+
+    static SingleParam param(Class<?> type, String name) {
+        return param(BoundedType.exactType(type),
+                Pattern.compile("^%s$".formatted(name)));
     }
 
 }

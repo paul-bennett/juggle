@@ -88,9 +88,10 @@ public class MemberParserTest {
         );
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.addAnnotationType(SafeVarargs.class);
-        expectedQuery.addAnnotationType(Deprecated.class);
-        expectedQuery.addModifier(Modifier.STATIC, true);
+        expectedQuery.setAnnotationTypes(Set.of(
+                SafeVarargs.class, Deprecated.class
+        ));
+        expectedQuery.setModifiersAndMask(Modifier.STATIC, Modifier.STATIC);
         expectedQuery.setAccessibility(Accessibility.PROTECTED);
 
         assertEquals(expectedQuery, actualQuery);
@@ -155,7 +156,7 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType =
-                BoundedType.subtypeOf(Set.of(String.class, Serializable.class));
+                BoundedType.subtypeOf(String.class, Serializable.class);
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -215,14 +216,15 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.params = List.of(
-                ParamSpec.unnamed(
+                ParamSpec.param(
                         BoundedType.subtypeOf(java.net.InetAddress.class)),
-                ParamSpec.unnamed(
+                ParamSpec.param(
                         BoundedType.subtypeOf(
-                                Set.of(java.util.List.class,
-                                        java.util.RandomAccess.class))
+                                java.util.List.class,
+                                java.util.RandomAccess.class
+                        )
                 ),
-                ParamSpec.unnamed(BoundedType.supertypeOf(Integer.class))
+                ParamSpec.param(BoundedType.supertypeOf(Integer.class))
         );
 
         assertEquals(expectedQuery, actualQuery);
@@ -234,7 +236,8 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.params = List.of(
-                ParamSpec.unnamed(BoundedType.exactType(Integer.class)));
+                ParamSpec.param(BoundedType.exactType(Integer.class))
+        );
 
         assertEquals(expectedQuery, actualQuery);
     }

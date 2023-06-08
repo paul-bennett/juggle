@@ -18,6 +18,7 @@
 package com.angellane.juggle.query;
 
 import com.angellane.juggle.candidate.Candidate;
+import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
@@ -115,19 +116,16 @@ public abstract sealed class Query<C extends Candidate>
 
     // SETTERS ================================================================
 
-    public void addAnnotationType(Class<?> annotationType) {
-        if (annotationTypes == null)
-            annotationTypes = new HashSet<>();
-        annotationTypes.add(annotationType);
-    }
+    public void setAnnotationTypes(Set<Class<?>> annotationTypes) {
+        this.annotationTypes = annotationTypes == null
+                ? null
+                : new HashSet<>(annotationTypes);
+    } 
 
-    public void addModifier(int modifier, boolean val) {
-        // First clear this modifier bit, then add it if necessary
-        this.modifiers = (this.modifiers & ~modifier) | (val ? modifier : 0);
-        this.modifierMask |= modifier;
+    public void setModifiersAndMask(int modifiers, int modifierMask) {
+        this.modifiers    = modifiers;
+        this.modifierMask = modifierMask;
     }
-
-    public void addModifier(int modifier) { addModifier(modifier, true); }
 
     public void setAccessibility(Accessibility accessibility) {
         this.accessibility = accessibility;
@@ -212,7 +210,7 @@ public abstract sealed class Query<C extends Candidate>
     }
 
     protected OptionalInt scoreParams(
-            TypeMatcher tm, List<? extends Class<?>> candidateParams) {
+            TypeMatcher tm, List<Param> candidateParams) {
         if (params == null)
             return EXACT_MATCH;
 
@@ -274,20 +272,46 @@ public abstract sealed class Query<C extends Candidate>
     private static OptionalInt scoreParamSpecs(
             TypeMatcher       tm,
             List<SingleParam> queryParams,
-            List<? extends Class<?>>    candidateParams
+            List<Param>       candidateParams
     ) {
         if (queryParams.size() != candidateParams.size())
             return NO_MATCH;
         else {
-            Iterator<? extends Class<?>> actualParamIter =
-                    candidateParams.iterator();
+            Iterator<Param> actualParamIter = candidateParams.iterator();
 
             return totalScore(
                     queryParams.stream()
-                            .map(ps -> {
-                                BoundedType bounds = ps.paramType();
-                                Class<?> actualType = actualParamIter.next();
-                                return tm.scoreTypeMatch(actualType, bounds);
+                            .map(queryParam -> {
+                                Param actualParam = actualParamIter.next();
+
+                                if (queryParam.annotations() != null &&
+                                    !actualParam.annotations()
+                                            .containsAll(
+                                                    queryParam.annotations())
+                                )
+                                    return NO_MATCH;
+
+                                if (actualParam.name() != null) {
+                                    // Parameter metadata (modifiers and name)
+                                    // available, i.e. class was compiled
+                                    // with `-parameters` option
+
+                                    if ((actualParam.otherModifiers()
+                                            & queryParam.modifiersMask())
+                                            != queryParam.modifiers())
+                                        return NO_MATCH;
+
+                                    if ((queryParam.paramName() != null)
+                                    && !queryParam.paramName()
+                                            .matcher(actualParam.name()).find())
+                                        return NO_MATCH;
+                                }
+
+                                // Now check on the type
+
+                                BoundedType bounds = queryParam.paramType();
+                                return tm.scoreTypeMatch(
+                                        actualParam.type(), bounds);
                             })
                             .toList()
             );

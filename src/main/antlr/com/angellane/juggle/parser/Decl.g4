@@ -70,7 +70,7 @@ decl
     ;
 
 classDecl
-    :   classModifier*
+    :   classModifiers
         'class' typeDeclName?
         (superClause? |
         classExtendsClause?
@@ -92,7 +92,7 @@ implementsClause
     ;
 
 interfaceDecl
-    :   interfaceModifier*
+    :   interfaceModifiers
         'interface' typeDeclName?
         (superClause? | interfaceExtendsClause?)
         permitsClause?
@@ -104,35 +104,38 @@ interfaceExtendsClause
 
 
 annotationDecl
-    :   annotationModifier*
+    :   annotationModifiers
         '@' 'interface' typeDeclName?
     ;
 
 enumDecl
-    :   classModifier*
+    :   classModifiers
         'enum' typeDeclName?
         implementsClause?
     ;
 
 recordDecl
-    :   classModifier*
+    :   classModifiers
         'record' typeDeclName?
-        params?
+        recordComps?
         implementsClause?
     ;
 
+classModifiers: classModifier*;
 classModifier
     :   annotation
     |   'private' | 'protected' | 'package' | 'public'
     |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
     ;
 
+interfaceModifiers: interfaceModifier*;
 interfaceModifier
     :   annotation
     |   'private' | 'protected' | 'package' | 'public'
     |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
     ;
 
+annotationModifiers: annotationModifier*;
 annotationModifier
     :   annotation
     |   'public' | 'abstract'
@@ -143,7 +146,7 @@ permitsClause
     ;
 
 memberDecl
-    :   memberModifier*
+    :   memberModifiers
         returnType?
         memberDeclName?
         params?
@@ -154,6 +157,7 @@ annotation
     :   '@' qname
     ;
 
+memberModifiers: memberModifier*;
 memberModifier
     : annotation
     | 'private' | 'protected' | 'package' | 'public'
@@ -192,16 +196,40 @@ type
 
 dim : '[' ']' ;
 
+recordComps
+    :   '(' ')'
+    |   '(' recordComp (',' recordComp)* ')'
+    ;
+
+recordComp
+    : recordCompModifiers typeAndName
+    ;
+
+recordCompModifiers: recordCompModifier*;
+recordCompModifier
+    :   annotation
+    ;
+
 params
     :   '(' ')'
     |   '(' param (',' param)* ')'
     ;
 
+paramModifiers: paramModifier*;
+paramModifier
+    :   annotation
+    |   'final'
+    ;
+
 param
-    :   type uname?     #unnamedParam   // potentially unnamed type
-    |   type? uname     #untypedParam   // potentially untyped name
-    |   ELLIPSIS        #ellipsisParam  // an unknown number of params (illegal in Java)
-    |                   #wildcardParam  // unnamed, untyped (i.e. wildcard)
+    : paramModifiers typeAndName
+    ;
+
+typeAndName
+    :   type uname?     #unnamedType    // potentially unnamed type
+    |   type? uname     #untypedName    // potentially untyped name
+    |   ELLIPSIS        #ellipsisType   // an unknown number of params
+    |                   #wildcardType   // unnamed, untyped (i.e. wildcard)
     ;
 
 throwsClause

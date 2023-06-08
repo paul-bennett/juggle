@@ -18,18 +18,25 @@
 package com.angellane.juggle.query;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public record SingleParam(
-        Pattern paramName,
-        BoundedType paramType
+        Set<Class<?>> annotations,
+        int modifiers,
+        int modifiersMask,
+        BoundedType paramType,
+        Pattern paramName
 ) implements ParamSpec {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SingleParam that = (SingleParam) o;
-        return Query.patternsEqual(paramName, that.paramName)
+        return Objects.equals(annotations, that.annotations)
+                && modifiers == that.modifiers
+                && modifiersMask == that.modifiersMask
+                && Query.patternsEqual(paramName, that.paramName)
                 && Objects.equals(paramType, that.paramType);
     }
 

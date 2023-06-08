@@ -362,7 +362,7 @@ public class Juggler {
 
                prependMemberCandidateProcessor(
                        c -> {
-                           int paramCount = c.paramTypes().size();
+                           int paramCount = c.params().size();
                            return (paramCount >= minParams
                                    && paramCount <= maxParams)
                                    ? Stream.of(c)

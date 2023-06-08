@@ -1,6 +1,7 @@
 package com.angellane.juggle.query;
 
 import com.angellane.juggle.candidate.MemberCandidate;
+import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.match.TypeMatcher;
 import org.junit.jupiter.api.Test;
@@ -20,19 +21,19 @@ public class MemberQueryTest {
     public void testScoreParamsIntInt() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(
-                ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE)),
-                ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE))
+                ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null),
+                ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null)
         );
 
-        assertEquals(OptionalInt.of(0),   q.scoreParams(noConv, List.of(Integer.TYPE, Integer.TYPE)));
-        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(Integer.TYPE, Integer.class)));
-        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(Integer.class, Integer.TYPE)));
-        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(Integer.class, Integer.class)));
+        assertEquals(OptionalInt.of(0),   q.scoreParams(noConv, List.of(new Param(Integer.TYPE,  "i"), new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(new Param(Integer.TYPE,  "i"), new Param(Integer.class, "i"))));
+        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(new Param(Integer.class, "i"), new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(new Param(Integer.class, "i"), new Param(Integer.class, "i"))));
 
-        assertEquals(OptionalInt.of(0), q.scoreParams(conv, List.of(Integer.TYPE, Integer.TYPE)));
-        assertEquals(OptionalInt.of(2), q.scoreParams(conv, List.of(Integer.TYPE, Integer.class)));
-        assertEquals(OptionalInt.of(2), q.scoreParams(conv, List.of(Integer.class, Integer.TYPE)));
-        assertEquals(OptionalInt.of(4), q.scoreParams(conv, List.of(Integer.class, Integer.class)));
+        assertEquals(OptionalInt.of(0), q.scoreParams(conv, List.of(new Param(Integer.TYPE, "i"),  new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.of(2), q.scoreParams(conv, List.of(new Param(Integer.TYPE, "i"),  new Param(Integer.class, "i"))));
+        assertEquals(OptionalInt.of(2), q.scoreParams(conv, List.of(new Param(Integer.class, "i"), new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.of(4), q.scoreParams(conv, List.of(new Param(Integer.class, "i"), new Param(Integer.class, "i"))));
     }
 
     @Test
@@ -60,8 +61,8 @@ public class MemberQueryTest {
             q.setAccessibility(Accessibility.PUBLIC);
             q.returnType = BoundedType.exactType(Integer.TYPE);
             q.params = List.of(
-                    ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE)),
-                    ParamSpec.unnamed(BoundedType.exactType(Integer.TYPE))
+                    ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null),
+                    ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null)
             );
 
             assertEquals(OptionalInt.empty(), q.scoreCandidate(noConv, c));

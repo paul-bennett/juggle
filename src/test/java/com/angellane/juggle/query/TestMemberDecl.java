@@ -57,10 +57,10 @@ public class TestMemberDecl {
                 , "Match modifiers");
         assertTrue(q.matchesAccessibility(cm.accessibility())
                 , "Match accessibility");
-        assertEquals(OptionalInt.of(0), q.scoreReturn(tm, cm.returnType())      , "Match return type");
-        assertTrue(q.matchesName(cm.simpleName(), cm.canonicalName())           , "Match method name");
-        assertEquals(OptionalInt.of(0), q.scoreParams(tm, cm.paramTypes())      , "Match parameters");
-        assertEquals(OptionalInt.of(0), q.scoreExceptions(tm, cm.throwTypes())  , "Match exceptions");
+        assertEquals(OptionalInt.of(0), q.scoreReturn(tm, cm.returnType())    , "Match return type");
+        assertTrue(q.matchesName(cm.simpleName(), cm.canonicalName())         , "Match method name");
+        assertEquals(OptionalInt.of(0), q.scoreParams(tm, cm.params())        , "Match parameters");
+        assertEquals(OptionalInt.of(0), q.scoreExceptions(tm, cm.throwTypes()), "Match exceptions");
 
         assertTrue(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
@@ -76,8 +76,8 @@ public class TestMemberDecl {
         q.returnType = BoundedType.exactType(java.net.URL.class);
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(
-                ParamSpec.param(null, ClassLoader.class),
-                ParamSpec.param("name", String.class));
+                ParamSpec.param(ClassLoader.class),
+                ParamSpec.param(String.class, "name"));
         q.exceptions = Set.of();
 
         matchQueryAndCandidate(q, cm);
@@ -100,9 +100,9 @@ public class TestMemberDecl {
 
         q.declarationPattern = Pattern.compile("^findResource$");
         q.params = List.of(
-                ParamSpec.param(null, ClassLoader.class),
-                ParamSpec.param("name", String.class),
-                ParamSpec.param("name", String.class),
+                ParamSpec.param(ClassLoader.class),
+                ParamSpec.param(String.class, "name"),
+                ParamSpec.param(String.class, "name"),
                 ParamSpec.ellipsis());
 
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
@@ -114,7 +114,7 @@ public class TestMemberDecl {
         MemberQuery q = new MemberQuery();
 
         q.declarationPattern = Pattern.compile("^findResource$");
-        q.params = List.of(ParamSpec.param(null, ClassLoader.class));
+        q.params = List.of(ParamSpec.param(ClassLoader.class));
 
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
@@ -171,7 +171,7 @@ public class TestMemberDecl {
     public void testCorrectNamedParams() {
         MemberQuery q = new MemberQuery();
         q.accessibility = Accessibility.PROTECTED;
-        q.params = List.of(ParamSpec.param("name", String.class));
+        q.params = List.of(ParamSpec.param(String.class, "name"));
         matchQueryAndCandidate(q, cm);
     }
 
@@ -237,8 +237,8 @@ public class TestMemberDecl {
     @Test
     public void testWrongParamName() {
         MemberQuery q = new MemberQuery();
-        q.params = List.of(ParamSpec.param("foo", String.class));
-        assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.paramTypes()), "Match params");
+        q.params = List.of(ParamSpec.param(String.class, "foo"));
+        assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.params()), "Match params");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
     }
@@ -246,8 +246,8 @@ public class TestMemberDecl {
     @Test
     public void testWrongParamType() {
         MemberQuery q = new MemberQuery();
-        q.params = List.of(ParamSpec.param("name", Integer.class));
-        assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.paramTypes()), "Match params");
+        q.params = List.of(ParamSpec.param(Integer.class, "name"));
+        assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.params()), "Match params");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
     }
@@ -256,10 +256,10 @@ public class TestMemberDecl {
     public void testWrongParamArity() {
         MemberQuery q = new MemberQuery();
         q.params = List.of(
-                ParamSpec.param("name", String.class),
-                ParamSpec.param("name", String.class)
+                ParamSpec.param(String.class, "name"),
+                ParamSpec.param(String.class, "name")
         );
-        assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.paramTypes()), "Match params");
+        assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.params()), "Match params");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
     }

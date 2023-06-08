@@ -29,6 +29,86 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #43](https://github.com/paul-bennett/juggle/issues/43): Search by parameter name/annotation
+
+This fix allows methods (and record types) to be matched by parameter
+(component) metadata such as per-parameter annotations, modifiers and name.
+
+However, annotations are restricted to those with the `RUNTIME` retention 
+policy, and modifiers and names can only be checked against classes which
+were compiled with `javac -parameters`.  In particular, I've yet to find a
+JDK which was built in this way.
+
+Consequently most of the tests here use the following method from the
+`com.angellane.juggle.testinput.lib` package:
+```java
+class Lib {
+    //...
+    public static void someFunction(
+            @SourceAnnotation @ClassAnnotation @RuntimeAnnotation int foo,
+            final String bar) {}
+}
+```
+
+First let's check that we can locate the method with a wildcard query:
+```shell
+$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,)'
+public static void Lib.someFunction(int,String)
+$
+```
+
+Let's try annotations first.  This should be an exact match:
+```shell
+$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(@RuntimeAnnotation,)'
+public static void Lib.someFunction(int,String)
+$
+```
+
+But this one should fail:
+```shell
+$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,@RuntimeAnnotation)'
+$
+```
+
+Turning to modifiers, this should match:
+```shell
+$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,final)'
+public static void Lib.someFunction(int,String)
+$
+```
+
+But this should fail:
+```shell
+$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(final,)'
+$
+```
+
+And for names, here's a success:
+```shell
+$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(? foo,)'
+public static void Lib.someFunction(int,String)
+$
+```
+
+And a failure:
+```shell
+$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(? bar,)'
+$
+```
+
+Putting it all together:
+```shell
+% juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(@RuntimeAnnotation ? foo, final ? bar)'
+public static void Lib.someFunction(int,String)
+%
+```
+
+(Annoyingly I've had to disable this last test. It works, but only if the
+previous two tests that mention `@RuntimeAnnotation` are disabled.  This
+isn't a surprise; it's a recurrence of [GitHub issue #39: _Classes loaded by
+inconsistent loaders (visible only in test)_](https://github.com/paul-bennett/juggle/issues/39).)
+
+
 ### [GitHub Issue #115](https://github.com/paul-bennett/juggle/issues/115): Allow qnames in type clauses
 
 Prior to this fix, it wasn't possible to use qualified names to look up
@@ -512,7 +592,7 @@ public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ```
 
-Similarly we should be able to go in the other direction too:
+Similarly, we should be able to go in the other direction too:
 ```shell
 $ juggle 'int (Integer,Integer)'
 public int Integer.compareTo(Integer)

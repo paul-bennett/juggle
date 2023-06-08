@@ -62,7 +62,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
 
     @Override
     public String toString() {
-        return "DeclQuery{" +
+        return getClass().getSimpleName() + "{" +
                 "annotationTypes=" + annotationTypes +
                 ", accessibility=" + accessibility +
                 ", modifierMask=" + modifierMask +
@@ -109,7 +109,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
                 , scoreModifiers(cm.otherModifiers())
                 , scoreReturn(tm, cm.returnType())
                 , scoreName(cm.simpleName(), cm.canonicalName())
-                , scoreParams(tm, cm.paramTypes())
+                , scoreParams(tm, cm.params())
                 , scoreExceptions(tm, cm.throwTypes())
         ));
     }

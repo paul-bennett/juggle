@@ -178,7 +178,7 @@ public class TypeParserTest {
 
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.ANNOTATION;
-        expectedQuery.addAnnotationType(Deprecated.class);
+        expectedQuery.setAnnotationTypes(Set.of(Deprecated.class));
 
         assertEquals(expectedQuery, actualQuery);
     }

@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.query;
 
+import java.util.List;
 import java.util.Set;
 
 public record BoundedType(
@@ -27,16 +28,12 @@ public record BoundedType(
         return new BoundedType(Set.of(c), c);
     }
 
-    public static BoundedType subtypeOf(Class<?> c) {
-        return new BoundedType(Set.of(c), null);
-    }
-
-    public static BoundedType subtypeOf(Set<Class<?>> cs) {
-        return new BoundedType(cs, null);
-    }
-
     public static BoundedType subtypeOf(Class<?>... cs) {
         return new BoundedType(Set.of(cs), null);
+    }
+
+    public static BoundedType subtypeOf(List<Class<?>> cs) {
+        return subtypeOf(cs.toArray(new Class<?>[0]));
     }
 
     public static BoundedType supertypeOf(Class<?> c) {

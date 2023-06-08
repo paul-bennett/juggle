@@ -17,11 +17,13 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
 import com.angellane.juggle.util.ClassUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,7 +74,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
 
     @Override
     public String toString() {
-        return "ClassQuery{"
+        return getClass().getSimpleName() + "{"
                 + "flavour="              + flavour
                 + ", annotationTypes="    + annotationTypes
                 + ", accessibility="      + accessibility
@@ -237,7 +239,16 @@ public final class TypeQuery extends Query<TypeCandidate> {
     }
 
     OptionalInt scoreRecordComponents(TypeMatcher tm, List<RecordComponent> rcs) {
-        List<? extends Class<?>> params = rcs.stream().map(RecordComponent::getType).toList();
+        List<Param> params = rcs.stream().map(
+                rc -> new Param(Arrays.stream(rc.getAnnotations())
+                            .map(Annotation::annotationType)
+                            .collect(Collectors.toSet()
+                            ),
+                        0,
+                        rc.getType(),
+                        rc.getName()
+                        )
+        ).toList();
         return scoreParams(tm, params);
     }
 }

@@ -31,6 +31,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -179,6 +180,67 @@ public class QueryFactory {
 
         // MODIFIERS ==========================================================
 
+        private Set<Class<?>> tempAnnotations = null;
+
+        private void clearAnnotations() { tempAnnotations = null; }
+
+        private void addAnnotationType(Class<?> annotationType) {
+            if (tempAnnotations == null)
+                tempAnnotations = new HashSet<>();
+            tempAnnotations.add(annotationType);
+        }
+
+        private int tempModifiers, tempModifiersMask;
+        private void clearOtherModifiers() {
+            tempModifiers = tempModifiersMask = 0;
+        }
+
+        private void addOtherModifier(int modifier,
+                                      @SuppressWarnings("SameParameterValue")
+                                      boolean val) {
+            // First clear this modifier bit, then add it if necessary
+            this.tempModifiers = (this.tempModifiers & ~modifier) | (val ? modifier : 0);
+            this.tempModifiersMask |= modifier;
+        }
+
+        private void addOtherModifier(int modifier) {
+            addOtherModifier(modifier, true);
+        }
+
+        // Clears all modifiers (other modifiers & annotations)
+        private void clearAllModifiers() {
+            clearAnnotations();
+            clearOtherModifiers();
+        }
+
+        // Copy modifiers & annotations from this class to the relevant query
+        private void attachModifiersToQuery() {
+            this.tempQuery.setModifiersAndMask(
+                    this.tempModifiers, this.tempModifiersMask);
+            this.tempQuery.setAnnotationTypes(this.tempAnnotations);
+        }
+
+
+        @Override
+        public void exitAnnotationModifiers(DeclParser.AnnotationModifiersContext ctx) {
+            attachModifiersToQuery();
+        }
+
+        @Override
+        public void exitClassModifiers(DeclParser.ClassModifiersContext ctx) {
+            attachModifiersToQuery();
+        }
+
+        @Override
+        public void exitInterfaceModifiers(DeclParser.InterfaceModifiersContext ctx) {
+            attachModifiersToQuery();
+        }
+
+        @Override
+        public void exitMemberModifiers(DeclParser.MemberModifiersContext ctx) {
+            attachModifiersToQuery();
+        }
+
         @Override
         public void enterAnnotation(DeclParser.AnnotationContext ctx) {
             String typeName = ctx.qname().IDENT().stream()
@@ -188,35 +250,37 @@ public class QueryFactory {
 
             Class<?> c = classForTypename(typeName);
             if (c != null)
-                tempQuery.addAnnotationType(c);
+                addAnnotationType(c);
         }
 
         @Override
         public void enterClassModifier(DeclParser.ClassModifierContext ctx) {
-            if (ctx.annotation() != null)
-                return;             // Annotations are handled elsewhere
-            handleModifier(ctx.getText());
+            if (ctx.annotation() == null) handleModifier(ctx.getText());
         }
 
         @Override
         public void enterInterfaceModifier(DeclParser.InterfaceModifierContext ctx) {
-            if (ctx.annotation() != null)
-                return;             // Annotations are handled elsewhere
-            handleModifier(ctx.getText());
+            if (ctx.annotation() == null) handleModifier(ctx.getText());
         }
 
         @Override
         public void enterAnnotationModifier(DeclParser.AnnotationModifierContext ctx) {
-            if (ctx.annotation() != null)
-                return;             // Annotations are handled elsewhere
-            handleModifier(ctx.getText());
+            if (ctx.annotation() == null) handleModifier(ctx.getText());
         }
 
         @Override
         public void enterMemberModifier(DeclParser.MemberModifierContext ctx) {
-            if (ctx.annotation() != null)
-                return;             // Annotations are handled elsewhere
-            handleModifier(ctx.getText());
+            if (ctx.annotation() == null) handleModifier(ctx.getText());
+        }
+
+        @Override
+        public void enterParamModifier(DeclParser.ParamModifierContext ctx) {
+            if (ctx.annotation() == null) handleModifier(ctx.getText());
+        }
+
+        @Override
+        public void enterRecordCompModifier(DeclParser.RecordCompModifierContext ctx) {
+            if (ctx.annotation() == null) handleModifier(ctx.getText());
         }
 
         private void handleModifier(String text) {
@@ -224,14 +288,15 @@ public class QueryFactory {
                 case "private", "package", "protected", "public" ->
                         tempQuery.setAccessibility(Accessibility.fromString(text));
 
-                case "static"       -> tempQuery.addModifier(Modifier.STATIC);
-                case "final"        -> tempQuery.addModifier(Modifier.FINAL);
-                case "synchronized" -> tempQuery.addModifier(Modifier.SYNCHRONIZED);
-                case "volatile"     -> tempQuery.addModifier(Modifier.VOLATILE);
-                case "transient"    -> tempQuery.addModifier(Modifier.TRANSIENT);
-                case "native"       -> tempQuery.addModifier(Modifier.NATIVE);
-                case "abstract"     -> tempQuery.addModifier(Modifier.ABSTRACT);
-                case "strictfp"     -> tempQuery.addModifier(Modifier.STRICT);
+                // This group of modifiers apply to members and parameters
+                case "static"       -> addOtherModifier(Modifier.STATIC);
+                case "final"        -> addOtherModifier(Modifier.FINAL);
+                case "synchronized" -> addOtherModifier(Modifier.SYNCHRONIZED);
+                case "volatile"     -> addOtherModifier(Modifier.VOLATILE);
+                case "transient"    -> addOtherModifier(Modifier.TRANSIENT);
+                case "native"       -> addOtherModifier(Modifier.NATIVE);
+                case "abstract"     -> addOtherModifier(Modifier.ABSTRACT);
+                case "strictfp"     -> addOtherModifier(Modifier.STRICT);
 
                 // The grammar restricts these to type queries only
                 case "sealed"       -> tempTypeQuery.setIsSealed(true);
@@ -249,6 +314,10 @@ public class QueryFactory {
         // This is populated by other listeners – either as a parameter name
         // or a method name
         private Pattern tempName = null;
+
+        private void clearName() {
+            tempName = null;
+        }
 
         @Override
         public void enterUname(DeclParser.UnameContext ctx) {
@@ -373,7 +442,7 @@ public class QueryFactory {
                     ctx.qname().stream()
                             .map(DeclParser.QnameContext::getText)
                             .map(juggler::classForTypename)
-                            .collect(Collectors.toSet())
+                            .collect(Collectors.toList())
             );
             tempTypeList.add(tempType);
         }
@@ -405,30 +474,50 @@ public class QueryFactory {
 
         List<ParamSpec> tempParams;
 
+        private void clearParamList() { tempParams = new ArrayList<>(); }
+
         @Override
         public void enterParams(DeclParser.ParamsContext ctx) {
-            // We've seen parentheses, so we're matching parameters
-            tempParams = new ArrayList<>();
+            clearParamList();
         }
 
         @Override
-        public void exitEllipsisParam(DeclParser.EllipsisParamContext ctx) {
+        public void enterRecordComps(DeclParser.RecordCompsContext ctx) {
+            clearParamList();
+        }
+
+        @Override
+        public void enterParam(DeclParser.ParamContext ctx) {
+            clearAllModifiers();
+            clearName();
+        }
+
+        @Override
+        public void enterRecordComp(DeclParser.RecordCompContext ctx) {
+            clearAllModifiers();
+            clearName();
+        }
+
+        @Override
+        public void exitEllipsisType(DeclParser.EllipsisTypeContext ctx) {
             tempParams.add(ParamSpec.ellipsis());
         }
 
         @Override
-        public void exitWildcardParam(DeclParser.WildcardParamContext ctx) {
-            tempParams.add(ParamSpec.wildcard());
+        public void exitWildcardType(DeclParser.WildcardTypeContext ctx) {
+            tempParams.add(ParamSpec.wildcard(tempAnnotations, tempModifiers, tempModifiersMask));
         }
 
         @Override
-        public void exitUnnamedParam(DeclParser.UnnamedParamContext ctx) {
-            tempParams.add(ParamSpec.unnamed(tempType));
+        public void exitUnnamedType(DeclParser.UnnamedTypeContext ctx) {
+            tempParams.add(ParamSpec.param(tempAnnotations,
+                    tempModifiers, tempModifiersMask, tempType, tempName));
         }
 
         @Override
-        public void exitUntypedParam(DeclParser.UntypedParamContext ctx) {
-            tempParams.add(ParamSpec.untyped(tempName));
+        public void exitUntypedName(DeclParser.UntypedNameContext ctx) {
+            tempParams.add(ParamSpec.param(tempAnnotations,
+                    tempModifiers, tempModifiersMask, tempType, tempName));
         }
 
 
