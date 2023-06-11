@@ -60,15 +60,22 @@ names separated by a period.
 ## What to look for
 
 To ask Juggle a question, provide it with a Java declaration, omitting
-parts you're unsure of.  In the above example we wrote something that
+parts you're unsure of.  In the above example I wrote something that
 looked like a method declaration, but omitted the method name because
-we didn't know it.
+I didn't know it.
+
+> **Note:**
+> Java declarations tend to use shell characters such as `(` and `)` which the
+> shell tries to interpret.  In many of the examples in this file, I surround
+> the query with quote marks to tell the shell to back off.  This isn't always
+> required; Juggle looks at the entire command-line and forms a query
+> from that.
 
 Most of the time Juggle searches for members -- constructors, fields
 and methods.  To search for a method, write its return type followed
 by a parentheses-wrapped comma-separated parameter list.
 ```shell
-$ juggle void '(double[], int, int, double)' 
+$ juggle 'void (double[], int, int, double)' 
 public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ```
@@ -84,12 +91,14 @@ public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
 public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ```
-("What are those last three results?" you might be thinking, "They don't
-match!" You're right. They don't. But at the moment Juggle works on the
-_erased type_ of methods, so these looks like methods that take four
-`Object` parameters, and Juggle recognises that each of the types in
-the query - `double[]`, `int` and `double` can be passed as a parameter
-of type `Object`.)
+> **Note: Type erasure**
+> 
+> "What are those last three results?" you might be thinking, "They don't
+> match!" You're right. They don't. But at the moment Juggle works on the
+> _erased type_ of methods, so these look like methods that take four
+> `Object` parameters, and Juggle recognises that each of the types in
+> the query -- `double[]`, `int` and `double` -- can be passed as a parameter
+> of type `Object`.)
 
 In the same way that you can omit the return type from your query, you
 can also omit the parameter list, which will show methods that take _any
@@ -104,20 +113,24 @@ $
 So the only way to get a `Inet6Address` appears to be either of the two
 static `getByAddress` methods on the `Inet6Address` class.   
 
-Of course methods may return an instance of a subclass of their declared return
-type.  `Inet6Address` is a member of a small family of classes rooted in its
-parent `InetAddress` class, and it's possible that the runtime type returned
-by one of those methods is actually `Inet6Address`, but Juggle deals in
-compile-time types.
-
-Another reason why Juggle won't list these methods-returning-a-superclass is
-that doing so would result in long and not particularly helpful outputs.
-(Since `Object` is a superclass of every reference type, at a minimum Juggle
-would have to include hundreds of methods that return `Object` in every 
-result.)
+> **Note: Type families**
+> 
+> Of course methods may return an instance of a subclass of their declared 
+> return type.  `Inet6Address` is a member of a small family of classes rooted 
+> in its parent `InetAddress` class, and it's possible that the runtime type
+> returned by one of those methods is actually `Inet6Address`, but Juggle deals 
+> in compile-time types.
+>
+> Another reason why Juggle won't list these methods-returning-a-superclass is
+> that doing so would result in long and not particularly helpful outputs.
+> (Since `Object` is a superclass of every reference type, at a minimum Juggle
+> would have to include hundreds of methods that return `Object` in every 
+> result.)
 
 Omitting the return type and parameters will list all methods in the JDK.
 While marginally interesting, the output is rather too long to be helpful!
+
+### The hidden `this` parameter
 
 Juggle treats non-static methods as if they have a silent
 first parameter whose type is the class in question:
@@ -136,6 +149,13 @@ a parent class (Widening Reference Conversion). This particular method is
 listed last in the results, because Juggle tries to list closer matches
 (i.e. where fewer conversions are necessary) first.
 
+To list static methods which take no arguments use `()`.
+
+(This also lists all default constructors, as well as static fields
+by virtue of Juggle treating fields as having zero-arg pseudo-getters.)
+
+### Fields: a getter and a setter
+
 Juggle treats data fields as a pair of methods: a setter (which takes an
 argument of the field's type and returns `void`), and a getter (which takes
 no additional arguments and returns a value of the field's type). 
@@ -152,10 +172,7 @@ public static int java.util.Objects.hashCode(Object)
 $
 ```
 
-To list static methods which take no arguments use `()`.
-
-(This also lists all default constructors, as well as static fields
-by virtue of Juggle treating fields as having zero-arg pseudo-getters.)
+### Exceptions
 
 The `throws` clause allows you to filter by methods that might throw a
 specific exception type:
@@ -180,10 +197,12 @@ exceptions.
 A query that ends `throws` (without being followed by any exception type) will
 show all methods that declare no thrown types.
 
-You can also ask Juggle to look for annotations.  Juggle will list methods
-that have the named annotations, but it's not possible to include annotation
-data in the query.  If multiple annotations are supplied, they must all be
-present on the class or method.
+### Annotations
+
+You can also ask Juggle to look for members that have particular annotations.
+Juggle will list methods that have the named annotations, but it's not 
+possible to include annotation data in the query.  If multiple annotations
+are supplied, they must all be present on the class or method.
 ```shell
 $ juggle @FunctionalInterface int
 public abstract int java.util.Comparator<T>.compare(T,T)
@@ -196,6 +215,8 @@ public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
 public abstract int java.util.function.IntSupplier.getAsInt()
 $
 ```
+
+### Member names
 
 You can follow the return type with a member name to match only members
 with that name (case-sensitive, exact match):
@@ -235,6 +256,31 @@ Note how the member is considered to match if either of these two names match:
 2. The member's canonical name (its declaration name prefixed with the
    declaring package and class)  
 
+### Constructors
+
+Juggle treats constructors as if they were static methods called `<init>`
+returning an instance of the declaring class.  In the following example
+you'll see a couple of constructors and a static method, all with broadly
+similar signatures:
+```shell
+$ juggle 'java.io.InputStream (String)'
+public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
+public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
+public java.io.StringBufferInputStream.<init>(String)
+$
+```
+
+> **Note: Reference widening conversion**
+> 
+> Here we see an example of a Reference Widening converion: `FileInputStream`
+> and `StringBufferInputStream` are both descendant classes of `InputStream`,
+> so objects of those first two types can be assigned to a variable of the
+> latter type.
+
+> **Note: Constructor name**
+> 
+> Juggle does not provide a means of searching for a constructor by name.
+
 ## Where to look
 
 You can tell Juggle which JARs to include in the search by using the `-j`
@@ -245,6 +291,12 @@ public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testin
 com.angellane.juggle.testinput.lib.Lib.<init>()
 $
 ```
+
+> **Warning: the `-j` option may change
+> 
+> In the future I expect to replace the `-j` option with a more comprehensive
+> `-c` option that allows a search classpath to be specified so that Juggle
+> can search JARs as well as directories of class files. See GitHub issue #5.
 
 The `-m` flag can be used to specify JMODs to search.  Juggle will also search
 any modules that this module requires transitively (sometimes referred to as
@@ -264,8 +316,8 @@ class files.
 ## Sorting the results
 
 Juggle can sort its output in a number of ways. Specify sort criteria using
-`-s`. The first criteria sorts the results, with ties resolved by any
-subsequent criteria.
+`-s`. The first criteria sorts the results, with ties resolved by subsequent
+criteria.
 
 | Option         | Description                                                             |
 |----------------|-------------------------------------------------------------------------|
@@ -320,10 +372,21 @@ $
 Of course `private` members can't be used, so `protected` is likely the most
 nosey you should be.
 
+> **Note: Default access**
+> 
+> Use the word `package` as an access modifier if you want to list methods
+> that have at least the default level of access.
+
 This output also shows that Juggle is inspecting the runtime and not the
 specification. That can result in some pseudo-private members or classes
-(such as `sun.security.util.DerOutputStream` above) leaking into output.
-Just because you _can_ call a method doesn't mean you _should_.
+leaking into output. Just because you _can_ call a method doesn't mean you
+_should_.
+
+All other member and type modifiers are supported too (`static`, `final`,
+`synchronized`, `volatile`, `transient`, `native`, `abstract`, `strictfp`,
+`sealed` and `non-sealed`).  A candidate member or type must match _all_
+specified modifiers to be included in the results.
+
 
 ### Parameter Metadata
 
@@ -335,14 +398,16 @@ as you might expect.  There are three types of parameter metadata:
 
 Of these, annotations can always be checked (but only those with a `RUNTIME`
 retention policy).  To match either of the other two, the metadata must be
-present in the class file.  This is achieved by passing the `parameters` flag
+present in the class file.  This is achieved by passing the `-parameters` flag
 to `javac` when compiling the original source.  This restriction also applies
 to classes in the JDK itself, and unfortunately I'm not aware of any JDKs that
 have been built in this way.
 
-(Note: if you want to build your own JDK to do this, it might be as simple
-as specifying exporting a `JAVAC_FLAGS=-parameters` environment variable before
-following the usual build instructions.)
+> **Note: Building a JDK with parameter metadata**
+>
+> If you want to build your own JDK to do this, it might be as simple as
+> specifying exporting a `JAVAC_FLAGS=-parameters` environment variable 
+> before following the usual build instructions.
 
 When checking a candidate against a query, if the candidate wasn't compiled with
 parameter metadata, then those elements of the query are ignored (i.e. the
@@ -363,7 +428,7 @@ $ juggle "void (double[],int,double,int)"
 $
 ```
 
-However, if we allow Juggle to permute parameters, it locates a match:
+However, allowing Juggle to permute parameters, locates a match:
 
 ```shell
 $ juggle -x "void (double[],int,double,int)"
@@ -371,8 +436,9 @@ public static void java.util.Arrays.fill(double[],int,int,double)
 $
 ```
 
-Note that parameter permutation can significantly increase runtime,
-so it's not enabled by default.
+> **Warning:**
+> Parameter permutation can significantly increase runtime,
+> so it's not enabled by default.
 
 ### Imports
 
@@ -390,8 +456,12 @@ public CartesianProduct<T>.<init>(List<E>[])
 public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<E>[])
 %
 ```
-(Note that in this example, Juggle isn't yet unifying the type arguments;
-ideally it should output `CartesianProduct<T>.of(List<T>[])`.)
+> **Note: Type arguments**
+> 
+> Juggle doesn't yet unify type arguments.  The `E` and `T` in the The last
+> match in the above example refer to the same thing, so Juggle should
+> ideally have output 
+> `public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<T>[])`.
 
 ### Wildcards
 
@@ -416,9 +486,10 @@ public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ```
 
-Specifying a `?` as a return type is equivalent to leaving it out.  This
-helps us get around an ambiguity in Juggle's parser.  Juggle assumes that
-the first identifier in the query is the return type, so `juggle substring`
+Specifying a `?` as a return type is equivalent to leaving it out.
+
+This helps us get around an ambiguity in Juggle's parser.  Juggle assumes
+that the first identifier in the query is the return type, so `juggle substring`
 causes it to look for a type called `substring` not a method name.  To find
 all members called `substring`, we can say:
 ```shell
@@ -433,7 +504,10 @@ public synchronized String StringBuffer.substring(int)
 public synchronized String StringBuffer.substring(int,int)
 $
 ```
-As you might expect, with many shells we need to escape this special character.
+
+The same ambiguity exists with parameter names. If you want to search for a
+method with parameters of a particular name but unknown type, use an unbounded
+wildcard.
 
 ### Bounded Wildcards
 
@@ -446,20 +520,20 @@ Upper bounds are specified `? extends InetAddress`, which would match
 Multiple upper bounds (a class and an interface, or multiple interfaces)
 are separated with an ampersand: `? extends InetAddress & Serializable`.
 
-Typically, we might use lower-bounds on parameter specifications and upper
+Lower-bounds are typically used on parameter specifications and upper
 bounds on return types.
 
 So for example, what could replace `UnknownMethod` in this code?
 ```java
 class Foo {
-    void f(String s, int i, int j) {
+    CharSequence f(String s, int i, int j) {
         return UnknownMethod(myString, i, j);
     }
 }
 ```
 
-We can ask Juggle. We need a method that takes a `String` (or any superclass
-of `String`) and two `int`s, and returns a `CharSequence` (or any subclass): 
+Let's ask Juggle. What's a method that takes a `String` (or any superclass
+of `String`) and two `int`s, and returns a `CharSequence` (or any subclass)?
 ```shell
 $ juggle '? extends CharSequence (? super String,int,int)'
 public CharSequence String.subSequence(int,int)
@@ -470,11 +544,13 @@ $
 ```
 
 Since Java normally applies these conversions automatically, Juggle does too.
-If we don't explicitly use a bounded wildcard in our query, Juggle considers
-each parameter type to be a lower bound for a wildcard, and return and exception
-types to be upper bounds.
 
-So we can write the query more naturally and get the same results:
+If the query doesn't use a _bounded_ wildcard, Juggle considers each parameter
+type to be a lower bound for a wildcard, and return and exception types to be
+upper bounds.
+
+So the above query can be written more naturally, and Juggle will give the
+same results:
 ```shell
 $ juggle 'CharSequence (String,int,int)'
 public CharSequence String.subSequence(int,int)
@@ -490,16 +566,16 @@ Sometimes these automatic conversions get in the way.  You can control whether
 Juggle performs conversions (replacing types with bounded wildcards) using
 the `-c` or `--conversions` option. 
 
-| Conversion | Description                                                                  |
-|------------|------------------------------------------------------------------------------|
-| `-c all`   | Treat plain params as lower bounded wildcards, and return as upper bounded   |
-| `-c none`  | Apply no conversions; all types are matched exactly                          |
-| `-c auto`  | Behave as `all` if no bounded wildcards appear in query, or `none` otherwise |
+| Conversion | Description                                                                    |
+|------------|--------------------------------------------------------------------------------|
+| `-c all`   | Treat plain parameters as lower bounded wildcards, and return as upper bounded |
+| `-c none`  | Apply no conversions; all types are matched exactly                            |
+| `-c auto`  | Behave as `all` if no bounded wildcards appear in query, or `none` otherwise   |
 
 The default is `-c auto`.
 
 
-### Type Matches
+## Type Matches
 
 Juggle's most useful for finding members.  But you can also ask it about data
 types by providing the header of a type declaration.
@@ -514,8 +590,8 @@ public final class java.lang.reflect.Method extends java.lang.reflect.Executable
 $
 ```
 
-Note that this show direct and indirect derived classes.   If we just wanted
-classes that directly extend a base class, we can turn off conversions:
+Note that this shows direct and indirect derived classes.   To see just those
+classes that directly extend a base class, turn off conversions:
 ```shell
 $ juggle -c none class extends java.lang.reflect.AccessibleObject
 public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
@@ -524,26 +600,17 @@ $
 ```
 
 All the other kinds of type are also supported: `enum`, `record`, 
-`interface` and `@interface`. As with member queries, we can restrict the
-search by specifying annotations and other modifiers.
+`interface` and `@interface`. Amd just like when searching for members,
+it's possible to restrict the search by specifying annotations and other
+modifiers.
 
-### Constructors
+> **Note: `class` and `interface`**
+> 
+> If you're looking for a class, you must use the `class` keyword.
+> If you're looking for an interface, you must use `interface`.
+> There's no way to ask Juggle to list every super-type (`class` or
+> `interface`) of a class in a single query.
 
-Juggle treats constructors as if they were static methods called `<init>`
-returning an instance of the declaring class.  In the following example
-you'll see a couple of constructors and a static method, all with broadly
-similar signatures:
-```shell
-$ juggle 'java.io.InputStream (String)'
-public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
-public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
-public java.io.StringBufferInputStream.<init>(String)
-$
-```
-(We see another example of Reference Widening here too: `FileInputStream` 
-and `StringBufferInputStream` are both descendant classes of `InputStream`, 
-so objects of those first two types can be assigned to a variable of the 
-latter type.)
 
 ## Command-line summary
 
