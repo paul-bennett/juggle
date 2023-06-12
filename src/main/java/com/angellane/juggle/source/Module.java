@@ -19,50 +19,71 @@ package com.angellane.juggle.source;
 
 import java.io.IOException;
 import java.lang.module.*;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class Module extends Source {
     private static final String CLASS_SUFFIX = ".class";
     private static final String MODULE_INFO  = "module-info";
 
+    private final List<String> modulePaths;
     private final String moduleName;
 
-    public Module(String name) {
-        moduleName = name;
+    public Module(List<String> modulePaths, String name) {
+        this.modulePaths = modulePaths;
+        this.moduleName = name;
     }
 
     private final Set<ResolvedModule> mods = new HashSet<>();
 
     @Override
-    public Optional<URL> configure() {
+    public List<URL> configure() {
         List<String> modNames = List.of(moduleName);
+
+        Path[] paths = modulePaths.stream()
+                .map(Path::of)
+                .toList()
+                .toArray(new Path[0]);
 
         Configuration modConf = ModuleLayer.boot().configuration().resolve(
                 ModuleFinder.ofSystem(),
-                ModuleFinder.of(Path.of(".")),
+                ModuleFinder.of(paths),
                 modNames);
 
-        addTransitiveModules(modConf, moduleName);
-
-        return Optional.empty();
+        return addTransitiveModules(modConf, moduleName).stream()
+                .mapMulti((URI u, Consumer<URL> c) -> {
+                    try { c.accept(u.toURL()); }
+                    catch (MalformedURLException ignored) {}
+                })
+                .toList();
     }
 
-    private void addTransitiveModules(Configuration modConf, String moduleName) {
+    private List<URI> addTransitiveModules(Configuration modConf, String moduleName) {
+        List<URI> ret = new ArrayList<>();
+
         ResolvedModule mod = modConf.findModule(moduleName).orElse(null);
 
         assert mod != null;
 
         mods.add(mod);
+        mod.reference().location().ifPresent(ret::add);
 
         // Find transitively required modules ("implied read")
 
         mod.reference().descriptor().requires().stream()
                 .filter(rm -> rm.modifiers().contains(ModuleDescriptor.Requires.Modifier.TRANSITIVE))
                 .map(ModuleDescriptor.Requires::name)
-                .forEach(name -> addTransitiveModules(modConf, name));
+                .forEach(name -> ret.addAll(
+                        addTransitiveModules(modConf, name)
+                        )
+                );
+
+        return ret;
     }
 
     @Override

@@ -295,7 +295,7 @@ $
 > **Warning: the `-j` option may change
 > 
 > In the future I expect to replace the `-j` option with a more comprehensive
-> `-c` option that allows a search classpath to be specified so that Juggle
+> `-cp` option that allows a search classpath to be specified so that Juggle
 > can search JARs as well as directories of class files. See GitHub issue #5.
 
 The `-m` flag can be used to specify JMODs to search.  Juggle will also search
@@ -309,6 +309,9 @@ public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(Strin
 public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(String,int,int,int) throws java.sql.SQLException
 $
 ```
+
+By default Juggle searches for modules in the current working directory.
+To change this, use the `-p` / `--module-path` option.
 
 At present there's no support for scanning an unpacked JAR, or a directory of
 class files.
@@ -621,7 +624,8 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-c`   | `--conversions` | `auto`, `none`, `all`                                     | `-c auto`                                                    | Whether to apply type conversions                   |
 | `-i`   | `--import`      | package name                                              |                                                              | Packages to import (`java.lang` is always searched) |
 | `-j`   | `--jar`         | file path                                                 |                                                              | JAR files to search                                 |
-| `-m`   | `--module`      | module name(s)                                            | `-m java.base`                                               | JMODs to search                                     |
+| `-m`   | `--add-module`  | module name(s)                                            | `-m java.base`                                               | JMODs to search                                     |
+| `-p`   | `--module-path` | path`:`path                                               | `-p .`                                                       | Directories to search for modules                   |
 | `-s`   | `--sort`        | `access`, `hierarchy`, `name`, `package`, `score`, `text` | `-s score -s hierarchy -s access -s package -s name -s text` | Sort criteria                                       |
 | `-x`   | `--permute`     | (none)                                                    | (don't permute)                                              | Match permutations of supplied parameters           |
 | `-f`   | `--format`      | `auto`, `colour`, `color`, `plain`                        | `auto`                                                       | Output format                                       |

@@ -29,6 +29,15 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #15](https://github.com/paul-bennett/juggle/issues/15): Handle module path
+
+We can now load classes from modules, searched on the specified module path.
+```shell
+$ juggle -p build/libs -m juggle.testLib /someFunction/
+public static void com.angellane.juggle.testinput.lib.Lib.someFunction(int,String)
+$
+```
+
 ### [GitHub Issue #43](https://github.com/paul-bennett/juggle/issues/43): Search by parameter name/annotation
 
 This fix allows methods (and record types) to be matched by parameter

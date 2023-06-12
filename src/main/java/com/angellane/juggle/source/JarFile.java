@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
@@ -42,8 +43,8 @@ public class JarFile extends Source {
     }
 
     @Override
-    public Optional<URL> configure() {
-        return Optional.of(jarURL);
+    public List<URL> configure() {
+        return List.of(jarURL);
     }
 
     @Override

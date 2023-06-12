@@ -41,8 +41,24 @@ public class Juggler {
     private final List<String> importedPackageNames = new ArrayList<>();
 
     public Juggler() {
-        addSource(new Module(Object.class.getModule().getName()));  // "java.base" is always inspected
+        addSource(new Module(getModulePaths(),
+                Object.class.getModule().getName()  // "java.base" is always inspected
+                )
+        );
         importedPackageNames.add(Object.class.getPackageName());    // "java.lang" is always imported
+    }
+
+
+    // Modules ========================================================================================================
+
+    private final List<String> modulePaths = new ArrayList<>();
+
+    public void addModulePath(String path) {
+        modulePaths.add(path);
+    }
+
+    public List<String> getModulePaths() {
+        return modulePaths.size() == 0 ? List.of(".") : modulePaths;
     }
 
 
@@ -58,7 +74,7 @@ public class Juggler {
         try {
             URL[] urls = getSources().stream()
                     .map(Source::configure)
-                    .flatMap(Optional::stream)
+                    .flatMap(List::stream)
                     .toArray(URL[]::new);
 
             this.loader = new ResolvingURLClassLoader(urls);

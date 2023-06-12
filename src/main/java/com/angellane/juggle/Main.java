@@ -35,10 +35,13 @@ import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 
 @Command( name="juggle"
@@ -74,21 +77,34 @@ public class Main implements Runnable {
 
     // Command-line options
 
+    private Stream<String> paths(String arg) {
+        return Arrays.stream(arg.split(File.pathSeparator))
+                .filter(Predicate.not(String::isEmpty));
+    }
+
     @SuppressWarnings("unused")
     @Option(names={"-i", "--import"}, paramLabel="packageName", description="Imported package names")
     public void addImport(String importName) { juggler.addImportedPackageName(importName); }
 
     @SuppressWarnings("unused")
-    @Option(names={"-j", "--jar"}, paramLabel="jarFilePath", description="JAR file to include in search")
-    public void addJar(String jarName) { juggler.addSource(new JarFile(jarName)); }
-
+    @Option(names={"-cp", "--classpath", "--class-path", "-j"}, paramLabel="jarFilePath", description="JAR file to include in search")
+    public void addToClassPath(String arg) {
+        paths(arg).forEach(p -> juggler.addSource(new JarFile(p)));
+    }
 
     @SuppressWarnings("unused")
-    @Option(names={"-m", "--module"}, paramLabel="moduleName", description="Modules to search")
+    @Option(names={"-p", "--module-path"}, paramLabel="modulePath", description="Where to look for modules")
+    public void addModulePath(String arg) {
+        paths(arg).forEach(juggler::addModulePath);
+    }
+
+    @SuppressWarnings("unused")
+    @Option(names={"-m", "--module", "--add-modules"}, paramLabel="moduleName", description="Modules to search")
     public void addModule(String arg) {
         Arrays.stream(arg.split(","))
                 .filter(s -> !s.isEmpty())
-                .forEach(m -> juggler.addSource(new Module(m)));
+                .forEach(m -> juggler.addSource(
+                        new Module(juggler.getModulePaths(), m)));
     }
 
     @SuppressWarnings("unused")
