@@ -132,7 +132,7 @@ public class Juggler {
                 // Carry on with next iteration
             } catch (NoClassDefFoundError e) {
                 // This might be thrown if the class file references other classes that can't be loaded.
-                // Maybe it depends on another JAR that hasn't been specified on the command-line with -j.
+                // Maybe it depends on another JAR that hasn't been specified on the command-line with -cp.
                 System.err.println("*** Warning: related class " + className + ": " + e);
                 return Optional.empty();
             }

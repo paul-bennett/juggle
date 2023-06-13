@@ -283,20 +283,26 @@ $
 
 ## Where to look
 
-You can tell Juggle which JARs to include in the search by using the `-j`
+> **Warning: arbitrary code execution**
+>
+> When Juggle inspects a class, it loads it into the JVM.  In doing so, any
+> `static` initialisers in the class will be executed, whether Juggle finds
+> matches in the class or not.
+> 
+> Never use Juggle's `-cp` or `-m` options to inspect code you do not trust.
+
+You can tell Juggle which JARs to include in the search by using the `-cp`
 option:
 ```shell
-$ juggle -j build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
+$ juggle -cp build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
 public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
 com.angellane.juggle.testinput.lib.Lib.<init>()
 $
 ```
 
-> **Warning: the `-j` option may change
-> 
-> In the future I expect to replace the `-j` option with a more comprehensive
-> `-cp` option that allows a search classpath to be specified so that Juggle
-> can search JARs as well as directories of class files. See GitHub issue #5.
+This same option can also be used to load directories of `.class` files.
+Separate multiple paths with colons (on UNIX, Linux and macOS) or semicolons
+(on Windows).
 
 The `-m` flag can be used to specify JMODs to search.  Juggle will also search
 any modules that this module requires transitively (sometimes referred to as
@@ -451,7 +457,7 @@ class names don't have to be written out each time. As you would expect,
 names in its output.
 ```shell
 % juggle                                                                \
-    -j build/libs/juggle-1.0-SNAPSHOT.jar                               \
+    -cp build/libs/juggle-1.0-SNAPSHOT.jar                              \
     -i com.angellane.juggle                                             \
     -i java.util                                                        \
     -r CartesianProduct
@@ -623,9 +629,9 @@ Each command-line option has a long name equivalent. This table summarises all o
 |--------|-----------------|-----------------------------------------------------------|--------------------------------------------------------------|-----------------------------------------------------|
 | `-c`   | `--conversions` | `auto`, `none`, `all`                                     | `-c auto`                                                    | Whether to apply type conversions                   |
 | `-i`   | `--import`      | package name                                              |                                                              | Packages to import (`java.lang` is always searched) |
-| `-j`   | `--jar`         | file path                                                 |                                                              | JAR files to search                                 |
+| `-cp`  | `--classpath`   | paths, separated by `:` (Unix-like) or `;` (Windows)      |                                                              | JAR files or directories to search                  |
 | `-m`   | `--add-module`  | module name(s)                                            | `-m java.base`                                               | JMODs to search                                     |
-| `-p`   | `--module-path` | path`:`path                                               | `-p .`                                                       | Directories to search for modules                   |
+| `-p`   | `--module-path` | paths, separated by `:` (Unix-like) or `;` (Windows)      | `-p .`                                                       | Directories to search for modules                   |
 | `-s`   | `--sort`        | `access`, `hierarchy`, `name`, `package`, `score`, `text` | `-s score -s hierarchy -s access -s package -s name -s text` | Sort criteria                                       |
 | `-x`   | `--permute`     | (none)                                                    | (don't permute)                                              | Match permutations of supplied parameters           |
 | `-f`   | `--format`      | `auto`, `colour`, `color`, `plain`                        | `auto`                                                       | Output format                                       |

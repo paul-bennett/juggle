@@ -27,7 +27,7 @@ import com.angellane.juggle.query.Query;
 import com.angellane.juggle.query.QueryFactory;
 import com.angellane.juggle.query.TypeQuery;
 import com.angellane.juggle.sink.TextOutput;
-import com.angellane.juggle.source.JarFile;
+import com.angellane.juggle.source.FileSource;
 import com.angellane.juggle.source.Module;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -87,9 +87,9 @@ public class Main implements Runnable {
     public void addImport(String importName) { juggler.addImportedPackageName(importName); }
 
     @SuppressWarnings("unused")
-    @Option(names={"-cp", "--classpath", "--class-path", "-j"}, paramLabel="jarFilePath", description="JAR file to include in search")
+    @Option(names={"-cp", "--classpath", "--class-path"}, paramLabel="path", description="JAR file or directory to include in search")
     public void addToClassPath(String arg) {
-        paths(arg).forEach(p -> juggler.addSource(new JarFile(p)));
+        paths(arg).forEach(p -> juggler.addSource(new FileSource(p)));
     }
 
     @SuppressWarnings("unused")

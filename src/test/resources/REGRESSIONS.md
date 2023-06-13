@@ -61,53 +61,53 @@ class Lib {
 
 First let's check that we can locate the method with a wildcard query:
 ```shell
-$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,)'
+$ juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,)'
 public static void Lib.someFunction(int,String)
 $
 ```
 
 Let's try annotations first.  This should be an exact match:
 ```shell
-$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(@RuntimeAnnotation,)'
+$ juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(@RuntimeAnnotation,)'
 public static void Lib.someFunction(int,String)
 $
 ```
 
 But this one should fail:
 ```shell
-$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,@RuntimeAnnotation)'
+$ juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,@RuntimeAnnotation)'
 $
 ```
 
 Turning to modifiers, this should match:
 ```shell
-$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,final)'
+$ juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(,final)'
 public static void Lib.someFunction(int,String)
 $
 ```
 
 But this should fail:
 ```shell
-$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(final,)'
+$ juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(final,)'
 $
 ```
 
 And for names, here's a success:
 ```shell
-$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(? foo,)'
+$ juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(? foo,)'
 public static void Lib.someFunction(int,String)
 $
 ```
 
 And a failure:
 ```shell
-$ juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(? bar,)'
+$ juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(? bar,)'
 $
 ```
 
 Putting it all together:
 ```shell
-% juggle -j build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(@RuntimeAnnotation ? foo, final ? bar)'
+% juggle -cp build/libs/testLib.jar -i com.angellane.juggle.testinput.lib '? someFunction(@RuntimeAnnotation ? foo, final ? bar)'
 public static void Lib.someFunction(int,String)
 %
 ```

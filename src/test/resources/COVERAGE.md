@@ -29,21 +29,21 @@ If we pass an invalid argument, we should get an error and the help text:
 ```shell
 $ juggle --fiddle-de-dee
 Unknown option: '--fiddle-de-dee'
-Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
-              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-p=modulePath]
-              [-s=access|hierarchy|name|package|score|text] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto] [-cp=path]
+              [-f=auto|plain|colour|color] [-i=packageName] [-m=moduleName]
+              [-p=modulePath] [-s=access|hierarchy|name|package|score|text]
+              [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
   -c, --conversions=none|all|auto
                              Which conversions to apply
+      -cp, --classpath, --class-path=path
+                             JAR file or directory to include in search
       --dry-run              Dry run only
   -f, --format=auto|plain|colour|color
                              Output format
   -h, --help                 Show this help message and exit.
   -i, --import=packageName   Imported package names
-  -j, -cp, --classpath, --class-path=jarFilePath
-                             JAR file to include in search
   -m, --module, --add-modules=moduleName
                              Modules to search
   -p, --module-path=modulePath
@@ -60,21 +60,21 @@ Of course, we can explicitly ask for help:
 
 ```shell
 $ juggle --help
-Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto]
-              [-f=auto|plain|colour|color] [-i=packageName] [-j=jarFilePath]
-              [-m=moduleName] [-p=modulePath]
-              [-s=access|hierarchy|name|package|score|text] [declaration...]
+Usage: juggle [-hVx] [--dry-run] [--show-query] [-c=none|all|auto] [-cp=path]
+              [-f=auto|plain|colour|color] [-i=packageName] [-m=moduleName]
+              [-p=modulePath] [-s=access|hierarchy|name|package|score|text]
+              [declaration...]
 An API search tool for Java
       [declaration...]       A Java-style declaration to match against
   -c, --conversions=none|all|auto
                              Which conversions to apply
+      -cp, --classpath, --class-path=path
+                             JAR file or directory to include in search
       --dry-run              Dry run only
   -f, --format=auto|plain|colour|color
                              Output format
   -h, --help                 Show this help message and exit.
   -i, --import=packageName   Imported package names
-  -j, -cp, --classpath, --class-path=jarFilePath
-                             JAR file to include in search
   -m, --module, --add-modules=moduleName
                              Modules to search
   -p, --module-path=modulePath
@@ -220,7 +220,7 @@ The (contrived) App class from testApp uses the Lib class from testLib in its in
 dependent classes in the JAR (it's not an uberjar).  This means trying to load the App class fails.  
 
 ```shell
-$ juggle -j build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
+$ juggle -cp build/libs/testApp.jar 'com.angellane.juggle.testinput.app.App()'            
 *** Warning: related class com.angellane.juggle.testinput.app.App: java.lang.NoClassDefFoundError: com/angellane/juggle/testinput/lib/Lib
 *** Error: Couldn't find type: com.angellane.juggle.testinput.app.App
 $
@@ -231,7 +231,7 @@ $
 
 Curiously this test fails here, but works in README.md.  See GitHub issue #39.
 ```shell
-% juggle -j build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
+% juggle -cp build/libs/testLib.jar package com.angellane.juggle.testinput.lib.Lib
 public static com.angellane.juggle.testinput.lib.Lib com.angellane.juggle.testinput.lib.Lib.libFactory()
 com.angellane.juggle.testinput.lib.Lib.<init>()
 %
