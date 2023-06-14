@@ -71,8 +71,7 @@ public record MemberCandidate(
 
     public static MemberCandidate memberFromMethod(Method m) {
         return new MemberCandidate(m,
-                annotationClasses(m.getDeclaringClass().getAnnotations(),
-                        m.getAnnotations()),
+                annotationClasses(m.getAnnotations()),
                 m.getReturnType(),
                 paramsWithImplicitThis(m,
                         Arrays.stream(m.getParameters())
@@ -84,8 +83,7 @@ public record MemberCandidate(
 
     public static MemberCandidate memberFromConstructor(Constructor<?> c) {
         return new MemberCandidate(c,
-                annotationClasses(c.getDeclaringClass().getAnnotations(),
-                        c.getAnnotations()),
+                annotationClasses(c.getAnnotations()),
                 c.getDeclaringClass(),
                 Arrays.stream(c.getParameters()).map(Param::new).toList(),
                 Set.of(c.getExceptionTypes())
@@ -94,7 +92,6 @@ public record MemberCandidate(
 
     public static List<MemberCandidate> membersFromField(Field f) {
         Set<Class<?>> as = annotationClasses(
-                f.getDeclaringClass().getDeclaredAnnotations(),
                 f.getDeclaredAnnotations());
 
         var getter = new MemberCandidate(f, as, f.getType(),
@@ -109,11 +106,8 @@ public record MemberCandidate(
         return List.of(getter, setter);
     }
 
-    private static Set<Class<?>> annotationClasses(
-            Annotation[] classAnnotations, Annotation[] memberAnnotations) {
-        return Stream.concat(Arrays.stream(classAnnotations),
-                        Arrays.stream(memberAnnotations)
-                )
+    private static Set<Class<?>> annotationClasses(Annotation[] annotations) {
+        return Arrays.stream(annotations)
                 .map(Annotation::annotationType)
                 .collect(Collectors.toSet());
     }

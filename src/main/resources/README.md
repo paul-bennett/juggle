@@ -202,17 +202,16 @@ show all methods that declare no thrown types.
 You can also ask Juggle to look for members that have particular annotations.
 Juggle will list methods that have the named annotations, but it's not 
 possible to include annotation data in the query.  If multiple annotations
-are supplied, they must all be present on the class or method.
+are supplied, they must all be present on the method.
 ```shell
-$ juggle @FunctionalInterface int
-public abstract int java.util.Comparator<T>.compare(T,T)
-public abstract int java.util.function.DoubleToIntFunction.applyAsInt(double)
-public abstract int java.util.function.IntBinaryOperator.applyAsInt(int,int)
-public abstract int java.util.function.IntUnaryOperator.applyAsInt(int)
-public abstract int java.util.function.LongToIntFunction.applyAsInt(long)
-public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
-public abstract int java.util.function.ToIntFunction<T>.applyAsInt(T)
-public abstract int java.util.function.IntSupplier.getAsInt()
+$ juggle @SafeVarargs
+public static transient <T> boolean java.util.Collections.addAll(java.util.Collection<E>,T[])
+public static transient <T> java.util.List<E> java.util.Arrays.asList(T[])
+public static transient <E> java.util.EnumSet<E> java.util.EnumSet<E>.of(E extends Enum<E>,E extends Enum<E>[])
+public static transient <E> java.util.List<E> java.util.List<E>.of(E[])
+public static transient <E> java.util.Set<E> java.util.Set<E>.of(E[])
+public static transient <K,V> java.util.Map<K,V> java.util.Map<K,V>.ofEntries(java.util.Map.Entry<K,V>[])
+public static transient <T> java.util.stream.Stream<T> java.util.stream.Stream<T>.of(T[])
 $
 ```
 
