@@ -269,6 +269,9 @@ public abstract sealed class Query<C extends Candidate>
         }
     }
 
+    private final static String thisPattern =
+            QueryFactory.patternFromLiteral("this").toString();
+
     private static OptionalInt scoreParamSpecs(
             TypeMatcher       tm,
             List<SingleParam> queryParams,
@@ -291,21 +294,25 @@ public abstract sealed class Query<C extends Candidate>
                                 )
                                     return NO_MATCH;
 
+                                if ((actualParam.otherModifiers()
+                                        & queryParam.modifiersMask())
+                                        != queryParam.modifiers())
+                                    return NO_MATCH;
+
                                 if (actualParam.name() != null) {
-                                    // Parameter metadata (modifiers and name)
-                                    // available, i.e. class was compiled
-                                    // with `-parameters` option
-
-                                    if ((actualParam.otherModifiers()
-                                            & queryParam.modifiersMask())
-                                            != queryParam.modifiers())
-                                        return NO_MATCH;
-
-                                    if ((queryParam.paramName() != null)
-                                    && !queryParam.paramName()
+                                    if (!queryParam.paramName()
                                             .matcher(actualParam.name()).find())
                                         return NO_MATCH;
                                 }
+                                else if (thisPattern.equals(
+                                            queryParam.paramName().toString())
+                                    )
+                                    // User was looking for `this`, but actual
+                                    // param name missing, so we fail it.
+                                    // (Actual name should always be present
+                                    // for `this` since we set it when creating
+                                    // candidate
+                                    return NO_MATCH;
 
                                 // Now check on the type
 
@@ -317,5 +324,4 @@ public abstract sealed class Query<C extends Candidate>
             );
         }
     }
-
 }

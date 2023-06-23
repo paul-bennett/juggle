@@ -29,6 +29,24 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #102](https://github.com/paul-bennett/juggle/issues/102): Add receiver parameter support
+
+It's now possible to list just non-static members by specifying the name
+of the first parameter as `this`:
+```shell
+$ juggle -c none '(java.util.function.Function this,...)'
+public <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.andThen(java.util.function.Function<T,R>)
+public abstract R java.util.function.Function<T,R>.apply(T)
+public <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.compose(java.util.function.Function<T,R>)
+$
+```
+
+(Prior to this change, the above query would've listed all the members of 
+`Function`, including the `static` members, mainly because most JDK builds
+don't include parameter metadata in which case Juggle ignores all parameter
+names.)
+
+
 ### [GitHub Issue #15](https://github.com/paul-bennett/juggle/issues/15): Handle module path
 
 We can now load classes from modules, searched on the specified module path.
@@ -37,6 +55,7 @@ $ juggle -p build/libs -m juggle.testLib /someFunction/
 public static void com.angellane.juggle.testinput.lib.Lib.someFunction(int,String)
 $
 ```
+
 
 ### [GitHub Issue #43](https://github.com/paul-bennett/juggle/issues/43): Search by parameter name/annotation
 

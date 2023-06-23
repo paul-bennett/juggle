@@ -116,6 +116,10 @@ public class QueryFactory {
         return juggler.classForTypename(className);
     }
 
+    public static Pattern patternFromLiteral(String s) {
+        return Pattern.compile("^" + Pattern.quote(s) + "$");
+    }
+
     class Listener extends DeclBaseListener {
         // This is the object that the listener is constructing
         Query<?> tempQuery;
@@ -341,10 +345,6 @@ public class QueryFactory {
         @Override
         public void exitMemberDeclName(DeclParser.MemberDeclNameContext ctx) {
             tempQuery.setNamePattern(tempName);
-        }
-
-        private Pattern patternFromLiteral(String s) {
-            return Pattern.compile("^" + Pattern.quote(s) + "$");
         }
 
         private Pattern patternFromRegex(String re) {
