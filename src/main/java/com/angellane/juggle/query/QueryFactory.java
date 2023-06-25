@@ -27,11 +27,11 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -52,7 +52,7 @@ public class QueryFactory {
 
         DeclParser.OneDeclContext tree = parser.oneDecl();
         if (parser.getCurrentToken().getType() != Token.EOF)
-            throw new JuggleError("Extra input after query: " + parser.getCurrentToken());
+            throw new JuggleError("Extra input after query: %s".formatted(parser.getCurrentToken()));
 
         ParseTreeWalker walker = new ParseTreeWalker();
         Listener listener = new Listener();
@@ -192,6 +192,33 @@ public class QueryFactory {
             if (tempAnnotations == null)
                 tempAnnotations = new HashSet<>();
             tempAnnotations.add(annotationType);
+
+            if (!Annotation.class.isAssignableFrom(annotationType))
+                juggler.warn(
+                        ("`%s' is not an annotation interface;"
+                                + " won't match anything"
+                        ).formatted(annotationType.getCanonicalName()));
+            else {
+                RetentionPolicy rp =
+                        Arrays.stream(annotationType.getAnnotations())
+                                .filter(a -> a instanceof Retention)
+                                .map(a -> ((Retention) a).value())
+                                .findFirst()
+                                .orElse(RetentionPolicy.CLASS);
+
+                RetentionPolicy requiredPolicy = RetentionPolicy.RUNTIME;
+                if (rp != requiredPolicy)
+                    juggler.warn(
+                            ("`@interface %s' has `%s' retention policy;"
+                                    + " won't match anything"
+                                    + " (only `%s' policy works)"
+                            ).formatted
+                                    ( annotationType.getCanonicalName()
+                                    , rp
+                                    , requiredPolicy
+                                    )
+                    );
+            }
         }
 
         private int tempModifiers, tempModifiersMask;
@@ -307,8 +334,8 @@ public class QueryFactory {
                 case "non-sealed"   -> tempTypeQuery.setIsSealed(false);
 
                 default ->
-                        System.err.println("*** Warning: unknown modifier `"
-                                + text + "'; ignoring");
+                        juggler.warn("Unknown modifier `%s'; ignoring"
+                                .formatted(text));
             }
         }
 
@@ -427,8 +454,14 @@ public class QueryFactory {
             // Now turn it into an array with as many dimensions as []s (dims),
             // plus one if there was an ellipsis
 
-            for (var dims = ctx.dim().size() + (ctx.ELLIPSIS() != null ? 1 : 0);
-                 dims > 0; --dims) {
+            int numDims = ctx.dim().size() + (ctx.ELLIPSIS() != null ? 1 : 0);
+
+            if (numDims > 0 && cls.equals(Void.TYPE))
+                throw new JuggleError("Can't have an array with element type `%s'"
+                        .formatted(cls.getCanonicalName())
+                );
+
+            for (var dims = numDims; dims > 0; --dims) {
                 cls = cls.arrayType();
             }
 
@@ -508,16 +541,38 @@ public class QueryFactory {
             tempParams.add(ParamSpec.wildcard(tempAnnotations, tempModifiers, tempModifiersMask));
         }
 
-        @Override
-        public void exitUnnamedType(DeclParser.UnnamedTypeContext ctx) {
+        private void addParam() {
+            // This is actually a parameter or a record component.
+            // We can't use `void` in this context
+
+            if (tempType != null) {
+                Class<?> lb = tempType.lowerBound();
+                Set<Class<?>> ub = tempType.upperBound();
+
+                if ((lb != null && lb == Void.TYPE) ||
+                        (ub != null && ub.stream().anyMatch(
+                                c -> c.equals(Void.TYPE)
+                        ))
+                )
+                    throw new JuggleError(
+                            ("Can't use `%s' in a parameter"
+                                    + " or record component type"
+                            ).formatted(Void.TYPE.getCanonicalName())
+                    );
+            }
+
             tempParams.add(ParamSpec.param(tempAnnotations,
                     tempModifiers, tempModifiersMask, tempType, tempName));
         }
 
         @Override
+        public void exitUnnamedType(DeclParser.UnnamedTypeContext ctx) {
+            addParam();
+        }
+
+        @Override
         public void exitUntypedName(DeclParser.UntypedNameContext ctx) {
-            tempParams.add(ParamSpec.param(tempAnnotations,
-                    tempModifiers, tempModifiersMask, tempType, tempName));
+            addParam();
         }
 
 
@@ -531,8 +586,31 @@ public class QueryFactory {
 
         @Override
         public void exitException(DeclParser.ExceptionContext ctx) {
+            Class<?> lb = tempType.lowerBound();
+            Set<Class<?>> ub = tempType.upperBound();
+
+            // Check that:
+            // 1. Lower bound is a class that extends Throwable
+            // 2. All non-interface upper bounds extend Throwable
+            // Be sure to only emit one warning if UB=LB
+
+            if (lb != null && !Throwable.class.isAssignableFrom(lb))
+                juggler.warn(
+                        ("`%s' is not a Throwable;"
+                                + " won't match anything"
+                        ).formatted(lb.getCanonicalName()));
+            else if (ub != null)
+                ub.forEach(c -> {
+                    if (c != null
+                            && !c.isInterface()
+                            && !Throwable.class.isAssignableFrom(c))
+                        juggler.warn(
+                                ("`%s' is not a Throwable;"
+                                        + " won't match anything"
+                                ).formatted(c.getCanonicalName()));
+                });
+
             tempMemberQuery.exceptions.add(tempType);
         }
     }
-
 }

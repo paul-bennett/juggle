@@ -24,4 +24,8 @@ public interface Formatter {
     String formatClassName(String s);
     String formatMethodName(String s);
     String formatType(String s);
+
+    default String formatInfo       (String s)      { return s; }
+    default String formatWarning    (String s)      { return s; }
+    default String formatError      (String s)      { return s; }
 }

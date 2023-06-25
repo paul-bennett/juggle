@@ -49,10 +49,14 @@ public class AnsiColourFormatter implements Formatter {
         return b.toString();
     }
 
-    @Override public String formatPunctuation   (String s)  { return format(s, FAINT); }
-    @Override public String formatKeyword       (String s)  { return format(s, FAINT); }
-    @Override public String formatPackageName   (String s)  { return format(s , FAINT, GREEN); }
-    @Override public String formatClassName     (String s)  { return format(s, GREEN); }
-    @Override public String formatMethodName    (String s)  { return format(s, BRIGHT_GREEN); }
-    @Override public String formatType          (String s)  { return format(s, BRIGHT_BLUE); }
+    @Override public String formatPunctuation   (String s)  { return format(s, FAINT        ); }
+    @Override public String formatKeyword       (String s)  { return format(s, FAINT        ); }
+    @Override public String formatPackageName   (String s)  { return format(s, FAINT, GREEN ); }
+    @Override public String formatClassName     (String s)  { return format(s, GREEN        ); }
+    @Override public String formatMethodName    (String s)  { return format(s, BRIGHT_GREEN ); }
+    @Override public String formatType          (String s)  { return format(s, BRIGHT_BLUE  ); }
+
+    @Override public String formatInfo          (String s)  { return format(s, BRIGHT_CYAN  ); }
+    @Override public String formatWarning       (String s)  { return format(s, BRIGHT_YELLOW); }
+    @Override public String formatError         (String s)  { return format(s, BRIGHT_RED   ); }
 }

@@ -29,6 +29,87 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #42](https://github.com/paul-bennett/juggle/issues/42): Warn on impossible queries
+
+Juggle now warns on things which won't match anything.
+
+#### Annotations
+For example, non-annotation classes used in annotation contexts:
+```shell
+$ juggle '@String class'
+*** Warning: `java.lang.String' is not an annotation interface; won't match anything
+$
+```
+
+#### Throwables
+Juggle also now checks that types in `throws` clauses are appropriate.
+
+A class that appears directly must extend `Throwable`:
+```shell
+$ juggle throws String
+*** Warning: `java.lang.String' is not a Throwable; won't match anything
+$
+```
+
+The same restriction exists on classes in the upper bound of the thrown
+type:
+```shell
+$ juggle throws ? extends String
+*** Warning: `java.lang.String' is not a Throwable; won't match anything
+$
+```
+
+But note that interfaces in the upper bound are unrestricted:
+```shell
+$ juggle throws ? extends java.util.Collection
+$
+```
+
+Finally, things that appear in the lower bound must be throwable classes.
+```shell
+$ juggle throws ? super String
+*** Warning: `java.lang.String' is not a Throwable; won't match anything
+$
+```
+
+#### `void`
+
+```shell
+$ juggle 'void []'
+*** Error: Can't have an array with element type `void'
+$
+```
+
+```shell
+$ juggle '(void)'
+*** Error: Can't use `void' in a parameter or record component type
+$
+```
+
+### [GitHub Issue #41](https://github.com/paul-bennett/juggle/issues/41): Warn if searching for features inaccessible to reflection
+
+The `@Override` annotation has a `RetentionPolicy` of `SOURCE`, so trying to
+use it in a Juggle query will always produce no results.  Following this fix,
+Juggle is now explicit about this.  (See also `@SuppressWarnings` and other
+annotation interfaces.)
+
+```shell
+$ juggle @Override class
+*** Warning: `@interface java.lang.Override' has `SOURCE' retention policy; won't match anything (only `RUNTIME' policy works)
+$
+```
+
+Conversely, `@Deprecated` has `RUNTIME` retention so no warning is emitted
+in this case:
+```shell
+$ juggle '@Deprecated interface'
+public abstract interface java.security.Certificate
+public abstract interface java.security.DomainCombiner
+public abstract static interface java.security.Policy.Parameters
+public abstract interface java.util.Observer
+$
+```
+
 ### [GitHub Issue #102](https://github.com/paul-bennett/juggle/issues/102): Add receiver parameter support
 
 It's now possible to list just non-static members by specifying the name

@@ -21,6 +21,7 @@ import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.comparator.MultiComparator;
+import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
 import com.angellane.juggle.query.*;
@@ -133,7 +134,7 @@ public class Juggler {
             } catch (NoClassDefFoundError e) {
                 // This might be thrown if the class file references other classes that can't be loaded.
                 // Maybe it depends on another JAR that hasn't been specified on the command-line with -cp.
-                System.err.println("*** Warning: related class " + className + ": " + e);
+                warn("related class %s: %s".formatted(className, e));
                 return Optional.empty();
             }
         }
@@ -173,7 +174,7 @@ public class Juggler {
                         return opt.get();
                     else {
                         // If we get here, the class wasn't found, either naked or with any imported package prefix
-                        throw new JuggleError("Couldn't find type: " + name);
+                        throw new JuggleError("Couldn't find type: %s".formatted(name));
                     }
                 });
 
@@ -289,6 +290,25 @@ public class Juggler {
     public void setSink(Sink sink) {
         this.sink = sink;
     }
+
+    private Formatter formatter;
+    public void setFormatter(Formatter f) {
+        this.formatter = f;
+    }
+
+    public void info(String msg) {
+        System.out.println(formatter.formatInfo(msg));
+    }
+
+    public void warn(String msg) {
+        System.err.println(formatter.formatWarning(
+                "*** Warning: %s".formatted(msg)));
+    }
+    public void error(String msg) {
+        System.err.println(formatter.formatError(
+                "*** Error: %s".formatted(msg)));
+    }
+
 
 
     // Conversions ====================================================================================================

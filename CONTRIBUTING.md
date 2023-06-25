@@ -35,8 +35,8 @@ The most useful contributions at the moment would be:
     results you expected to see.
 
 * Did Juggle barf?
-  - Juggle should never throw an exception or provide unintelligible
-    output.  If it outputs junk I'd like to know.
+  - Juggle should never experience an unhandled exception or emit
+    unintelligible output.  If it outputs junk I'd like to know.
   - What query did you use? What did you see?
 
 * Do you find the query syntax confusing or clumsy?

@@ -179,12 +179,17 @@ public class Main implements Runnable {
                 juggler.setTypeQuery(tq);
 
             if (showQuery)
-                System.err.println("QUERY: " + query);
+                juggler.info("QUERY: %s".formatted(query));
         }
     }
 
     @Override
     public void run() {
+        // Formatting
+
+        Formatter f = formatterOption.getFormatter();
+        juggler.setFormatter(f);
+
         // Sources
 
         juggler.configureAllSources();      // Essential that sources are configured before getting param/return types
@@ -206,7 +211,7 @@ public class Main implements Runnable {
         if (!dryRun) {
             // Sinks
 
-            juggler.setSink(new TextOutput(juggler.getImportedPackageNames(), System.out, formatterOption.getFormatter()));
+            juggler.setSink(new TextOutput(juggler.getImportedPackageNames(), System.out, f));
 
             // Go!
 
@@ -215,14 +220,15 @@ public class Main implements Runnable {
     }
 
     public static void main(String[] args) {
+        Main m = new Main();
         try {
-            new CommandLine(new Main())
+            new CommandLine(m)
                     .setCaseInsensitiveEnumValuesAllowed(true)
                     .setOverwrittenOptionsAllowed(true)
                     .execute(args);
         }
         catch (JuggleError ex) {
-            System.err.println("*** Error: " + ex.getMessage());
+            m.juggler.error(ex.getLocalizedMessage());
         }
     }
 }
