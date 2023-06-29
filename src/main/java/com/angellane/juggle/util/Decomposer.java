@@ -24,6 +24,8 @@ import java.util.stream.IntStream;
 import static java.util.function.IntUnaryOperator.identity;
 
 public class Decomposer {
+    private Decomposer() {}
+
     /**
      * Decomposes a number into parts, such that the sum of the parts is
      * equal to the original number.  As each decomposition is computed,

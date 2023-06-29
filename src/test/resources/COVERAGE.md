@@ -92,7 +92,7 @@ source tree it doesn't show anything useful:
 ```shell
 $ juggle --version
 juggle (unreleased version)
-Java Runtime 17.0.6+9-LTS-190
+Java Runtime 17.0
 $
 ```
 
@@ -250,3 +250,32 @@ QUERY: MemberQuery{annotationTypes=null, accessibility=PUBLIC, modifierMask=0, m
 $
 ```
 
+## Classpath source
+
+```shell
+$ juggle -cp build/classes/java/main com.angellane.juggle.Juggler
+public com.angellane.juggle.Juggler.<init>()
+public com.angellane.juggle.Juggler com.angellane.juggle.Main.juggler
+public com.angellane.juggle.Juggler com.angellane.juggle.source.Source.getJuggler()
+$
+```
+
+```shell
+$ juggle -cp this-path-does-not-exist             
+*** Error: Couldn't locate this-path-does-not-exist
+$
+```
+
+This test will only work on UNIX-like operating systems:
+```shell
+$ juggle -cp /dev/null
+*** Error: Not a file or directory: `/dev/null'
+$
+```
+
+And this one relies on `/etc/sudoers` being unreadable:
+```shell
+$ juggle -cp /etc/sudoers
+*** Error: /etc/sudoers (Permission denied)
+$
+```

@@ -67,7 +67,8 @@ public class Main implements Runnable {
                     )
                             .orElse("(unreleased version)")
                     ,
-                    "Java Runtime " + Runtime.version().toString()
+                    "Java Runtime %d.%d".formatted(Runtime.version().feature(),
+						   Runtime.version().interim())
             };
         }
     }

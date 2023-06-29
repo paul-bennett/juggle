@@ -38,7 +38,7 @@ public class ByHierarchy
         boolean c1Assignable = c1.isAssignableFrom(c2);
         boolean c2Assignable = c2.isAssignableFrom(c1);
 
-        return (c1.equals(c2) || (c1Assignable == c2Assignable))
+        return c1Assignable == c2Assignable
                 ? 0
                 : c1Assignable ? -1 : +1;
     }
