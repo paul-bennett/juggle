@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.sink;
 
+import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
@@ -46,10 +47,14 @@ public class TextOutput implements Sink {
 
     @Override
     public void accept(Candidate candidate) {
-        if (candidate instanceof TypeCandidate ct)
+        if (candidate instanceof TypeCandidate) {
+            TypeCandidate ct = (TypeCandidate)candidate;
             out.println(decode(ct.clazz()));
-        else if (candidate instanceof MemberCandidate cm)
+        }
+        else if (candidate instanceof MemberCandidate) {
+            MemberCandidate cm = (MemberCandidate)candidate;
             out.println(decode(cm.member()));
+        }
     }
 
 
@@ -69,7 +74,7 @@ public class TextOutput implements Sink {
 
         if (c.getSuperclass() != null
                 && !c.getSuperclass().equals(Object.class)
-                && !c.isRecord() && !c.isEnum()
+                && !ClassExtras.isRecord(c) && !c.isEnum()
         ) {
             ret.append(f.formatKeyword(" extends "));
             ret.append(f.formatType(decodeClass(c.getSuperclass())));
@@ -87,11 +92,11 @@ public class TextOutput implements Sink {
             );
         }
 
-        if (c.getPermittedSubclasses() != null
-                && c.getPermittedSubclasses().length > 0) {
+        if (ClassExtras.getPermittedSubclasses(c) != null
+                && ClassExtras.getPermittedSubclasses(c).length > 0) {
             ret.append(f.formatKeyword(" permits "));
             ret.append(
-                    Arrays.stream(c.getPermittedSubclasses())
+                    Arrays.stream(ClassExtras.getPermittedSubclasses(c))
                             .map(this::decodeClass)
                             .map(f::formatType)
                             .collect(Collectors.joining(
@@ -141,12 +146,12 @@ public class TextOutput implements Sink {
     }
 
     public String decodeTypeKind(Class<?> type) {
-             if (type.isRecord())       return "record";
-        else if (type.isAnnotation())   return "@interface";
-        else if (type.isInterface())    return "interface";
-        else if (type.isEnum())         return "enum";
-        else if (!type.isPrimitive())   return "class";
-        else                            return "";
+             if (ClassExtras.isRecord(type))    return "record";
+        else if (type.isAnnotation())           return "@interface";
+        else if (type.isInterface())            return "interface";
+        else if (type.isEnum())                 return "enum";
+        else if (!type.isPrimitive())           return "class";
+        else                                    return "";
     }
 
     public String decodeTypeParameters(TypeVariable<?>[] typeVariables) {

@@ -17,6 +17,8 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.backport.jdk17.java.lang.ClassExtras;
+
 /**
  * This enum represents the 'flavour' of a type.  Java reflects pretty much
  * everything as a java.lang.Class: classes, interfaces, annotations, enums
@@ -30,7 +32,7 @@ public enum TypeFlavour {
         return c.isAnnotation() ? ANNOTATION
                 : c.isInterface() ? INTERFACE
                 : c.isEnum() ? ENUM
-                : c.isRecord() ? RECORD
+                : ClassExtras.isRecord(c) ? RECORD
                 : CLASS;
     }
 }

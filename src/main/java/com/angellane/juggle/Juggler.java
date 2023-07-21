@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle;
 
+import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
@@ -89,7 +90,7 @@ public class Juggler {
     public Collection<Class<?>> getClassesToSearch() {
         return getSources().stream()
                 .flatMap(Source::classStream)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public void addImportedPackageName(String name) {
@@ -134,7 +135,7 @@ public class Juggler {
             } catch (NoClassDefFoundError e) {
                 // This might be thrown if the class file references other classes that can't be loaded.
                 // Maybe it depends on another JAR that hasn't been specified on the command-line with -cp.
-                warn("related class %s: %s".formatted(className, e));
+                warn("related class " + className + ": " + e);
                 return Optional.empty();
             }
         }
@@ -174,13 +175,13 @@ public class Juggler {
                         return opt.get();
                     else {
                         // If we get here, the class wasn't found, either naked or with any imported package prefix
-                        throw new JuggleError("Couldn't find type: %s".formatted(name));
+                        throw new JuggleError("Couldn't find type: " + name);
                     }
                 });
 
         // Now add the array dimension
         for ( ; arrayDimension > 0; --arrayDimension)
-            ret = ret.arrayType();
+            ret = ClassExtras.arrayType(ret);
 
         return ret;
     }
@@ -275,12 +276,12 @@ public class Juggler {
     Comparator<Match<TypeCandidate,TypeQuery>> getTypeComparator() {
         return MultiComparator.of(getSortCriteria().stream()
                 .map(g -> g.getTypeComparator(this))
-                .toList());
+                .collect(Collectors.toList()));
     }
     Comparator<Match<MemberCandidate,MemberQuery>> getMemberComparator() {
         return MultiComparator.of(getSortCriteria().stream()
                 .map(g -> g.getMemberComparator(this))
-                .toList());
+                .collect(Collectors.toList()));
     }
 
 
@@ -302,11 +303,11 @@ public class Juggler {
 
     public void warn(String msg) {
         System.err.println(formatter.formatWarning(
-                "*** Warning: %s".formatted(msg)));
+                "*** Warning: " + msg));
     }
     public void error(String msg) {
         System.err.println(formatter.formatError(
-                "*** Error: %s".formatted(msg)));
+                "*** Error: " + msg));
     }
 
 
@@ -321,11 +322,12 @@ public class Juggler {
 
     public <C extends Candidate, Q extends Query<C>>
     TypeMatcher getTypeMatcher(Q query) {
-        return new TypeMatcher(switch (conversions) {
-            case ALL -> true;
-            case NONE -> false;
-            case AUTO -> !query.hasBoundedWildcards();
-        });
+        switch (conversions) {
+            case ALL: return new TypeMatcher(true);
+            case NONE: return new TypeMatcher(false);
+            case AUTO: return new TypeMatcher(!query.hasBoundedWildcards());
+        };
+        return null;
     }
 
 

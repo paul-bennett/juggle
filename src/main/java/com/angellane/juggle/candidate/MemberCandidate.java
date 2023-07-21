@@ -32,18 +32,40 @@ import java.util.stream.Stream;
  * fields, which represent the type the member would have if considered as a static function.  For static
  * methods the paramTypes field includes an implicit first entry representing the type of 'this'.
  */
-public record MemberCandidate(
-        Member member,
-        Accessibility accessibility,
-        int otherModifiers,
-        Set<Class<?>> annotationTypes,
-        String simpleName,
-        String canonicalName,
-        Class<?> returnType,
-        List<Param> params,
-        Set<Class<?>> throwTypes
-)
+public class MemberCandidate
         implements Candidate {
+
+    private final Member member;
+    private final Accessibility accessibility;
+    private final int otherModifiers;
+    private final Set<Class<?>> annotationTypes;
+    private final String simpleName;
+    private final String canonicalName;
+    private final Class<?> returnType;
+    private final List<Param> params;
+    private final Set<Class<?>> throwTypes;
+
+    public MemberCandidate(
+            Member member,
+            Accessibility accessibility,
+            int otherModifiers,
+            Set<Class<?>> annotationTypes,
+            String simpleName,
+            String canonicalName,
+            Class<?> returnType,
+            List<Param> params,
+            Set<Class<?>> throwTypes
+    ) {
+        this.member = member;
+        this.accessibility = accessibility;
+        this.otherModifiers = otherModifiers;
+        this.annotationTypes = annotationTypes;
+        this.simpleName = simpleName;
+        this.canonicalName = canonicalName;
+        this.returnType = returnType;
+        this.params = params;
+        this.throwTypes = throwTypes;
+    }
 
     // Constructor used by factory methods
     private MemberCandidate(Member member, Set<Class<?>> annotationTypes,
@@ -64,6 +86,35 @@ public record MemberCandidate(
                 other.returnType, params, other.throwTypes);
     }
 
+    public Member member()                  { return member; }
+    public Accessibility accessibility()    { return accessibility; }
+    public int otherModifiers()             { return otherModifiers; }
+    public Set<Class<?>> annotationTypes()  { return annotationTypes; }
+    public String simpleName()              { return simpleName; }
+    public String canonicalName()           { return canonicalName; }
+    public Class<?> returnType()            { return returnType; }
+    public List<Param> params()             { return params; }
+    public Set<Class<?>> throwTypes()       { return throwTypes; }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MemberCandidate that = (MemberCandidate) o;
+        return Objects.equals(member, that.member);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(member);
+    }
+
+    @Override
+    public String toString() {
+        return member().toString();
+    }
+
     @Override
     public String packageName() {
         return member().getDeclaringClass().getPackageName();
@@ -75,7 +126,7 @@ public record MemberCandidate(
                 m.getReturnType(),
                 paramsWithImplicitThis(m,
                         Arrays.stream(m.getParameters())
-                                .map(Param::new).toList()
+                                .map(Param::new).collect(Collectors.toList())
                 ),
                 Set.of(m.getExceptionTypes())
         );
@@ -85,7 +136,9 @@ public record MemberCandidate(
         return new MemberCandidate(c,
                 annotationClasses(c.getAnnotations()),
                 c.getDeclaringClass(),
-                Arrays.stream(c.getParameters()).map(Param::new).toList(),
+                Arrays.stream(c.getParameters())
+                        .map(Param::new)
+                        .collect(Collectors.toList()),
                 Set.of(c.getExceptionTypes())
         );
     }
@@ -124,6 +177,6 @@ public record MemberCandidate(
             return params;
         else
             return Stream.concat(Stream.of(thisParam(m)), params.stream())
-                    .toList();
+                    .collect(Collectors.toList());
     }
 }

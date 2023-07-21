@@ -20,6 +20,7 @@ package com.angellane.juggle.query;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.TypeMatcher;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
@@ -36,19 +37,18 @@ public class TypeQueryTest {
     @Test
     public void testClassQuery() {
         TypeCandidate ct =
-                TypeCandidate.candidateForType(java.lang.String.class);
+                TypeCandidate.candidateForType(java.util.ArrayList.class);
 
         TypeQuery q = new TypeQuery();
         q.annotationTypes   = Set.of();
         q.accessibility     = Accessibility.PUBLIC;
-        q.modifiers         = Modifier.FINAL;
-        q.supertype         = BoundedType.exactType(java.lang.Object.class);
+        q.modifiers         = 0;
+        q.supertype         = BoundedType.exactType(java.util.AbstractList.class);
         q.superInterfaces   = Set.of(
                 BoundedType.exactType(java.io.Serializable.class),
-                BoundedType.exactType(java.lang.Comparable.class),
-                BoundedType.exactType(java.lang.CharSequence.class),
-                BoundedType.exactType(java.lang.constant.Constable.class),
-                BoundedType.exactType(java.lang.constant.ConstantDesc.class));
+                BoundedType.exactType(java.lang.Cloneable.class),
+                BoundedType.exactType(java.util.List.class),
+                BoundedType.exactType(java.util.RandomAccess.class));
 
         assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }
@@ -97,17 +97,34 @@ public class TypeQueryTest {
 
     @Test
     public void testRecordQuery() {
-        // As of Java 20 there's only one record class in the JDK!
+        Class<?> unixDomainPrincipalClass   = null;
+        Class<?> userPrincipalClass         = null;
+        Class<?> groupPrincipalClass        = null;
+
+        try {
+            unixDomainPrincipalClass =
+                    Class.forName("jdk.net.UnixDomainPrincipal");
+            userPrincipalClass =
+                    Class.forName("java.nio.file.attribute.UserPrincipal");
+            groupPrincipalClass =
+                    Class.forName("java.nio.file.attribute.GroupPrincipal");
+        } catch (ClassNotFoundException e) {
+            // The classes we use in this test only exist since JDK 16
+            // When running on earlier releases we should end up here
+
+            Assumptions.assumeTrue(Runtime.version().feature() < 16);
+            Assumptions.abort("Skipping test -- Record classes not available");
+        }
+
         TypeCandidate ct =
-                TypeCandidate.candidateForType(
-                        jdk.net.UnixDomainPrincipal.class);
+                TypeCandidate.candidateForType(unixDomainPrincipalClass);
 
         TypeQuery q = new TypeQuery();
         q.modifiers         = Modifier.FINAL;
         q.declarationPattern = Pattern.compile("Unix");
         q.params            = List.of(
-                ParamSpec.param(java.nio.file.attribute.UserPrincipal.class, "user"),
-                ParamSpec.param(java.nio.file.attribute.GroupPrincipal.class, "group")
+                ParamSpec.param(userPrincipalClass, "user"),
+                ParamSpec.param(groupPrincipalClass, "group")
         );
 
         assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));

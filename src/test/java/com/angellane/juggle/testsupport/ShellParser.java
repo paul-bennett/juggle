@@ -51,29 +51,25 @@ public class ShellParser {
 
     private State step(State state, char ch) {
         switch (state) {
-            case NORM -> {
+            case NORM:
                 if (Character.isWhitespace(ch))
                     return WS;
                 else {
                     startArg(); // starts an arg if one not already being built
-                    return switch (ch) {
-                        case '\\' -> ESC;
-                        case '\'' -> SQ;
-                        case '"' -> DQ;
-                        default -> {
-                            addChar(ch);
-                            yield state;
-                        }
-                    };
+                    switch (ch) {
+                        case '\\':                  return ESC;
+                        case '\'':                  return SQ;
+                        case '"':                   return DQ;
+                        default:    addChar(ch);    return state;
+                    }
                 }
-            }
 
-            case SQ  -> { if (ch == '\'') return NORM; else { addChar(ch); return state; } }
-            case DQ  -> { if (ch == '"')  return NORM; else { addChar(ch); return state; } }
-            case ESC -> { addChar(ch); return NORM; }
-            case WS  -> { if (Character.isWhitespace(ch)) return state; else { finishArg(); return step(NORM, ch); } }
+            case SQ:    if (ch == '\'') return NORM; else { addChar(ch); return state; }
+            case DQ:    if (ch == '"')  return NORM; else { addChar(ch); return state; }
+            case ESC:   addChar(ch);    return NORM;
+            case WS:    if (Character.isWhitespace(ch)) return state; else { finishArg(); return step(NORM, ch); }
 
-            default  -> throw new IllegalStateException("Unknown parser state");
+            default:    throw new IllegalStateException("Unknown parser state");
         }
     }
 

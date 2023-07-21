@@ -20,7 +20,7 @@ package com.angellane.juggle.query;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
+public interface ParamSpec {
     static ZeroOrMoreParams ellipsis() {
         return new ZeroOrMoreParams();
     }
@@ -62,7 +62,7 @@ public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
 
     static SingleParam param(Class<?> type, String name) {
         return param(BoundedType.exactType(type),
-                Pattern.compile("^%s$".formatted(name)));
+                Pattern.compile("^" + name + "$"));
     }
 
 }

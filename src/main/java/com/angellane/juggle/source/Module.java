@@ -25,6 +25,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Module extends Source {
@@ -47,7 +48,7 @@ public class Module extends Source {
 
         Path[] paths = modulePaths.stream()
                 .map(Path::of)
-                .toList()
+                .collect(Collectors.toList())
                 .toArray(new Path[0]);
 
         Configuration modConf = ModuleLayer.boot().configuration().resolve(
@@ -56,11 +57,14 @@ public class Module extends Source {
                 modNames);
 
         return addTransitiveModules(modConf, moduleName).stream()
-                .mapMulti((URI u, Consumer<URL> c) -> {
-                    try { c.accept(u.toURL()); }
-                    catch (MalformedURLException ignored) {}
+                .flatMap(u -> {
+                    try {
+                        return Stream.of(u.toURL());
+                    } catch (MalformedURLException ignored) {
+                        return Stream.of();
+                    }
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private List<URI> addTransitiveModules(Configuration modConf, String moduleName) {

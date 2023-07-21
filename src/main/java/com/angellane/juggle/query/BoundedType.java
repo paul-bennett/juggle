@@ -18,12 +18,38 @@
 package com.angellane.juggle.query;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
-public record BoundedType(
-        Set<Class<?>> upperBound,   // extends/implements
-        Class<?> lowerBound         // super
-) {
+public class BoundedType {
+    private final Set<Class<?>> upperBound;
+    private final Class<?> lowerBound;
+
+    public BoundedType(
+            Set<Class<?>> upperBound,   // extends/implements
+            Class<?> lowerBound         // super
+    ) {
+        this.upperBound = upperBound;
+        this.lowerBound = lowerBound;
+    }
+
+    public Set<Class<?>> upperBound()   { return upperBound; }
+    public Class<?> lowerBound()        { return lowerBound; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BoundedType that = (BoundedType) o;
+        return Objects.equals(upperBound, that.upperBound)
+                && Objects.equals(lowerBound, that.lowerBound);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(upperBound, lowerBound);
+    }
+
     public static BoundedType exactType(Class<?> c) {
         return new BoundedType(Set.of(c), c);
     }

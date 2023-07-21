@@ -17,5 +17,19 @@
  */
 package com.angellane.juggle.query;
 
-public record ZeroOrMoreParams() implements ParamSpec {
+import java.util.Objects;
+
+public class ZeroOrMoreParams implements ParamSpec {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ZeroOrMoreParams that = (ZeroOrMoreParams) o;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash();
+    }
 }

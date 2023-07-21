@@ -24,7 +24,7 @@ import com.angellane.juggle.match.TypeMatcher;
 import com.angellane.juggle.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.RecordComponent;
+import com.angellane.backport.jdk17.java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,9 +47,10 @@ public final class TypeQuery extends Query<TypeCandidate> {
     public boolean equals(Object other) {
         if (this == other)
             return true;
-        else if (!(other instanceof TypeQuery q))
+        else if (!(other instanceof TypeQuery))
             return false;
-        else
+        else {
+            TypeQuery q = (TypeQuery)other;
             return super.equals(q)
                     && Objects.equals(flavour,           q.flavour)
                     && Objects.equals(supertype,         q.supertype)
@@ -58,6 +59,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                     && Objects.equals(isSealed,          q.isSealed)
                     && Objects.equals(permittedSubtypes, q.permittedSubtypes)
                     ;
+        }
     }
 
     @Override
@@ -104,8 +106,8 @@ public final class TypeQuery extends Query<TypeCandidate> {
                         .anyMatch(BoundedType::isBoundedWildcard);
         boolean boundedRecordComponents =
                 params != null && params.stream()
-                        .flatMap(ps -> ps instanceof SingleParam sp
-                                ? Stream.of(sp) : Stream.empty())
+                        .flatMap(ps -> ps instanceof SingleParam
+                                ? Stream.of((SingleParam)ps) : Stream.empty())
                         .anyMatch(sp -> sp.paramType().isBoundedWildcard());
 
         return boundedSupertype || boundedSuperInterfaces || boundedSubtype
@@ -248,7 +250,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
                         rc.getType(),
                         rc.getName()
                         )
-        ).toList();
+        ).collect(Collectors.toList());
         return scoreParams(tm, params);
     }
 }

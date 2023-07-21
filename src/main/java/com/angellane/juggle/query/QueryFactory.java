@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.JuggleError;
 import com.angellane.juggle.Juggler;
 import com.angellane.juggle.match.Accessibility;
@@ -52,7 +53,7 @@ public class QueryFactory {
 
         DeclParser.OneDeclContext tree = parser.oneDecl();
         if (parser.getCurrentToken().getType() != Token.EOF)
-            throw new JuggleError("Extra input after query: %s".formatted(parser.getCurrentToken()));
+            throw new JuggleError("Extra input after query: " + parser.getCurrentToken());
 
         ParseTreeWalker walker = new ParseTreeWalker();
         Listener listener = new Listener();
@@ -82,9 +83,9 @@ public class QueryFactory {
             int col = errorToken.getCharPositionInLine();
 
             StringBuilder msg = new StringBuilder(
-                    "Couldn't parse query at %d:%d\n".formatted(row,col));
+                    "Couldn't parse query at " + row + ":" + col + "\n");
 
-            List<String> inputLines = input.lines().toList();
+            List<String> inputLines = input.lines().collect(Collectors.toList());
             for (int i = 0; i < inputLines.size(); ++i) {
                 msg.append(inputLines.get(i)).append("\n");
                 if (i == row - 1)
@@ -195,9 +196,10 @@ public class QueryFactory {
 
             if (!Annotation.class.isAssignableFrom(annotationType))
                 juggler.warn(
-                        ("`%s' is not an annotation interface;"
+                        "`" + annotationType.getCanonicalName()
+                                + "' is not an annotation interface;"
                                 + " won't match anything"
-                        ).formatted(annotationType.getCanonicalName()));
+                        );
             else {
                 RetentionPolicy rp =
                         Arrays.stream(annotationType.getAnnotations())
@@ -209,14 +211,10 @@ public class QueryFactory {
                 RetentionPolicy requiredPolicy = RetentionPolicy.RUNTIME;
                 if (rp != requiredPolicy)
                     juggler.warn(
-                            ("`@interface %s' has `%s' retention policy;"
+                            "`@interface " + annotationType.getCanonicalName()
+                                    + "' has `" + rp + "' retention policy;"
                                     + " won't match anything"
-                                    + " (only `%s' policy works)"
-                            ).formatted
-                                    ( annotationType.getCanonicalName()
-                                    , rp
-                                    , requiredPolicy
-                                    )
+                                    + " (only `" + requiredPolicy + "' policy works)"
                     );
             }
         }
@@ -316,26 +314,28 @@ public class QueryFactory {
 
         private void handleModifier(String text) {
             switch (text) {
-                case "private", "package", "protected", "public" ->
-                        tempQuery.setAccessibility(Accessibility.fromString(text));
+                case "private":
+                case "package":
+                case "protected":
+                case "public":
+                    tempQuery.setAccessibility(Accessibility.fromString(text)); break;
 
                 // This group of modifiers apply to members and parameters
-                case "static"       -> addOtherModifier(Modifier.STATIC);
-                case "final"        -> addOtherModifier(Modifier.FINAL);
-                case "synchronized" -> addOtherModifier(Modifier.SYNCHRONIZED);
-                case "volatile"     -> addOtherModifier(Modifier.VOLATILE);
-                case "transient"    -> addOtherModifier(Modifier.TRANSIENT);
-                case "native"       -> addOtherModifier(Modifier.NATIVE);
-                case "abstract"     -> addOtherModifier(Modifier.ABSTRACT);
-                case "strictfp"     -> addOtherModifier(Modifier.STRICT);
+                case "static"       : addOtherModifier(Modifier.STATIC);        break;
+                case "final"        : addOtherModifier(Modifier.FINAL);         break;
+                case "synchronized" : addOtherModifier(Modifier.SYNCHRONIZED);  break;
+                case "volatile"     : addOtherModifier(Modifier.VOLATILE);      break;
+                case "transient"    : addOtherModifier(Modifier.TRANSIENT);     break;
+                case "native"       : addOtherModifier(Modifier.NATIVE);        break;
+                case "abstract"     : addOtherModifier(Modifier.ABSTRACT);      break;
+                case "strictfp"     : addOtherModifier(Modifier.STRICT);        break;
 
                 // The grammar restricts these to type queries only
-                case "sealed"       -> tempTypeQuery.setIsSealed(true);
-                case "non-sealed"   -> tempTypeQuery.setIsSealed(false);
+                case "sealed"       : tempTypeQuery.setIsSealed(true);          break;
+                case "non-sealed"   : tempTypeQuery.setIsSealed(false);         break;
 
-                default ->
-                        juggler.warn("Unknown modifier `%s'; ignoring"
-                                .formatted(text));
+                default:
+                        juggler.warn("Unknown modifier `" + text + "'; ignoring");
             }
         }
 
@@ -457,12 +457,12 @@ public class QueryFactory {
             int numDims = ctx.dim().size() + (ctx.ELLIPSIS() != null ? 1 : 0);
 
             if (numDims > 0 && cls.equals(Void.TYPE))
-                throw new JuggleError("Can't have an array with element type `%s'"
-                        .formatted(cls.getCanonicalName())
+                throw new JuggleError("Can't have an array with element type `"
+                        + cls.getCanonicalName() + "'"
                 );
 
             for (var dims = numDims; dims > 0; --dims) {
-                cls = cls.arrayType();
+                cls = ClassExtras.arrayType(cls);
             }
 
             tempType = BoundedType.exactType(cls);
@@ -555,9 +555,9 @@ public class QueryFactory {
                         ))
                 )
                     throw new JuggleError(
-                            ("Can't use `%s' in a parameter"
+                            "Can't use `" + Void.TYPE.getCanonicalName()
+                                    + "' in a parameter"
                                     + " or record component type"
-                            ).formatted(Void.TYPE.getCanonicalName())
                     );
             }
 
@@ -596,18 +596,18 @@ public class QueryFactory {
 
             if (lb != null && !Throwable.class.isAssignableFrom(lb))
                 juggler.warn(
-                        ("`%s' is not a Throwable;"
+                        "`" + lb.getCanonicalName() + "' is not a Throwable;"
                                 + " won't match anything"
-                        ).formatted(lb.getCanonicalName()));
+                );
             else if (ub != null)
                 ub.forEach(c -> {
                     if (c != null
                             && !c.isInterface()
                             && !Throwable.class.isAssignableFrom(c))
                         juggler.warn(
-                                ("`%s' is not a Throwable;"
+                                "`" + c.getCanonicalName() +  "' is not a Throwable;"
                                         + " won't match anything"
-                                ).formatted(c.getCanonicalName()));
+                        );
                 });
 
             tempMemberQuery.exceptions.add(tempType);

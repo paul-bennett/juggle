@@ -42,8 +42,8 @@ dependencies {
 }
 
 java.toolchain {
-    // We use a lot of Java 17 features: records, pattern matching, etc.
-    languageVersion.set(JavaLanguageVersion.of(17))
+    // This is a backport to JDK11
+    languageVersion.set(JavaLanguageVersion.of(11))
 }
 
 application {

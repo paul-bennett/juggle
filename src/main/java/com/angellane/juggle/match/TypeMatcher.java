@@ -19,10 +19,7 @@ package com.angellane.juggle.match;
 
 import com.angellane.juggle.query.BoundedType;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>Is the target type compatible with the expression type?</p>
@@ -43,7 +40,7 @@ import java.util.Set;
  *
  * @param applyConversions whether to apply conversions when matching
  */
-public record TypeMatcher(boolean applyConversions) {
+public class TypeMatcher {
     static final int IDENTITY_COST  = 0;
     static final int WIDENING_COST  = 1;
     static final int BOXING_COST    = 2;
@@ -58,6 +55,27 @@ public record TypeMatcher(boolean applyConversions) {
     public static final OptionalInt BOXED_MATCH    = OptionalInt.of(BOXING_COST);
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static final OptionalInt UNBOXED_MATCH  = OptionalInt.of(BOXING_COST);
+
+    private final boolean applyConversions;
+
+    public TypeMatcher(boolean applyConversions) {
+        this.applyConversions = applyConversions;
+    }
+
+    public boolean applyConversions() { return applyConversions; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeMatcher that = (TypeMatcher) o;
+        return applyConversions == that.applyConversions;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(applyConversions);
+    }
 
     /**
      * <p>

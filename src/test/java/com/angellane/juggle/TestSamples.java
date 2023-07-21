@@ -44,18 +44,28 @@ public class TestSamples {
     @Test
     public void useThisTestForDebugging() {
         String query = "/search$/i (? extends java.util.Collection,...)";
-        String expectedResults = """
-                public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
-                public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
-                public synchronized int java.util.Stack<E>.search(Object)
-                """;
+        String expectedResults =
+                "public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)\n"
+                + "public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)\n"
+                + "public synchronized int java.util.Stack<E>.search(Object)\n";
 
         runTest(query, expectedResults);
+    }
+
+    @Test
+    public void testFilenameWithSuffix() {
+        assertEquals("README-suffix",
+                filenameWithSuffix("-suffix", "README"));
+        assertEquals("README-suffix.md",
+                filenameWithSuffix("-suffix", "README.md"));
+        assertEquals("READ.ME-suffix.md",
+                filenameWithSuffix("-suffix", "READ.ME.md"));
     }
 
     @TestFactory
     public Stream<DynamicNode> testSampleFiles() {
         ClassLoader cl = getClass().getClassLoader();
+        String versionSuffix = "-jdk" + Runtime.version().feature();
 
         return Stream.of( "README.md"
                         , "REGRESSIONS.md"
@@ -63,14 +73,50 @@ public class TestSamples {
                         , "DECLARATIONS.md"
                         , "TYPE-SEARCH.md"
                 )
-                .map(fn -> DynamicContainer.dynamicContainer(fn, sampleTestStreamFrom(fn, cl.getResource(fn))));
+                .map(baseFilename -> {
+                    String annotatedFilename =
+                            filenameWithSuffix(versionSuffix, baseFilename);
+
+                    for (String fn : new String[] {
+                            annotatedFilename, baseFilename
+                    }) {
+                        URL url = cl.getResource(fn);
+                        if (url != null) {
+                            try (InputStream is = url.openStream()) {
+                                return DynamicContainer.dynamicContainer(
+                                        fn, sampleTestStreamFrom(fn, is)
+                                );
+                            } catch (IOException ignored) {}
+                        }
+                    }
+
+                    return DynamicTest.dynamicTest(baseFilename,
+                            () -> fail("Couldn't open file: " + baseFilename));
+                });
+    }
+
+    /**
+     * Generates a filename that has @nameSuffix inserted just before the
+     * filename extension, or at the end of the filename if there's no
+     * extension.
+     *
+     * @param nameSuffix the component to add
+     * @param filename the filename, with optional path
+     * @return the generated filename
+     */
+    public static String filenameWithSuffix(String nameSuffix, String filename) {
+        int index = filename.lastIndexOf('.');
+        if (index == -1) index = filename.length();
+
+        String namePart = filename.substring(0, index);
+        String extPart  = filename.substring(index);
+
+        return namePart + nameSuffix + extPart;
     }
 
     enum State { SKIP, CMD, OUT }
 
-    private Stream<DynamicNode> sampleTestStreamFrom(String filename, URL url) {
-        assertNotNull(url, "Couldn't load test resource");
-
+    private Stream<DynamicNode> sampleTestStreamFrom(String filename, InputStream is) {
         List<DynamicNode> ret = new ArrayList<>();
 
         // Within the file, examples of running the command are on lines that start "$ juggle ".  The rest of the
@@ -82,7 +128,7 @@ public class TestSamples {
         // Lines after the end of the output (and before the first command line) are treated as narrative text
         // to be ignored.
 
-        try (InputStreamReader isr = new InputStreamReader(url.openStream());
+        try (InputStreamReader isr = new InputStreamReader(is);
              LineNumberReader br = new LineNumberReader(isr))
         {
             final String DISABLED_CMD = "% juggle ";

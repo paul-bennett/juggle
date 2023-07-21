@@ -67,8 +67,8 @@ public class Main implements Runnable {
                     )
                             .orElse("(unreleased version)")
                     ,
-                    "Java Runtime %d.%d".formatted(Runtime.version().feature(),
-						   Runtime.version().interim())
+                    "Java Runtime " + Runtime.version().feature() + "." +
+						   Runtime.version().interim()
             };
         }
     }
@@ -174,13 +174,17 @@ public class Main implements Runnable {
             if (query.getAccessibility() == null)
                 query.setAccessibility(Accessibility.PUBLIC);
 
-            if (query instanceof MemberQuery mq)
+            if (query instanceof MemberQuery) {
+                MemberQuery mq = (MemberQuery) query;
                 juggler.setMemberQuery(mq);
-            else if (query instanceof TypeQuery tq)
+            }
+            else if (query instanceof TypeQuery) {
+                TypeQuery tq = (TypeQuery) query;
                 juggler.setTypeQuery(tq);
+            }
 
             if (showQuery)
-                juggler.info("QUERY: %s".formatted(query));
+                juggler.info("QUERY: " + query);
         }
     }
 

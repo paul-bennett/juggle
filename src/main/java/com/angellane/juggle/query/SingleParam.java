@@ -21,13 +21,33 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public record SingleParam(
-        Set<Class<?>> annotations,
-        int modifiers,
-        int modifiersMask,
-        BoundedType paramType,
-        Pattern paramName
-) implements ParamSpec {
+public class SingleParam implements ParamSpec {
+    private final Set<Class<?>> annotations;
+    private final int modifiers;
+    private final int modifiersMask;
+    private final BoundedType paramType;
+    private final Pattern paramName;
+
+    public SingleParam(
+            Set<Class<?>> annotations,
+            int modifiers,
+            int modifiersMask,
+            BoundedType paramType,
+            Pattern paramName
+    ) {
+        this.annotations = annotations;
+        this.modifiers = modifiers;
+        this.modifiersMask = modifiersMask;
+        this.paramType = paramType;
+        this.paramName = paramName;
+    }
+
+    public Set<Class<?>> annotations()  { return annotations; }
+    public int modifiers()              { return modifiers; }
+    public int modifiersMask()          { return modifiersMask; }
+    public BoundedType paramType()      { return paramType; }
+    public Pattern paramName()          { return paramName; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

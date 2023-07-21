@@ -17,33 +17,112 @@
  */
 package com.angellane.juggle.candidate;
 
+import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.TypeFlavour;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.RecordComponent;
+import com.angellane.backport.jdk17.java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record TypeCandidate(
-        Class<?>                clazz,
-        TypeFlavour             flavour,
-
-        Set<Class<?>>           annotationTypes,
-        Accessibility           accessibility,
-        int                     otherModifiers,
-        String                  simpleName,
-        String                  canonicalName,
-
-        Class<?>                superClass,
-        Set<Class<?>>           superInterfaces,
-        Set<Class<?>>           permittedSubtypes,
-        List<RecordComponent>   recordComponents
-)
+public class TypeCandidate
 implements Candidate
 {
+    private final Class<?>                clazz;
+    private final TypeFlavour             flavour;
+
+    private final Set<Class<?>>           annotationTypes;
+    private final Accessibility           accessibility;
+    private final int                     otherModifiers;
+    private final String                  simpleName;
+    private final String                  canonicalName;
+
+    private final Class<?>                superClass;
+    private final Set<Class<?>>           superInterfaces;
+    private final Set<Class<?>>           permittedSubtypes;
+    private final List<RecordComponent>   recordComponents;
+
+    public TypeCandidate(
+            Class<?>                clazz,
+            TypeFlavour             flavour,
+            Set<Class<?>>           annotationTypes,
+            Accessibility           accessibility,
+            int                     otherModifiers,
+            String                  simpleName,
+            String                  canonicalName,
+            Class<?>                superClass,
+            Set<Class<?>>           superInterfaces,
+            Set<Class<?>>           permittedSubtypes,
+            List<RecordComponent>   recordComponents) {
+        this.clazz              = clazz;
+        this.flavour            = flavour;
+        this.annotationTypes    = annotationTypes;
+        this.accessibility      = accessibility;
+        this.otherModifiers     = otherModifiers;
+        this.simpleName         = simpleName;
+        this.canonicalName      = canonicalName;
+        this.superClass         = superClass;
+        this.superInterfaces    = superInterfaces;
+        this.permittedSubtypes  = permittedSubtypes;
+        this.recordComponents   = recordComponents;
+    }
+
+    public Class<?>                clazz()      { return clazz; }
+    public TypeFlavour             flavour()    { return flavour; }
+    public Set<Class<?>>           annotationTypes()    { return annotationTypes; }
+    public Accessibility           accessibility()      { return accessibility; }
+    public int                     otherModifiers()     { return otherModifiers; }
+    public String                  simpleName()         { return simpleName; }
+    public String                  canonicalName()      { return canonicalName; }
+    public Class<?>                superClass()         { return superClass; }
+    public Set<Class<?>>           superInterfaces()    { return superInterfaces; }
+    public Set<Class<?>>           permittedSubtypes()  { return permittedSubtypes; }
+    public List<RecordComponent>   recordComponents()   { return recordComponents; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeCandidate that = (TypeCandidate) o;
+        return otherModifiers == that.otherModifiers
+                && Objects.equals(clazz, that.clazz)
+                && flavour == that.flavour
+                && Objects.equals(annotationTypes, that.annotationTypes)
+                && accessibility == that.accessibility
+                && Objects.equals(simpleName, that.simpleName)
+                && Objects.equals(canonicalName, that.canonicalName)
+                && Objects.equals(superClass, that.superClass)
+                && Objects.equals(superInterfaces, that.superInterfaces)
+                && Objects.equals(permittedSubtypes, that.permittedSubtypes)
+                && Objects.equals(recordComponents, that.recordComponents);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                clazz,
+                flavour,
+                annotationTypes,
+                accessibility,
+                otherModifiers,
+                simpleName,
+                canonicalName,
+                superClass,
+                superInterfaces,
+                permittedSubtypes,
+                recordComponents
+        );
+    }
+
+    @Override
+    public String toString() {
+        return clazz().toString();
+    }
+
     public String packageName() {
         return clazz.getPackageName();
     }
@@ -60,13 +139,13 @@ implements Candidate
         Class<?> superClass                 = c.getSuperclass();
         Set<Class<?>> superInterfaces       = Set.of(c.getInterfaces());
         Set<Class<?>> permittedSubtypes     =
-                c.getPermittedSubclasses() == null
+                ClassExtras.getPermittedSubclasses(c) == null
                 ? Set.of()
-                : Set.of(c.getPermittedSubclasses());
+                : Set.of(ClassExtras.getPermittedSubclasses(c));
         List<RecordComponent> recordComponents =
-                c.getRecordComponents() == null
+                ClassExtras.getRecordComponents(c) == null
                 ? List.of()
-                : List.of(c.getRecordComponents());
+                : List.of(ClassExtras.getRecordComponents(c));
 
         return new TypeCandidate(c, f, annotations, access, mods,
                 c.getSimpleName(), c.getCanonicalName(),

@@ -43,13 +43,15 @@ public final class MemberQuery extends Query<MemberCandidate> {
     public boolean equals(Object other) {
         if (this == other)
             return true;
-        else if (!(other instanceof MemberQuery q))
+        else if (!(other instanceof MemberQuery))
             return false;
-        else
+        else {
+            MemberQuery q = (MemberQuery)other;
             return super.equals(q)
                     && Objects.equals(returnType, q.returnType)
                     && Objects.equals(exceptions, q.exceptions)
                     ;
+        }
     }
 
     @Override
@@ -77,8 +79,8 @@ public final class MemberQuery extends Query<MemberCandidate> {
     @Override
     public boolean hasBoundedWildcards() {
         boolean boundedParams = params != null && params.stream()
-                .flatMap(ps -> ps instanceof SingleParam sp
-                        ? Stream.of(sp) : Stream.empty())
+                .flatMap(ps -> ps instanceof SingleParam
+                        ? Stream.of((SingleParam)ps) : Stream.empty())
                 .anyMatch(sp -> sp.paramType().isBoundedWildcard());
         boolean boundedReturn =
                 returnType != null && returnType.isBoundedWildcard();
