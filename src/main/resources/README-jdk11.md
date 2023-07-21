@@ -92,7 +92,7 @@ public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
 $
 ```
 > **Note: Type erasure**
->
+> 
 > "What are those last three results?" you might be thinking, "They don't
 > match!" You're right. They don't. But at the moment Juggle works on the
 > _erased type_ of methods, so these look like methods that take four
@@ -111,20 +111,20 @@ public static java.net.Inet6Address java.net.Inet6Address.getByAddress(String,by
 $
 ```
 So the only way to get a `Inet6Address` appears to be either of the two
-static `getByAddress` methods on the `Inet6Address` class.
+static `getByAddress` methods on the `Inet6Address` class.   
 
 > **Note: Type families**
->
-> Of course methods may return an instance of a subclass of their declared
-> return type.  `Inet6Address` is a member of a small family of classes rooted
+> 
+> Of course methods may return an instance of a subclass of their declared 
+> return type.  `Inet6Address` is a member of a small family of classes rooted 
 > in its parent `InetAddress` class, and it's possible that the runtime type
-> returned by one of those methods is actually `Inet6Address`, but Juggle deals
+> returned by one of those methods is actually `Inet6Address`, but Juggle deals 
 > in compile-time types.
 >
 > Another reason why Juggle won't list these methods-returning-a-superclass is
 > that doing so would result in long and not particularly helpful outputs.
 > (Since `Object` is a superclass of every reference type, at a minimum Juggle
-> would have to include hundreds of methods that return `Object` in every
+> would have to include hundreds of methods that return `Object` in every 
 > result.)
 
 Omitting the return type and parameters will list all methods in the JDK.
@@ -158,9 +158,9 @@ by virtue of Juggle treating fields as having zero-arg pseudo-getters.)
 
 Juggle treats data fields as a pair of methods: a setter (which takes an
 argument of the field's type and returns `void`), and a getter (which takes
-no additional arguments and returns a value of the field's type).
+no additional arguments and returns a value of the field's type). 
 
-As with non-static methods, non-static fields have an additional implicit
+As with non-static methods, non-static fields have an additional implicit 
 `this` parameter:
 ```shell
 $ juggle 'int (java.io.InterruptedIOException)'
@@ -191,7 +191,7 @@ $
 
 Juggle will list all methods that include the named exception (or a subclass
 of the named type) in their `throws` clause.  Specifying multiple exception
-types will show only the methods that might throw _all_ the specified
+types will show only the methods that might throw _all_ the specified 
 exceptions.
 
 A query that ends `throws` (without being followed by any exception type) will
@@ -200,7 +200,7 @@ show all methods that declare no thrown types.
 ### Annotations
 
 You can also ask Juggle to look for members that have particular annotations.
-Juggle will list methods that have the named annotations, but it's not
+Juggle will list methods that have the named annotations, but it's not 
 possible to include annotation data in the query.  If multiple annotations
 are supplied, they must all be present on the method.
 ```shell
@@ -247,13 +247,12 @@ public String Package.getSpecificationTitle()
 public String Package.getSpecificationVendor()
 public String Package.getSpecificationVersion()
 public String Package.toString()
-public String java.lang.constant.ClassDesc.packageName()
 $
 ```
 Note how the member is considered to match if either of these two names match:
 1. The member's simple name (i.e. the declaration name)
 2. The member's canonical name (its declaration name prefixed with the
-   declaring package and class)
+   declaring package and class)  
 
 ### Constructors
 
@@ -270,14 +269,14 @@ $
 ```
 
 > **Note: Reference widening conversion**
->
-> Here we see an example of a Reference Widening converion: `FileInputStream`
+> 
+> Here we see an example of a Reference Widening conversion: `FileInputStream`
 > and `StringBufferInputStream` are both descendant classes of `InputStream`,
 > so objects of those first two types can be assigned to a variable of the
 > latter type.
 
 > **Note: Constructor name**
->
+> 
 > Juggle does not provide a means of searching for a constructor by name.
 
 ## Where to look
@@ -287,7 +286,7 @@ $
 > When Juggle inspects a class, it loads it into the JVM.  In doing so, any
 > `static` initialisers in the class will be executed, whether Juggle finds
 > matches in the class or not.
->
+> 
 > Never use Juggle's `-cp` or `-m` options to inspect code you do not trust.
 
 You can tell Juggle which JARs to include in the search by using the `-cp`
@@ -338,7 +337,7 @@ criteria.
 
 The default sort is equivalent to `-s score -s hierarchy -s access -s package -s name -s text`.
 The intent is that this default causes Juggle to list the "best" matches first.
-If that's not what's happening in practice, I'd like to hear about it!
+If that's not what's happening in practice, I'd like to hear about it! 
 
 ## Output format
 
@@ -381,7 +380,7 @@ Of course `private` members can't be used, so `protected` is likely the most
 nosey you should be.
 
 > **Note: Default access**
->
+> 
 > Use the word `package` as an access modifier if you want to list methods
 > that have at least the default level of access.
 
@@ -414,7 +413,7 @@ have been built in this way.
 > **Note: Building a JDK with parameter metadata**
 >
 > If you want to build your own JDK to do this, it might be as simple as
-> specifying exporting a `JAVAC_FLAGS=-parameters` environment variable
+> specifying exporting a `JAVAC_FLAGS=-parameters` environment variable 
 > before following the usual build instructions.
 
 When checking a candidate against a query, if the candidate wasn't compiled with
@@ -452,7 +451,7 @@ $
 
 To make life easier, packages can be imported with `-i` so that fully qualified
 class names don't have to be written out each time. As you would expect,
-`java.lang` is always implicitly imported.  Juggle omits imported package
+`java.lang` is always implicitly imported.  Juggle omits imported package 
 names in its output.
 ```shell
 % juggle                                                                \
@@ -465,10 +464,10 @@ public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<E>[])
 %
 ```
 > **Note: Type arguments**
->
-> Juggle doesn't yet unify type arguments.  The `E` and `T` in the The last
+> 
+> Juggle doesn't yet unify type arguments.  The `E` and `T` in the last
 > match in the above example refer to the same thing, so Juggle should
-> ideally have output
+> ideally have output 
 > `public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<T>[])`.
 
 ### Wildcards
@@ -572,7 +571,7 @@ $
 
 Sometimes these automatic conversions get in the way.  You can control whether
 Juggle performs conversions (replacing types with bounded wildcards) using
-the `-c` or `--conversions` option.
+the `-c` or `--conversions` option. 
 
 | Conversion | Description                                                                    |
 |------------|--------------------------------------------------------------------------------|
@@ -591,7 +590,7 @@ types by providing the header of a type declaration.
 What types extend `AccessibleObject`?
 ```shell
 $ juggle class extends java.lang.reflect.AccessibleObject
-public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
+public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 public final class java.lang.reflect.Constructor<T> extends java.lang.reflect.Executable
 public final class java.lang.reflect.Method extends java.lang.reflect.Executable
@@ -602,18 +601,18 @@ Note that this shows direct and indirect derived classes.   To see just those
 classes that directly extend a base class, turn off conversions:
 ```shell
 $ juggle -c none class extends java.lang.reflect.AccessibleObject
-public abstract sealed class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration permits java.lang.reflect.Constructor<T>, java.lang.reflect.Method
+public abstract class java.lang.reflect.Executable extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member, java.lang.reflect.GenericDeclaration
 public final class java.lang.reflect.Field extends java.lang.reflect.AccessibleObject implements java.lang.reflect.Member
 $
 ```
 
-All the other kinds of type are also supported: `enum`, `record`,
+All the other kinds of type are also supported: `enum`, `record`, 
 `interface` and `@interface`. Amd just like when searching for members,
 it's possible to restrict the search by specifying annotations and other
 modifiers.
 
 > **Note: `class` and `interface`**
->
+> 
 > If you're looking for a class, you must use the `class` keyword.
 > If you're looking for an interface, you must use `interface`.
 > There's no way to ask Juggle to list every super-type (`class` or

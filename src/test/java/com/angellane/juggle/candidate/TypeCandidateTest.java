@@ -19,12 +19,14 @@ package com.angellane.juggle.candidate;
 
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.TypeFlavour;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
-import java.lang.reflect.RecordComponent;
+import com.angellane.backport.jdk17.java.lang.reflect.RecordComponent;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -33,20 +35,19 @@ public class TypeCandidateTest {
     @Test
     public void testClassCandidate() {
         TypeCandidate ct =
-                TypeCandidate.candidateForType(java.lang.String.class);
+                TypeCandidate.candidateForType(java.util.ArrayList.class);
 
-        assertEquals(java.lang.String.class,            ct.clazz());
+        assertEquals(java.util.ArrayList.class,         ct.clazz());
         assertEquals(TypeFlavour.CLASS,                 ct.flavour());
         assertEquals(Accessibility.PUBLIC,              ct.accessibility());
-        assertEquals(Modifier.FINAL,                    ct.otherModifiers());
+        assertEquals(0,                                 ct.otherModifiers());
         assertEquals(Set.of(),                          ct.annotationTypes());
-        assertEquals(java.lang.Object.class,            ct.superClass());
+        assertEquals(java.util.AbstractList.class,      ct.superClass());
         assertEquals(
                 Set.of(java.io.Serializable.class,
-                    java.lang.Comparable.class,
-                    java.lang.CharSequence.class,
-                    java.lang.constant.Constable.class,
-                    java.lang.constant.ConstantDesc.class
+                    java.lang.Cloneable.class,
+                    java.util.List.class,
+                    java.util.RandomAccess.class
                 ),                                      ct.superInterfaces());
         assertEquals(List.of(),                         ct.recordComponents());
     }
@@ -83,30 +84,49 @@ public class TypeCandidateTest {
 
     @Test
     public void testRecordCandidate() {
-        // As of Java 20 there's only one record class in the JDK!
-        TypeCandidate ct =
-                TypeCandidate.candidateForType(
-                        jdk.net.UnixDomainPrincipal.class);
+        Class<?> unixDomainPrincipalClass   = null;
+        Class<?> userPrincipalClass         = null;
+        Class<?> groupPrincipalClass        = null;
+        Class<?> recordClass                = null;
 
-        assertEquals(jdk.net.UnixDomainPrincipal.class, ct.clazz());
+        try {
+            unixDomainPrincipalClass =
+                    Class.forName("jdk.net.UnixDomainPrincipal");
+            userPrincipalClass =
+                    Class.forName("java.nio.file.attribute.UserPrincipal");
+            groupPrincipalClass =
+                    Class.forName("java.nio.file.attribute.GroupPrincipal");
+            recordClass =
+                    Class.forName("java.lang.Record");
+        } catch (ClassNotFoundException e) {
+            // The classes we use in this test only exist since JDK 16
+            // When running on earlier releases we should end up here
+
+            Assumptions.assumeTrue(Runtime.version().feature() < 16);
+            Assumptions.abort("Skipping test -- Record classes not available");
+        }
+
+        TypeCandidate ct =
+                TypeCandidate.candidateForType(unixDomainPrincipalClass);
+
+        assertEquals(unixDomainPrincipalClass,          ct.clazz());
         assertEquals(TypeFlavour.RECORD,                ct.flavour());
         assertEquals(Accessibility.PUBLIC,              ct.accessibility());
         assertEquals(Modifier.FINAL,                    ct.otherModifiers());
         assertEquals(Set.of(),                          ct.annotationTypes());
-        assertEquals(java.lang.Record.class,            ct.superClass());
+        assertEquals(recordClass,                       ct.superClass());
         assertEquals(Set.of(),                          ct.superInterfaces());
 
         assertEquals(List.of("user", "group"),
                 ct.recordComponents().stream()
                         .map(RecordComponent::getName)
-                        .toList(),
+                        .collect(Collectors.toList()),
                 "recordComponent names match");
 
-        assertEquals(List.of(java.nio.file.attribute.UserPrincipal.class,
-                        java.nio.file.attribute.GroupPrincipal.class),
+        assertEquals(List.of(userPrincipalClass, groupPrincipalClass),
                 ct.recordComponents().stream()
                         .map(RecordComponent::getType)
-                        .toList(),
+                        .collect(Collectors.toList()),
                 "recordComponent types match");
     }
 

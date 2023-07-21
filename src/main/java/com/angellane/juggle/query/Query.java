@@ -25,6 +25,7 @@ import com.angellane.juggle.match.TypeMatcher;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -32,8 +33,7 @@ import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
 import static com.angellane.juggle.match.TypeMatcher.NO_MATCH;
 import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
 
-public abstract sealed class Query<C extends Candidate>
-        permits TypeQuery, MemberQuery {
+public abstract class Query<C extends Candidate> {
     protected Set<Class<?>> annotationTypes     = null;
     protected Accessibility accessibility       = null;
     protected int           modifierMask        = 0;
@@ -76,9 +76,10 @@ public abstract sealed class Query<C extends Candidate>
     public boolean equals(Object other) {
         if (this == other)
             return true;
-        else if (!(other instanceof Query<?> q))
+        else if (!(other instanceof Query<?>))
             return false;
-        else
+        else {
+            Query<?> q = (Query<?>)other;
             return Objects.equals(annotationTypes,       q.annotationTypes)
                     && accessibility                  == q.accessibility
                     && modifierMask                   == q.modifierMask
@@ -86,6 +87,7 @@ public abstract sealed class Query<C extends Candidate>
                     && patternsEqual(declarationPattern, q.declarationPattern)
                     && Objects.equals(params,            q.params)
                     ;
+        }
     }
 
     @Override
@@ -232,7 +234,7 @@ public abstract sealed class Query<C extends Candidate>
                     params.stream()
                             .filter(ps -> ps instanceof SingleParam)
                             .map(ps -> (SingleParam)ps)
-                            .toList(),
+                            .collect(Collectors.toList()),
                     candidateParams
             );
         else if (numEllipses == 0)
@@ -250,8 +252,10 @@ public abstract sealed class Query<C extends Candidate>
                 List<SingleParam> queryParams = new ArrayList<>();
 
                 for (ParamSpec ps : params) {
-                    if (ps instanceof SingleParam singleParam)
+                    if (ps instanceof SingleParam) {
+                        SingleParam singleParam = (SingleParam)ps;
                         queryParams.add(singleParam);
+                    }
                     else
                         for (int numWildcards = distribution[ix++];
                              numWildcards > 0; numWildcards--)
@@ -320,7 +324,7 @@ public abstract sealed class Query<C extends Candidate>
                                 return tm.scoreTypeMatch(
                                         actualParam.type(), bounds);
                             })
-                            .toList()
+                            .collect(Collectors.toList())
             );
         }
     }

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileSource extends Source {
@@ -47,7 +48,7 @@ public class FileSource extends Source {
             if (path.toFile().exists())
                 return List.of(path.toUri().toURL());
             else
-                throw new JuggleError("Couldn't locate %s".formatted(path));
+                throw new JuggleError("Couldn't locate " + path);
         }
         catch (MalformedURLException ex) {
             throw new JuggleError(ex.getLocalizedMessage());
@@ -67,17 +68,17 @@ public class FileSource extends Source {
                     entries = file.stream()
                             .filter(Predicate.not(JarEntry::isDirectory))
                             .map(JarEntry::getName)
-                            .toList();
+                            .collect(Collectors.toList());
                 }
             else if (f.isDirectory())
                 try (Stream<Path> stream = Files.walk(path)) {
                     entries = stream
                             .map(path::relativize)
                             .map(Path::toString)
-                            .toList();
+                            .collect(Collectors.toList());
                 }
             else
-                throw new JuggleError("Not a file or directory: `%s'".formatted(f));
+                throw new JuggleError("Not a file or directory: `" + f + "'");
         }
         catch (IOException ex) {
             throw new JuggleError(ex.getLocalizedMessage());

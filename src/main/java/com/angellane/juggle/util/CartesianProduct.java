@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -103,7 +104,7 @@ public class CartesianProduct<T> {
 
                 List<T> result = IntStream.range(0, lists.length)
                         .mapToObj(i -> lists[i].get(pos % divisors[i] / (divisors[i]/lists[i].size())))
-                        .toList();
+                        .collect(Collectors.toList());
 
                 action.accept(result);
 

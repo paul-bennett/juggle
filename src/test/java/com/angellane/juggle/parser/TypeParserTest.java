@@ -34,8 +34,8 @@ public class TypeParserTest {
     private TypeQuery typeQueryFor(final String decl) {
         Query<?> q = factory.createQuery(decl);
 
-        if (q instanceof TypeQuery typeQuery)
-            return typeQuery;
+        if (q instanceof TypeQuery)
+            return (TypeQuery)q;
         else {
             fail("Query is not a TypeQuery");
             return null;

@@ -20,6 +20,7 @@ package com.angellane.juggle.util;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.angellane.juggle.util.PermutationGenerator.PermSpliterator.permutationAfter;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -91,7 +92,7 @@ public class PermutationGeneratorTest {
 
         PermutationGenerator<String> gen = new PermutationGenerator<>(input);
 
-        var perms = gen.stream().toList();
+        var perms = gen.stream().collect(Collectors.toList());
 
         assertEquals(4, input.size());
 
@@ -111,7 +112,7 @@ public class PermutationGeneratorTest {
         var perms = gen.stream()
                 .parallel()
 //                .peek(l -> System.err.println(l + " on " + Thread.currentThread()))
-                .toList();
+                .collect(Collectors.toList());
 
         assertEquals(4, input.size());
 
@@ -129,7 +130,7 @@ public class PermutationGeneratorTest {
         List<List<Integer>> perms = input.stream()
                 .collect(PermutationGenerator.collector())
                 .stream()
-                .toList();
+                .collect(Collectors.toList());
 
         assertEquals(factorial(input.size()), perms.size());
     }
@@ -143,7 +144,7 @@ public class PermutationGeneratorTest {
                 .collect(PermutationGenerator.collector())
                 .stream()
                 .parallel()
-                .toList();
+                .collect(Collectors.toList());
 
         assertEquals(factorial(input.size()), perms.size());
     }

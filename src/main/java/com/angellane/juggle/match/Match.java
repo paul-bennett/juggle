@@ -20,6 +20,8 @@ package com.angellane.juggle.match;
 import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.query.Query;
 
+import java.util.Objects;
+
 
 /**
  * This record combines a candidate and a query, along with a score
@@ -32,9 +34,35 @@ import com.angellane.juggle.query.Query;
  * @param <C> The type of the candidate
  * @param <Q> The type of the query
  */
-public record Match<C extends Candidate, Q extends Query<C>>(
-        C candidate,
-        Q query,
-        int score) {
+public class Match<C extends Candidate, Q extends Query<C>> {
+    private final C candidate;
+    private final Q query;
+    private final int score;
+
+    public Match(
+            C candidate,
+            Q query,
+            int score) {
+        this.candidate = candidate;
+        this.query = query;
+        this.score = score;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Match<?, ?> match = (Match<?, ?>) o;
+        return score == match.score && Objects.equals(candidate, match.candidate) && Objects.equals(query, match.query);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(candidate, query, score);
+    }
+
+    public C candidate()    { return candidate; }
+    public Q query()        { return query; }
+    public int score()      { return score; }
 }
 

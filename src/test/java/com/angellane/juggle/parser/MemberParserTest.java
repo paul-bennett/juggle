@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.parser;
 
+import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.Juggler;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.parser.DeclParser.MemberDeclContext;
@@ -50,8 +51,8 @@ public class MemberParserTest {
     private MemberQuery memberQueryFor(String decl) {
         Query<?> q = factory.createQuery(decl);
 
-        if (q instanceof MemberQuery memberQuery)
-            return memberQuery;
+        if (q instanceof MemberQuery)
+            return (MemberQuery)q;
         else {
             fail("Query is not a MemberQuery");
             return null;
@@ -113,7 +114,7 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.exactType(
-                Integer.class.arrayType().arrayType().arrayType());
+                ClassExtras.arrayType(ClassExtras.arrayType(ClassExtras.arrayType(Integer.class))));
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -124,7 +125,7 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.exactType(
-                Float.TYPE.arrayType().arrayType());
+                ClassExtras.arrayType(ClassExtras.arrayType(Float.TYPE)));
 
         assertEquals(expectedQuery, actualQuery);
     }
