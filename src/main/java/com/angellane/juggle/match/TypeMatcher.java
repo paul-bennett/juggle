@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.match;
 
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.juggle.query.BoundedType;
 
 import java.util.*;
@@ -122,7 +123,7 @@ public class TypeMatcher {
 
     @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue"})
     static OptionalInt matchSum(OptionalInt a, OptionalInt b) {
-        return a.isEmpty() || b.isEmpty()
+        return !(a.isPresent() && b.isPresent())
                 ? NO_MATCH : OptionalInt.of(a.getAsInt() + b.getAsInt());
     }
 
@@ -182,7 +183,7 @@ public class TypeMatcher {
         else
             return Optional.ofNullable(
                     wideningPrimitiveConversions.get(exprType)
-            ).orElse(Set.of()).contains(targetType)
+            ).orElse(Collections.emptySet()).contains(targetType)
                     ? WIDENED_MATCH
                     : NO_MATCH;
     }
@@ -216,7 +217,7 @@ public class TypeMatcher {
         else
             return Optional.ofNullable(
                     wideningPrimitiveConversions.get(unboxedType)
-            ).orElse(Set.of()).contains(targetType)
+            ).orElse(Collections.emptySet()).contains(targetType)
                     ? matchSum(UNBOXED_MATCH, WIDENED_MATCH)
                     : NO_MATCH;
     }
@@ -251,7 +252,7 @@ public class TypeMatcher {
                 return NO_MATCH;
         }
         if (bt.upperBound() != null
-                && !bt.upperBound().equals(Set.of(candidate))
+                && !bt.upperBound().equals(Collections.singleton(candidate))
         ) {
             if (bt.upperBound().stream()
                     .allMatch(b -> b.isAssignableFrom(candidate)))
@@ -266,38 +267,39 @@ public class TypeMatcher {
 
     // The 19 Widening Primitive Conversions, documented in Java Language Specification (Java SE 14 edn) sect 5.1.2
     // https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.2
-    static Map<Class<?>, Set<Class<?>>> wideningPrimitiveConversions = Map.ofEntries(
-            Map.entry(Byte      .TYPE, Set.of(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Short     .TYPE, Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Character .TYPE, Set.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Integer   .TYPE, Set.of(                          Long.TYPE, Float.TYPE, Double.TYPE)),
-            Map.entry(Long      .TYPE, Set.of(                                     Float.TYPE, Double.TYPE)),
-            Map.entry(Float     .TYPE, Set.of(                                                 Double.TYPE))
-    );
+    static Map<Class<?>, Set<Class<?>>> wideningPrimitiveConversions = new HashMap<>();
+    static {
+        wideningPrimitiveConversions.put(Byte      .TYPE, SetExtras.of(Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE));
+        wideningPrimitiveConversions.put(Short     .TYPE, SetExtras.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE));
+        wideningPrimitiveConversions.put(Character .TYPE, SetExtras.of(            Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE));
+        wideningPrimitiveConversions.put(Integer   .TYPE, SetExtras.of(                          Long.TYPE, Float.TYPE, Double.TYPE));
+        wideningPrimitiveConversions.put(Long      .TYPE, SetExtras.of(                                     Float.TYPE, Double.TYPE));
+        wideningPrimitiveConversions.put(Float     .TYPE, SetExtras.of(                                                 Double.TYPE));
+    }
 
     // Boxing Conversions: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.7
-    static Map<Class<?>, Class<?>> boxingConversions =
-            Map.ofEntries(
-                    Map.entry(Boolean   .TYPE,  Boolean     .class),
-                    Map.entry(Byte      .TYPE,  Byte        .class),
-                    Map.entry(Short     .TYPE,  Short       .class),
-                    Map.entry(Character .TYPE,  Character   .class),
-                    Map.entry(Integer   .TYPE,  Integer     .class),
-                    Map.entry(Long      .TYPE,  Long        .class),
-                    Map.entry(Float     .TYPE,  Float       .class),
-                    Map.entry(Double    .TYPE,  Double      .class)
-            );
+    static Map<Class<?>, Class<?>> boxingConversions = new HashMap<>();
+    static {
+        boxingConversions.put(Boolean   .TYPE,  Boolean     .class);
+        boxingConversions.put(Byte      .TYPE,  Byte        .class);
+        boxingConversions.put(Short     .TYPE,  Short       .class);
+        boxingConversions.put(Character .TYPE,  Character   .class);
+        boxingConversions.put(Integer   .TYPE,  Integer     .class);
+        boxingConversions.put(Long      .TYPE,  Long        .class);
+        boxingConversions.put(Float     .TYPE,  Float       .class);
+        boxingConversions.put(Double    .TYPE,  Double      .class);
+    }
 
     // Unboxing Conversions: https://docs.oracle.com/javase/specs/jls/se14/html/jls-5.html#jls-5.1.8
-    static Map<Class<?>, Class<?>> unboxingConversions =
-            Map.ofEntries(
-                    Map.entry(Boolean   .class, Boolean     .TYPE),
-                    Map.entry(Byte      .class, Byte        .TYPE),
-                    Map.entry(Short     .class, Short       .TYPE),
-                    Map.entry(Character .class, Character   .TYPE),
-                    Map.entry(Integer   .class, Integer     .TYPE),
-                    Map.entry(Long      .class, Long        .TYPE),
-                    Map.entry(Float     .class, Float       .TYPE),
-                    Map.entry(Double    .class, Double      .TYPE)
-            );
+    static Map<Class<?>, Class<?>> unboxingConversions = new HashMap<>();
+    static {
+        unboxingConversions.put(Boolean   .class, Boolean     .TYPE);
+        unboxingConversions.put(Byte      .class, Byte        .TYPE);
+        unboxingConversions.put(Short     .class, Short       .TYPE);
+        unboxingConversions.put(Character .class, Character   .TYPE);
+        unboxingConversions.put(Integer   .class, Integer     .TYPE);
+        unboxingConversions.put(Long      .class, Long        .TYPE);
+        unboxingConversions.put(Float     .class, Float       .TYPE);
+        unboxingConversions.put(Double    .class, Double      .TYPE);
+    }
 }

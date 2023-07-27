@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.util;
 
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -45,6 +46,6 @@ public class ResolvingURLClassLoader extends URLClassLoader {
         // Linking /does/ seem to happen during Class.getDeclaredFields(), so we call that here.
         // Hopefully this won't be optimised away by the dead code analyser.
 
-        var ignored = cls.getDeclaredFields();
+        Field[] ignored = cls.getDeclaredFields();
     }
 }

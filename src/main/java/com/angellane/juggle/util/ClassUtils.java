@@ -1,5 +1,6 @@
 package com.angellane.juggle.util;
 
+import com.angellane.backport.jdk11.java.util.StreamExtras;
 import com.angellane.backport.jdk17.java.lang.ClassExtras;
 
 import java.lang.reflect.Modifier;
@@ -20,7 +21,7 @@ public final class ClassUtils {
         return !ClassExtras.isSealed(c)
                 && !classIsFinal(c)
                 && Stream.concat(
-                        Stream.ofNullable(c.getSuperclass()),
+                        StreamExtras.ofNullable(c.getSuperclass()),
                         Arrays.stream(c.getInterfaces())
                 ).anyMatch(ClassExtras::isSealed);
     }

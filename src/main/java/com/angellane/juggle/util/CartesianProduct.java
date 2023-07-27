@@ -119,7 +119,8 @@ public class CartesianProduct<T> {
         public Spliterator<List<T>> trySplit() {
             int numToDonate = numRemaining / 2;
 
-            var other = new CartesianProductSpliterator<>(lists, pos, numToDonate);
+            CartesianProductSpliterator<T> other =
+                    new CartesianProductSpliterator<>(lists, pos, numToDonate);
 
             pos += numToDonate;
             numRemaining -= numToDonate;

@@ -20,6 +20,7 @@ package com.angellane.juggle.candidate;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,7 +55,7 @@ public class Param {
     }
 
     public Param(Class<?> c, String name) {
-        this(Set.of(), 0, c, name);
+        this(Collections.emptySet(), 0, c, name);
     }
 
     public Set<Class<?>> annotations()  { return annotations; }

@@ -17,6 +17,9 @@
  */
 package com.angellane.juggle;
 
+//import com.angellane.backport.jdk11.java.lang.module.FindException;
+import com.angellane.backport.jdk11.java.lang.StringExtras;
+import com.angellane.backport.jdk11.java.util.OptionalExtras;
 import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.MemberCandidate;
@@ -47,7 +50,7 @@ public class Juggler {
                 Object.class.getModule().getName()  // "java.base" is always inspected
                 )
         );
-        importedPackageNames.add(Object.class.getPackageName());    // "java.lang" is always imported
+        importedPackageNames.add(Object.class.getPackage().getName());    // "java.lang" is always imported
     }
 
 
@@ -60,7 +63,7 @@ public class Juggler {
     }
 
     public List<String> getModulePaths() {
-        return modulePaths.size() == 0 ? List.of(".") : modulePaths;
+        return modulePaths.size() == 0 ? Collections.singletonList(".") : modulePaths;
     }
 
 
@@ -156,7 +159,9 @@ public class Juggler {
         int arrayDimension;
         String baseTypename = typename;
         for (arrayDimension = 0; baseTypename.endsWith(ARRAY_SUFFIX); ++arrayDimension)
-            baseTypename = baseTypename.substring(0, baseTypename.length() - ARRAY_SUFFIX.length()).stripTrailing();
+            baseTypename = StringExtras.stripTrailing(
+                    baseTypename.substring(0, baseTypename.length() - ARRAY_SUFFIX.length())
+            );
 
         // Start with the base type
         Juggler juggler = this;
@@ -168,7 +173,7 @@ public class Juggler {
                             Stream.of(Stream.of(""), getImportedPackageNames().stream().map(pkg -> pkg + "."))
                                     .flatMap(Function.identity())
                                     .map(prefix -> juggler.loadClassByName(prefix + name))
-                                    .flatMap(Optional::stream)
+                                    .flatMap(OptionalExtras::stream)
                                     .findFirst();
 
                     if (opt.isPresent())
@@ -266,7 +271,7 @@ public class Juggler {
         // Return default criteria of none were set.
         return sortCriteria.size() != 0
                 ? sortCriteria
-                : List.of(
+                : Arrays.asList(
                         SortCriteria.SCORE,   SortCriteria.HIERARCHY,
                         SortCriteria.ACCESS,  SortCriteria.PACKAGE,
                         SortCriteria.NAME,    SortCriteria.TEXT
@@ -326,7 +331,7 @@ public class Juggler {
             case ALL: return new TypeMatcher(true);
             case NONE: return new TypeMatcher(false);
             case AUTO: return new TypeMatcher(!query.hasBoundedWildcards());
-        };
+        }
         return null;
     }
 
@@ -369,8 +374,8 @@ public class Juggler {
                      Collection<Function<M, Stream<M>>> matchProcessors,
                      Comparator<M> comparator
     ) {
-        var candidateChain  = chainProcessors(candidateProcessors);
-        var matchChain      = chainProcessors(matchProcessors);
+        Function<C, Stream<C>> candidateChain  = chainProcessors(candidateProcessors);
+        Function<M, Stream<M>> matchChain      = chainProcessors(matchProcessors);
 
         source
                 .flatMap(candidateChain)

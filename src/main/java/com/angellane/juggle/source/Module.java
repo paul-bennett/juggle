@@ -17,14 +17,17 @@
  */
 package com.angellane.juggle.source;
 
-import java.io.IOException;
+//import com.angellane.backport.jdk11.java.lang.module.*;
+import com.angellane.backport.jdk11.java.util.OptionalExtras;
+
 import java.lang.module.*;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,12 +47,11 @@ public class Module extends Source {
 
     @Override
     public List<URL> configure() {
-        List<String> modNames = List.of(moduleName);
+        List<String> modNames = Collections.singletonList(moduleName);
 
         Path[] paths = modulePaths.stream()
                 .map(Path::of)
-                .collect(Collectors.toList())
-                .toArray(new Path[0]);
+                .toArray(Path[]::new);
 
         Configuration modConf = ModuleLayer.boot().configuration().resolve(
                 ModuleFinder.ofSystem(),
@@ -102,7 +104,7 @@ public class Module extends Source {
                                 .filter(s -> !s.equals(MODULE_INFO))
                                 .map(s -> s.replace('/', '.'))
                                 .map(n -> getJuggler().loadClassByName(n))
-                                .flatMap(Optional::stream)
+                                .flatMap(OptionalExtras::stream)
                                 // Ignore classes in packages that aren't exported
                                 .filter(c -> c.getModule().isExported(c.getPackageName()))
                         ;

@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.backport.jdk11.java.util.StreamExtras;
 import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.Match;
@@ -130,7 +131,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
     }
 
     public OptionalInt scoreCandidate(TypeMatcher tm, TypeCandidate ct) {
-        return totalScore(List.of(
+        return totalScore(Arrays.asList(
                 scoreAnnotations(ct.annotationTypes())
                 , scoreAccessibility(ct.accessibility())
                 , scoreModifiers(ct.otherModifiers())
@@ -217,7 +218,7 @@ public final class TypeQuery extends Query<TypeCandidate> {
             else {
                 // Only allow direct matches
                 return Stream.concat(
-                        Stream.ofNullable(lowerBound.getSuperclass()),
+                        StreamExtras.ofNullable(lowerBound.getSuperclass()),
                         Arrays.stream(lowerBound.getInterfaces())
                         )
                         .anyMatch(c::equals) ? EXACT_MATCH : NO_MATCH;

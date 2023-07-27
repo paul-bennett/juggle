@@ -26,10 +26,7 @@ import com.angellane.juggle.util.ClassUtils;
 
 import java.io.PrintStream;
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,7 +37,7 @@ public class TextOutput implements Sink {
     private final Set<String> imports;
 
     public TextOutput(List<String> importedPackageNames, PrintStream out, Formatter f) {
-        this.imports = Set.copyOf(importedPackageNames);
+        this.imports = new HashSet<>(importedPackageNames);
         this.out = out;
         this.f = f;
     }
@@ -207,7 +204,7 @@ public class TextOutput implements Sink {
     }
 
     public <T extends GenericDeclaration> String decodeTypeVariable(TypeVariable<T> t) {
-        var bs = t.getBounds();
+        Type[] bs = t.getBounds();
         if (bs.length == 1 && bs[0] == Object.class) bs = null;
 
         return t.getName() + (bs == null || bs.length == 0 ? ""
@@ -215,8 +212,8 @@ public class TextOutput implements Sink {
     }
 
     public String decodeWildcardType(WildcardType t) {
-        var lb = t.getLowerBounds();
-        var ub = t.getUpperBounds();
+        Type[] lb = t.getLowerBounds();
+        Type[] ub = t.getUpperBounds();
 
         if (ub.length == 1 && ub[0] == Object.class) ub = null;
 
@@ -246,7 +243,7 @@ public class TextOutput implements Sink {
             StringBuilder ret = new StringBuilder();
 
             String canonicalName = c.getCanonicalName();
-            String packageName = c.getPackageName();
+            String packageName = c.getPackage().getName();
 
             if (!imports.contains(packageName))
                 ret.append(packageName).append('.');
@@ -260,7 +257,7 @@ public class TextOutput implements Sink {
             if (typeVars.length > 0) {
                 ret.append('<');
                 StringJoiner j = new StringJoiner(",");
-                for (var tv : typeVars)
+                for (TypeVariable<?> tv : typeVars)
                     j.add(tv.toString());
                 ret.append(j);
                 ret.append('>');

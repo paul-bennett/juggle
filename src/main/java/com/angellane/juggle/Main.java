@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle;
 
+import com.angellane.backport.jdk11.java.lang.Runtime;
 import com.angellane.juggle.formatter.AnsiColourFormatter;
 import com.angellane.juggle.formatter.Formatter;
 import com.angellane.juggle.formatter.PlaintextFormatter;
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 
@@ -80,7 +80,7 @@ public class Main implements Runnable {
 
     private Stream<String> paths(String arg) {
         return Arrays.stream(arg.split(File.pathSeparator))
-                .filter(Predicate.not(String::isEmpty));
+                .filter(s -> !s.isEmpty());
     }
 
     @SuppressWarnings("unused")

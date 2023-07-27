@@ -21,10 +21,7 @@ import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
@@ -105,7 +102,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
     }
 
     OptionalInt scoreCandidate(TypeMatcher tm, MemberCandidate cm) {
-        return totalScore(List.of(
+        return totalScore(Arrays.asList(
                 scoreAnnotations(cm.annotationTypes())
                 , scoreAccessibility(cm.accessibility())
                 , scoreModifiers(cm.otherModifiers())

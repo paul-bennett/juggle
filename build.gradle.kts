@@ -42,8 +42,8 @@ dependencies {
 }
 
 java.toolchain {
-    // This is a backport to JDK11
-    languageVersion.set(JavaLanguageVersion.of(11))
+    // This is a backport to JDK8
+    languageVersion.set(JavaLanguageVersion.of(8))
 }
 
 application {

@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.backport.jdk11.java.util.OptionalExtras;
 import com.angellane.juggle.candidate.Candidate;
 import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.match.Accessibility;
@@ -185,7 +186,7 @@ public abstract class Query<C extends Candidate> {
     ) {
         return scores.stream()
                 .reduce(OptionalInt.of(0),
-                        (a,b) -> a.isEmpty() || b.isEmpty()
+                        (a,b) -> !(a.isPresent() && b.isPresent())
                                 ? OptionalInt.empty()
                                 : OptionalInt.of(a.getAsInt() + b.getAsInt())
                 );
@@ -265,7 +266,9 @@ public abstract class Query<C extends Candidate> {
                 OptionalInt  thisScore =
                         scoreParamSpecs(tm, queryParams, candidateParams);
 
-                ret[0] = IntStream.concat(ret[0].stream(), thisScore.stream())
+                ret[0] = IntStream.concat(OptionalExtras.stream(ret[0]),
+                                OptionalExtras.stream(thisScore)
+                        )
                         .max();
             });
 

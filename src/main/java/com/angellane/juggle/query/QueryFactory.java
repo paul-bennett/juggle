@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.backport.jdk11.java.lang.StringExtras;
 import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.JuggleError;
 import com.angellane.juggle.Juggler;
@@ -85,15 +86,14 @@ public class QueryFactory {
             StringBuilder msg = new StringBuilder(
                     "Couldn't parse query at " + row + ":" + col + "\n");
 
-            List<String> inputLines = input.lines().collect(Collectors.toList());
+            List<String> inputLines = Arrays.asList(input.split("[\r\n]"));
             for (int i = 0; i < inputLines.size(); ++i) {
                 msg.append(inputLines.get(i)).append("\n");
                 if (i == row - 1)
-                    msg.append(" ".repeat(col))
-                            .append("^".repeat(errorToken.getText().length()))
+                    msg.append(StringExtras.repeat(" ", col))
+                            .append(StringExtras.repeat("^", errorToken.getText().length()))
                             .append("\n");
             }
-//            msg.append("Expected: ").append(expectedTokens);
             return msg.toString();
         }
 
@@ -461,7 +461,7 @@ public class QueryFactory {
                         + cls.getCanonicalName() + "'"
                 );
 
-            for (var dims = numDims; dims > 0; --dims) {
+            for (int dims = numDims; dims > 0; --dims) {
                 cls = ClassExtras.arrayType(cls);
             }
 

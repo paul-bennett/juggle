@@ -17,16 +17,15 @@
  */
 package com.angellane.juggle.candidate;
 
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.TypeFlavour;
 
 import java.lang.annotation.Annotation;
 import com.angellane.backport.jdk17.java.lang.reflect.RecordComponent;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TypeCandidate
@@ -124,7 +123,7 @@ implements Candidate
     }
 
     public String packageName() {
-        return clazz.getPackageName();
+        return clazz.getPackage().getName();
     }
 
     public static TypeCandidate candidateForType(Class<?> c) {
@@ -137,15 +136,15 @@ implements Candidate
                         .map(Annotation::annotationType)
                         .collect(Collectors.toSet());
         Class<?> superClass                 = c.getSuperclass();
-        Set<Class<?>> superInterfaces       = Set.of(c.getInterfaces());
+        Set<Class<?>> superInterfaces       = SetExtras.of(c.getInterfaces());
         Set<Class<?>> permittedSubtypes     =
                 ClassExtras.getPermittedSubclasses(c) == null
-                ? Set.of()
-                : Set.of(ClassExtras.getPermittedSubclasses(c));
+                ? Collections.emptySet()
+                : SetExtras.of(ClassExtras.getPermittedSubclasses(c));
         List<RecordComponent> recordComponents =
                 ClassExtras.getRecordComponents(c) == null
-                ? List.of()
-                : List.of(ClassExtras.getRecordComponents(c));
+                ? Collections.emptyList()
+                : Arrays.asList(ClassExtras.getRecordComponents(c));
 
         return new TypeCandidate(c, f, annotations, access, mods,
                 c.getSimpleName(), c.getCanonicalName(),

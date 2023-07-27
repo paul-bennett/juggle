@@ -17,6 +17,8 @@
  */
 package com.angellane.juggle.source;
 
+import com.angellane.backport.jdk11.java.nio.PathExtras;
+import com.angellane.backport.jdk11.java.util.OptionalExtras;
 import com.angellane.juggle.JuggleError;
 
 import java.io.File;
@@ -25,9 +27,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,14 +40,14 @@ public class FileSource extends Source {
     private final Path path;
 
     public FileSource(String s) {
-        this.path = Path.of(s);
+        this.path = PathExtras.of(s);
     }
 
     @Override
     public List<URL> configure() {
         try {
             if (path.toFile().exists())
-                return List.of(path.toUri().toURL());
+                return Collections.singletonList(path.toUri().toURL());
             else
                 throw new JuggleError("Couldn't locate " + path);
         }
@@ -66,7 +67,7 @@ public class FileSource extends Source {
             if (f.isFile())
                 try (java.util.jar.JarFile file = new java.util.jar.JarFile(f)) {
                     entries = file.stream()
-                            .filter(Predicate.not(JarEntry::isDirectory))
+                            .filter(je -> !je.isDirectory())
                             .map(JarEntry::getName)
                             .collect(Collectors.toList());
                 }
@@ -90,6 +91,6 @@ public class FileSource extends Source {
                 .map(s -> s.substring(0, s.length() - CLASS_SUFFIX.length()))
                 .map(s -> s.replace('/', '.'))
                 .map(n -> getJuggler().loadClassByName(n))
-                .flatMap(Optional::stream);
+                .flatMap(OptionalExtras::stream);
     }
 }

@@ -17,6 +17,9 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.backport.jdk11.java.util.SetExtras;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -51,11 +54,11 @@ public class BoundedType {
     }
 
     public static BoundedType exactType(Class<?> c) {
-        return new BoundedType(Set.of(c), c);
+        return new BoundedType(Collections.singleton(c), c);
     }
 
     public static BoundedType subtypeOf(Class<?>... cs) {
-        return new BoundedType(Set.of(cs), null);
+        return new BoundedType(SetExtras.of(cs), null);
     }
 
     public static BoundedType subtypeOf(List<Class<?>> cs) {
@@ -86,7 +89,7 @@ public class BoundedType {
     public boolean isExactType() {
         return lowerBound() != null
                 && upperBound() != null
-                && upperBound().equals(Set.of(lowerBound()));
+                && upperBound().equals(Collections.singleton(lowerBound()));
     }
 
     public boolean isBoundedWildcard() {

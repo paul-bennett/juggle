@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.candidate;
 
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.juggle.match.Accessibility;
 
 import java.lang.annotation.Annotation;
@@ -117,7 +118,7 @@ public class MemberCandidate
 
     @Override
     public String packageName() {
-        return member().getDeclaringClass().getPackageName();
+        return member().getDeclaringClass().getPackage().getName();
     }
 
     public static MemberCandidate memberFromMethod(Method m) {
@@ -128,7 +129,7 @@ public class MemberCandidate
                         Arrays.stream(m.getParameters())
                                 .map(Param::new).collect(Collectors.toList())
                 ),
-                Set.of(m.getExceptionTypes())
+                SetExtras.of(m.getExceptionTypes())
         );
     }
 
@@ -139,7 +140,7 @@ public class MemberCandidate
                 Arrays.stream(c.getParameters())
                         .map(Param::new)
                         .collect(Collectors.toList()),
-                Set.of(c.getExceptionTypes())
+                SetExtras.of(c.getExceptionTypes())
         );
     }
 
@@ -147,16 +148,17 @@ public class MemberCandidate
         Set<Class<?>> as = annotationClasses(
                 f.getDeclaredAnnotations());
 
-        var getter = new MemberCandidate(f, as, f.getType(),
-                paramsWithImplicitThis(f, List.of()), Set.of()
+        MemberCandidate getter = new MemberCandidate(f, as, f.getType(),
+                paramsWithImplicitThis(f,
+                        Collections.emptyList()), Collections.emptySet()
         );
-        var setter = new MemberCandidate(f, as, Void.TYPE,
-                paramsWithImplicitThis(f, List.of(
+        MemberCandidate setter = new MemberCandidate(f, as, Void.TYPE,
+                paramsWithImplicitThis(f, Collections.singletonList(
                         new Param(f.getType(), f.getName()))
-                ), Set.of()
+                ), Collections.emptySet()
         );
 
-        return List.of(getter, setter);
+        return Arrays.asList(getter, setter);
     }
 
     private static Set<Class<?>> annotationClasses(Annotation[] annotations) {
@@ -166,7 +168,7 @@ public class MemberCandidate
     }
 
     private static Param thisParam(Member m) {
-        return new Param(Set.of(), m.getModifiers(),
+        return new Param(Collections.emptySet(), m.getModifiers(),
                 m.getDeclaringClass(), "this");
     }
 
