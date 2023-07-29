@@ -38,8 +38,6 @@ import java.util.*;
  *     will always be lower (better) than those allowed under the Loose
  *     Invocation Context.
  * </p>
- *
- * @param applyConversions whether to apply conversions when matching
  */
 public class TypeMatcher {
     static final int IDENTITY_COST  = 0;

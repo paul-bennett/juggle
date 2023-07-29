@@ -29,7 +29,7 @@ import com.angellane.juggle.query.QueryFactory;
 import com.angellane.juggle.query.TypeQuery;
 import com.angellane.juggle.sink.TextOutput;
 import com.angellane.juggle.source.FileSource;
-import com.angellane.juggle.source.Module;
+import com.angellane.juggle.source.ModuleSource;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.IVersionProvider;
@@ -105,7 +105,7 @@ public class Main implements Runnable {
         Arrays.stream(arg.split(","))
                 .filter(s -> !s.isEmpty())
                 .forEach(m -> juggler.addSource(
-                        new Module(juggler.getModulePaths(), m)));
+                        new ModuleSource(juggler.getModulePaths(), m)));
     }
 
     @SuppressWarnings("unused")

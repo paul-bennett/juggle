@@ -17,11 +17,11 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.juggle.match.TypeMatcher;
 import org.junit.jupiter.api.Test;
 
 import java.util.OptionalInt;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,9 +93,9 @@ public class TestBoundedType {
     @Test
     public void testFullySpecified() {
         BoundedType bt =
-                new BoundedType(Set.of(Inter.class, Top.class), Bottom.class);
+                new BoundedType(SetExtras.of(Inter.class, Top.class), Bottom.class);
 
-        assertEquals(Set.of(Inter.class, Top.class), bt.upperBound());
+        assertEquals(SetExtras.of(Inter.class, Top.class), bt.upperBound());
         assertEquals(Bottom.class,                   bt.lowerBound());
 
         assertFalse(bt.matchesClass(RootI.class),   "RootI");
@@ -168,9 +168,9 @@ public class TestBoundedType {
     @Test
     public void testScoreFullySpecified() {
         BoundedType bt =
-                new BoundedType(Set.of(Inter.class, Top.class), Bottom.class);
+                new BoundedType(SetExtras.of(Inter.class, Top.class), Bottom.class);
 
-        assertEquals(Set.of(Inter.class, Top.class), bt.upperBound());
+        assertEquals(SetExtras.of(Inter.class, Top.class), bt.upperBound());
         assertEquals(Bottom.class,                   bt.lowerBound());
 
         assertEquals(OptionalInt.empty(), tm.scoreTypeMatch(bt, RootI.class),   "RootI");

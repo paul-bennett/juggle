@@ -19,6 +19,7 @@ package com.angellane.juggle.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,11 +89,11 @@ public class PermutationGeneratorTest {
 
     @Test
     public void permutationStream_sequential() {
-        var input = List.of("one", "two", "three", "four");
+        List<String> input = Arrays.asList("one", "two", "three", "four");
 
         PermutationGenerator<String> gen = new PermutationGenerator<>(input);
 
-        var perms = gen.stream().collect(Collectors.toList());
+        List<List<String>> perms = gen.stream().collect(Collectors.toList());
 
         assertEquals(4, input.size());
 
@@ -105,11 +106,11 @@ public class PermutationGeneratorTest {
 
     @Test
     public void permutationStream_parallel() {
-        var input = List.of("one", "two", "three", "four");
+        List<String> input = Arrays.asList("one", "two", "three", "four");
 
         PermutationGenerator<String> gen = new PermutationGenerator<>(input);
 
-        var perms = gen.stream()
+        List<List<String>> perms = gen.stream()
                 .parallel()
 //                .peek(l -> System.err.println(l + " on " + Thread.currentThread()))
                 .collect(Collectors.toList());
@@ -125,7 +126,7 @@ public class PermutationGeneratorTest {
 
     @Test
     public void permutationCollector_sequential() {
-        var input = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
 
         List<List<Integer>> perms = input.stream()
                 .collect(PermutationGenerator.collector())
@@ -137,7 +138,7 @@ public class PermutationGeneratorTest {
 
     @Test
     public void permutationCollector_parallel() {
-        var input = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
 
         List<List<Integer>> perms = input.stream()
                 .parallel()

@@ -18,10 +18,8 @@
 package com.angellane.backport.jdk17.java.lang.reflect;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 public class RecordComponent {
     private static Class<?> clazz = null;
@@ -40,7 +38,7 @@ public class RecordComponent {
         ) {
         }
     }
-    private Object wrapped;
+    private final Object wrapped;
 
     public RecordComponent(Object rc) {
         assert rc.getClass() == clazz;

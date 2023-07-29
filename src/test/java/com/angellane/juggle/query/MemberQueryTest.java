@@ -7,7 +7,7 @@ import com.angellane.juggle.match.TypeMatcher;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Arrays;
 import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,20 +20,20 @@ public class MemberQueryTest {
     @Test
     public void testScoreParamsIntInt() {
         MemberQuery q = new MemberQuery();
-        q.params = List.of(
+        q.params = Arrays.asList(
                 ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null),
                 ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null)
         );
 
-        assertEquals(OptionalInt.of(0),   q.scoreParams(noConv, List.of(new Param(Integer.TYPE,  "i"), new Param(Integer.TYPE,  "i"))));
-        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(new Param(Integer.TYPE,  "i"), new Param(Integer.class, "i"))));
-        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(new Param(Integer.class, "i"), new Param(Integer.TYPE,  "i"))));
-        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, List.of(new Param(Integer.class, "i"), new Param(Integer.class, "i"))));
+        assertEquals(OptionalInt.of(0),   q.scoreParams(noConv, Arrays.asList(new Param(Integer.TYPE,  "i"), new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, Arrays.asList(new Param(Integer.TYPE,  "i"), new Param(Integer.class, "i"))));
+        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, Arrays.asList(new Param(Integer.class, "i"), new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.empty(), q.scoreParams(noConv, Arrays.asList(new Param(Integer.class, "i"), new Param(Integer.class, "i"))));
 
-        assertEquals(OptionalInt.of(0), q.scoreParams(conv, List.of(new Param(Integer.TYPE, "i"),  new Param(Integer.TYPE,  "i"))));
-        assertEquals(OptionalInt.of(2), q.scoreParams(conv, List.of(new Param(Integer.TYPE, "i"),  new Param(Integer.class, "i"))));
-        assertEquals(OptionalInt.of(2), q.scoreParams(conv, List.of(new Param(Integer.class, "i"), new Param(Integer.TYPE,  "i"))));
-        assertEquals(OptionalInt.of(4), q.scoreParams(conv, List.of(new Param(Integer.class, "i"), new Param(Integer.class, "i"))));
+        assertEquals(OptionalInt.of(0), q.scoreParams(conv, Arrays.asList(new Param(Integer.TYPE, "i"),  new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.of(2), q.scoreParams(conv, Arrays.asList(new Param(Integer.TYPE, "i"),  new Param(Integer.class, "i"))));
+        assertEquals(OptionalInt.of(2), q.scoreParams(conv, Arrays.asList(new Param(Integer.class, "i"), new Param(Integer.TYPE,  "i"))));
+        assertEquals(OptionalInt.of(4), q.scoreParams(conv, Arrays.asList(new Param(Integer.class, "i"), new Param(Integer.class, "i"))));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class MemberQueryTest {
             MemberQuery q = new MemberQuery();
             q.setAccessibility(Accessibility.PUBLIC);
             q.returnType = BoundedType.exactType(Integer.TYPE);
-            q.params = List.of(
+            q.params = Arrays.asList(
                     ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null),
                     ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null)
             );

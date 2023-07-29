@@ -26,9 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,15 +68,15 @@ public class TestMemberDecl {
     public void testAllAttributes() {
         MemberQuery q = new MemberQuery();
 
-        q.annotationTypes = Set.of();
+        q.annotationTypes = Collections.emptySet();
         q.modifierMask = Modifier.STATIC;
         q.accessibility = Accessibility.PROTECTED;
         q.returnType = BoundedType.exactType(java.net.URL.class);
         q.declarationPattern = Pattern.compile("^findResource$");
-        q.params = List.of(
+        q.params = Arrays.asList(
                 ParamSpec.param(ClassLoader.class),
                 ParamSpec.param(String.class, "name"));
-        q.exceptions = Set.of();
+        q.exceptions = Collections.emptySet();
 
         matchQueryAndCandidate(q, cm);
     }
@@ -89,7 +87,7 @@ public class TestMemberDecl {
 
         q.accessibility = Accessibility.PROTECTED;
         q.declarationPattern = Pattern.compile("^findResource$");
-        q.params = List.of(ParamSpec.ellipsis());
+        q.params = Collections.singletonList(ParamSpec.ellipsis());
 
         matchQueryAndCandidate(q, cm);
     }
@@ -99,7 +97,7 @@ public class TestMemberDecl {
         MemberQuery q = new MemberQuery();
 
         q.declarationPattern = Pattern.compile("^findResource$");
-        q.params = List.of(
+        q.params = Arrays.asList(
                 ParamSpec.param(ClassLoader.class),
                 ParamSpec.param(String.class, "name"),
                 ParamSpec.param(String.class, "name"),
@@ -114,7 +112,7 @@ public class TestMemberDecl {
         MemberQuery q = new MemberQuery();
 
         q.declarationPattern = Pattern.compile("^findResource$");
-        q.params = List.of(ParamSpec.param(ClassLoader.class));
+        q.params = Collections.singletonList(ParamSpec.param(ClassLoader.class));
 
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
@@ -131,7 +129,7 @@ public class TestMemberDecl {
     public void testCorrectAnnotations() {
         MemberQuery q = new MemberQuery();
         q.accessibility = Accessibility.PROTECTED;
-        q.annotationTypes = Set.of();
+        q.annotationTypes = Collections.emptySet();
         matchQueryAndCandidate(q, cm);
     }
 
@@ -171,7 +169,7 @@ public class TestMemberDecl {
     public void testCorrectNamedParams() {
         MemberQuery q = new MemberQuery();
         q.accessibility = Accessibility.PROTECTED;
-        q.params = List.of(ParamSpec.param(String.class, "name"));
+        q.params = Collections.singletonList(ParamSpec.param(String.class, "name"));
         matchQueryAndCandidate(q, cm);
     }
 
@@ -179,14 +177,14 @@ public class TestMemberDecl {
     public void testCorrectExceptions() {
         MemberQuery q = new MemberQuery();
         q.accessibility = Accessibility.PROTECTED;
-        q.exceptions = Set.of();
+        q.exceptions = Collections.emptySet();
         matchQueryAndCandidate(q, cm);
     }
 
     @Test
     public void testWrongAnnotations() {
         MemberQuery q = new MemberQuery();
-        q.annotationTypes = Set.of(Override.class);
+        q.annotationTypes = Collections.singleton(Override.class);
         assertFalse(q.matchesAnnotations(cm.annotationTypes()),
                 "Match annotations");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
@@ -237,7 +235,7 @@ public class TestMemberDecl {
     @Test
     public void testWrongParamName() {
         MemberQuery q = new MemberQuery();
-        q.params = List.of(ParamSpec.param(String.class, "foo"));
+        q.params = Collections.singletonList(ParamSpec.param(String.class, "foo"));
         assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.params()), "Match params");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
@@ -246,7 +244,7 @@ public class TestMemberDecl {
     @Test
     public void testWrongParamType() {
         MemberQuery q = new MemberQuery();
-        q.params = List.of(ParamSpec.param(Integer.class, "name"));
+        q.params = Collections.singletonList(ParamSpec.param(Integer.class, "name"));
         assertEquals(OptionalInt.empty(), q.scoreParams(tm, cm.params()), "Match params");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");
@@ -255,7 +253,7 @@ public class TestMemberDecl {
     @Test
     public void testWrongParamArity() {
         MemberQuery q = new MemberQuery();
-        q.params = List.of(
+        q.params = Arrays.asList(
                 ParamSpec.param(String.class, "name"),
                 ParamSpec.param(String.class, "name")
         );
@@ -268,7 +266,7 @@ public class TestMemberDecl {
     public void testWrongExceptions() {
         MemberQuery q = new MemberQuery();
         q.exceptions =
-                Set.of(BoundedType.exactType(NoSuchMethodException.class));
+                Collections.singleton(BoundedType.exactType(NoSuchMethodException.class));
         assertEquals(OptionalInt.empty(), q.scoreExceptions(tm, cm.throwTypes()), "Match exceptions");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");

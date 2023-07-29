@@ -77,6 +77,7 @@ by a parentheses-wrapped comma-separated parameter list.
 ```shell
 $ juggle 'void (double[], int, int, double)' 
 public static void java.util.Arrays.fill(double[],int,int,double)
+public static void com.sun.media.sound.EmergencySoundbank.complexGaussianDist(double[],double,double,double)
 $
 ```
 
@@ -86,9 +87,13 @@ _any_ return type:
 $ juggle '(double[], int, int, double)' 
 public static int java.util.Arrays.binarySearch(double[],int,int,double)
 public static void java.util.Arrays.fill(double[],int,int,double)
-public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
-public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
-public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
+public static void com.sun.media.sound.EmergencySoundbank.complexGaussianDist(double[],double,double,double)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(Object,Object,Object,Object)
+public static com.sun.istack.internal.localization.Localizable com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.localizableWSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(Object,Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.AddressingMessages.NON_UNIQUE_OPERATION_SIGNATURE(Object,Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.RUNTIME_WSDLPARSER_INVALID_WSDL(Object,Object,Object,Object)
+public static com.sun.istack.internal.localization.Localizable com.sun.xml.internal.ws.resources.AddressingMessages.localizableNON_UNIQUE_OPERATION_SIGNATURE(Object,Object,Object,Object)
+public static com.sun.istack.internal.localization.Localizable com.sun.xml.internal.ws.resources.ClientMessages.localizableRUNTIME_WSDLPARSER_INVALID_WSDL(Object,Object,Object,Object)
 $
 ```
 > **Note: Type erasure**
@@ -140,6 +145,79 @@ public String java.util.regex.Matcher.group(String)
 public String java.util.regex.Matcher.replaceAll(String)
 public String java.util.regex.Matcher.replaceFirst(String)
 public static String java.util.Objects.toString(Object,String)
+public static String com.sun.jmx.remote.internal.IIOPHelper.objectToString(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0003_UNMARSHALLING_FAILED_END_TAG_DOES_NOT_MATCH(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0009_UNEXPECTED_CDATA_ON_SOURCE_MODEL_NODE(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0017_UNABLE_TO_ACCESS_POLICY_SOURCE_MODEL_PLUS_REASON(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0021_SUBJECT_AND_POLICY_PARAM_MUST_NOT_BE_NULL(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0025_SPI_FAIL_SERVICE_MSG(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0033_SERVICE_AND_PORT_PARAM_MUST_NOT_BE_NULL(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0057_N_ALTERNATIVE_COMBINATIONS_M_POLICY_ALTERNATIVES_CREATED(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0073_CREATE_CHILD_NODE_OPERATION_NOT_SUPPORTED(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0075_PROBLEMATIC_ASSERTION_STATE(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0078_ASSERTION_CREATOR_DISCOVERED(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0081_UNABLE_TO_INSERT_CHILD(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0090_UNEXPECTED_ELEMENT(Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0093_INVALID_URI(Object,Object)
+public static String com.sun.xml.internal.ws.resources.HandlerMessages.CANNOT_INSTANTIATE_HANDLER(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.DD_MTOM_CONFLICT(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.FAILED_TO_PARSE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.HandlerMessages.HANDLER_MESSAGE_CONTEXT_INVALID_CLASS(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.HTTP_STATUS_CODE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.AddressingMessages.INVALID_ADDRESSING_HEADER_EXCEPTION(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.INVALID_BINDING_ID(Object,Object)
+public static String com.sun.xml.internal.ws.resources.DispatchMessages.INVALID_DATASOURCE_DISPATCH_BINDING(Object,Object)
+public static String com.sun.xml.internal.ws.resources.DispatchMessages.INVALID_DATASOURCE_DISPATCH_MSGMODE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.INVALID_EPR_PORT_NAME(Object,Object)
+public static String com.sun.xml.internal.ws.resources.DispatchMessages.INVALID_NULLARG_SOAP_MSGMODE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.DispatchMessages.INVALID_NULLARG_XMLHTTP_REQUEST_METHOD(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.INVALID_PORT_NAME(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.INVALID_SERVICE_NAME(Object,Object)
+public static String com.sun.xml.internal.ws.resources.DispatchMessages.INVALID_SOAPMESSAGE_DISPATCH_BINDING(Object,Object)
+public static String com.sun.xml.internal.ws.resources.DispatchMessages.INVALID_SOAPMESSAGE_DISPATCH_MSGMODE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.DispatchMessages.INVALID_URI_PATH_QUERY(Object,Object)
+public static String com.sun.xml.internal.ws.resources.TubelineassemblyMessages.MASM_0002_DEFAULT_CFG_FILE_LOCATED(Object,Object)
+public static String com.sun.xml.internal.ws.resources.TubelineassemblyMessages.MASM_0011_LOADING_RESOURCE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.TubelineassemblyMessages.MASM_0012_LOADING_VIA_SERVLET_CONTEXT(Object,Object)
+public static String com.sun.xml.internal.ws.resources.TubelineassemblyMessages.MASM_0015_CLASS_DOES_NOT_IMPLEMENT_INTERFACE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.TubelineassemblyMessages.MASM_0018_MSG_LOGGING_SYSTEM_PROPERTY_SET_TO_VALUE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.TubelineassemblyMessages.MASM_0019_MSG_LOGGING_SYSTEM_PROPERTY_ILLEGAL_VALUE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.NON_UNIQUE_DISPATCH_QNAME(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ProviderApiMessages.NOTFOUND_SERVICE_IN_WSDL(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.NOT_A_VALID_BARE_METHOD(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.PROVIDER_INVALID_PARAMETER_TYPE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_EXTERNAL_METADATA_UNSUPPORTED_SCHEMA(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_FEATURE_CONFLICT(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_INVALID_SOAPBINDING_PARAMETERSTYLE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_METHOD_NOT_FOUND(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_MTOM_CONFLICT(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_ONEWAY_OPERATION_NO_OUT_PARAMETERS(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_PORTNAME_SERVICENAME_NAMESPACE_MISMATCH(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_WSFEATURE_ILLEGAL_FTRCONSTRUCTOR(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_WSFEATURE_MORETHANONE_FTRCONSTRUCTOR(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_WSFEATURE_NO_FTRCONSTRUCTOR(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_INVALID_ATTRIBUTE_VALUE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_INVALID_ELEMENT(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_WSDL_INCORRECTSERVICE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_SAXPARSER_EXCEPTION(Object,Object)
+public static String com.sun.xml.internal.ws.resources.WsservletMessages.SERVLET_HTML_ENDPOINT_TABLE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.WsservletMessages.SERVLET_HTML_INFORMATION_TABLE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.SoapMessages.SOAP_VERSION_MISMATCH_ERR(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.STATEFUL_COOKIE_HEADER_INCORRECT(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.STATIC_RESOURCE_INJECTION_ONLY(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.UNSUPPORTED_CONTENT_TYPE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.UtilMessages.UTIL_FAILED_TO_FIND_HANDLERCHAIN_FILE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.UtilMessages.UTIL_FAILED_TO_PARSE_HANDLERCHAIN_FILE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.UtilMessages.UTIL_LOCATION(Object,Object)
+public static String com.sun.xml.internal.ws.resources.AddressingMessages.WRONG_ADDRESSING_VERSION(Object,Object)
+public static String com.sun.xml.internal.ws.resources.ManagementMessages.WSM_1004_EXPECTED_XML_TAG(Object,Object)
+public static String com.sun.xml.internal.ws.resources.PolicyMessages.WSP_1003_UNABLE_TO_CHECK_ELEMENT_NAME(Object,Object)
+public static String com.sun.xml.internal.ws.resources.PolicyMessages.WSP_1015_SERVER_SIDE_ASSERTION_VALIDATION_FAILED(Object,Object)
+public static String com.sun.xml.internal.ws.resources.StreamingMessages.XMLREADER_UNEXPECTED_STATE(Object,Object)
+public static String com.sun.xml.internal.ws.resources.StreamingMessages.XMLREADER_UNEXPECTED_STATE_TAG(Object,Object)
+public static String com.sun.xml.internal.ws.resources.EncodingMessages.XSD_UNEXPECTED_ELEMENT_NAME(Object,Object)
+public static String javax.swing.JOptionPane.showInputDialog(Object,Object)
 $
 ```
 In the above note how the first argument to `Objects.toString` is an `Object`,
@@ -169,6 +247,11 @@ public native int Object.hashCode()
 public static native int System.identityHashCode(Object)
 public static native int java.lang.reflect.Array.getLength(Object) throws IllegalArgumentException
 public static int java.util.Objects.hashCode(Object)
+public static int javax.swing.UIManager.getInt(Object)
+public static int sun.font.FontStrikeDesc.getFMHintIntVal(Object)
+public static int sun.invoke.util.ValueConversions.widenSubword(Object)
+public static int sun.swing.SwingUtilities2.getUIDefaultsInt(Object)
+public static int sun.util.logging.LoggingSupport.getLevelValue(Object)
 $
 ```
 
@@ -179,6 +262,7 @@ specific exception type:
 
 ```shell
 $ juggle throws java.net.URISyntaxException
+public com.sun.xml.internal.ws.api.EndpointAddress.<init>(String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String) throws java.net.URISyntaxException
 public java.net.URI.<init>(String,String,String,int,String,String,String) throws java.net.URISyntaxException
@@ -208,10 +292,8 @@ $ juggle @SafeVarargs
 public static transient <T> boolean java.util.Collections.addAll(java.util.Collection<E>,T[])
 public static transient <T> java.util.List<E> java.util.Arrays.asList(T[])
 public static transient <E> java.util.EnumSet<E> java.util.EnumSet<E>.of(E extends Enum<E>,E extends Enum<E>[])
-public static transient <E> java.util.List<E> java.util.List<E>.of(E[])
-public static transient <E> java.util.Set<E> java.util.Set<E>.of(E[])
-public static transient <K,V> java.util.Map<K,V> java.util.Map<K,V>.ofEntries(java.util.Map.Entry<K,V>[])
 public static transient <T> java.util.stream.Stream<T> java.util.stream.Stream<T>.of(T[])
+public final transient synchronized void sun.swing.AccumulativeRunnable<T>.add(T[])
 $
 ```
 
@@ -229,6 +311,16 @@ public volatile String StringBuilder.substring(int)
 public volatile String StringBuilder.substring(int,int)
 public synchronized String StringBuffer.substring(int)
 public synchronized String StringBuffer.substring(int,int)
+public abstract String com.sun.org.apache.regexp.internal.CharacterIterator.substring(int)
+public abstract String com.sun.org.apache.regexp.internal.CharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.CharacterArrayCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.CharacterArrayCharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.ReaderCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.ReaderCharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.StreamCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.StreamCharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.StringCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.StringCharacterIterator.substring(int,int)
 $
 ```
 
@@ -242,11 +334,109 @@ public String Package.getImplementationTitle()
 public String Package.getImplementationVendor()
 public String Package.getImplementationVersion()
 public String Package.getName()
-public String Class<T>.getPackageName()
 public String Package.getSpecificationTitle()
 public String Package.getSpecificationVendor()
 public String Package.getSpecificationVersion()
 public String Package.toString()
+public static String com.sun.corba.se.impl.util.PackagePrefixChecker.correctPackageName(String)
+public static String com.sun.corba.se.impl.util.PackagePrefixChecker.packagePrefix()
+public static String com.sun.corba.se.impl.util.PackagePrefixChecker.withoutPackagePrefix(String)
+public static String com.sun.corba.se.spi.activation.InitialNameServicePackage.NameAlreadyBoundHelper.id()
+public String com.sun.corba.se.spi.activation.LocatorPackage.ServerLocation.hostname
+public String com.sun.corba.se.spi.activation.LocatorPackage.ServerLocationPerORB.hostname
+public static String com.sun.corba.se.spi.activation.LocatorPackage.ServerLocationHelper.id()
+public static String com.sun.corba.se.spi.activation.LocatorPackage.ServerLocationPerORBHelper.id()
+public String com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef.applicationName
+public static String com.sun.corba.se.spi.activation.RepositoryPackage.ServerDefHelper.id()
+public static String com.sun.corba.se.spi.activation.RepositoryPackage.StringSeqHelper.id()
+public String com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef.serverArgs
+public String com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef.serverClassPath
+public String com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef.serverName
+public String com.sun.corba.se.spi.activation.RepositoryPackage.ServerDef.serverVmArgs
+public String com.sun.java.util.jar.pack.Package.Class.canonicalFileName()
+public String com.sun.java.util.jar.pack.Package.Class.Member.getName()
+public String com.sun.java.util.jar.pack.Package.Class.getName()
+public String com.sun.java.util.jar.pack.Package.Class.Member.getType()
+public String com.sun.java.util.jar.pack.Package.Class.Member.toString()
+public String com.sun.java.util.jar.pack.Package.Class.toString()
+public String com.sun.java.util.jar.pack.Package.File.toString()
+public String com.sun.java.util.jar.pack.Package.InnerClass.toString()
+public String com.sun.java.util.jar.pack.Package.Version.toString()
+public String com.sun.org.apache.bcel.internal.classfile.JavaClass.getPackageName()
+public static final String com.sun.org.apache.xalan.internal.xsltc.compiler.Constants.COMPILER_PACKAGE
+public static final String com.sun.org.apache.xalan.internal.xsltc.compiler.Constants.RUNTIME_PACKAGE
+public static final String com.sun.org.apache.xalan.internal.xsltc.compiler.Constants.XSLT_PACKAGE
+public static final String com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl.PACKAGE_NAME
+public String com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription.base_value
+public String com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription.defined_in
+public String com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription.id
+public static String com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescriptionHelper.id()
+public String com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription.name
+public String com.sun.org.omg.CORBA.ValueDefPackage.FullValueDescription.version
+public static String com.sun.org.omg.SendingContext.CodeBasePackage.URLHelper.extract(org.omg.CORBA.Any)
+public static String com.sun.org.omg.SendingContext.CodeBasePackage.URLHelper.id()
+public static String com.sun.org.omg.SendingContext.CodeBasePackage.URLSeqHelper.id()
+public static String com.sun.org.omg.SendingContext.CodeBasePackage.ValueDescSeqHelper.id()
+public static String com.sun.org.omg.SendingContext.CodeBasePackage.URLHelper.read(org.omg.CORBA.portable.InputStream)
+public abstract String com.sun.xml.internal.bind.api.impl.NameConverter.toPackageName(String)
+public String com.sun.xml.internal.bind.api.impl.NameConverter.Standard.toPackageName(String)
+public String com.sun.xml.internal.bind.v2.model.impl.RegistryInfoImpl<T,C,F,M>.getPackageName()
+public abstract String com.sun.xml.internal.bind.v2.model.nav.Navigator<T,C,F,M>.getPackageName(C)
+public String com.sun.xml.internal.bind.v2.model.nav.ReflectionNavigator.getPackageName(Class<T>)
+public volatile String com.sun.xml.internal.bind.v2.model.nav.ReflectionNavigator.getPackageName(Object)
+public static final String com.sun.xml.internal.ws.model.RuntimeModeler.JAXWS_PACKAGE_PD
+public static final String com.sun.xml.internal.ws.model.RuntimeModeler.PD_JAXWS_PACKAGE_PD
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_NO_PACKAGE(Object)
+public static final String java.rmi.server.LoaderHandler.packagePrefix
+public static final String java.rmi.server.RemoteRef.packagePrefix
+public static final String javax.management.remote.JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES
+public static final String javax.management.remote.JMXConnectorServerFactory.PROTOCOL_PROVIDER_PACKAGES
+public static String org.omg.CosNaming.NamingContextExtPackage.AddressHelper.extract(org.omg.CORBA.Any)
+public static String org.omg.CosNaming.NamingContextExtPackage.StringNameHelper.extract(org.omg.CORBA.Any)
+public static String org.omg.CosNaming.NamingContextExtPackage.URLStringHelper.extract(org.omg.CORBA.Any)
+public static String org.omg.CosNaming.NamingContextExtPackage.AddressHelper.id()
+public static String org.omg.CosNaming.NamingContextExtPackage.InvalidAddressHelper.id()
+public static String org.omg.CosNaming.NamingContextExtPackage.StringNameHelper.id()
+public static String org.omg.CosNaming.NamingContextExtPackage.URLStringHelper.id()
+public static String org.omg.CosNaming.NamingContextExtPackage.AddressHelper.read(org.omg.CORBA.portable.InputStream)
+public static String org.omg.CosNaming.NamingContextExtPackage.StringNameHelper.read(org.omg.CORBA.portable.InputStream)
+public static String org.omg.CosNaming.NamingContextExtPackage.URLStringHelper.read(org.omg.CORBA.portable.InputStream)
+public static String org.omg.CosNaming.NamingContextPackage.AlreadyBoundHelper.id()
+public static String org.omg.CosNaming.NamingContextPackage.CannotProceedHelper.id()
+public static String org.omg.CosNaming.NamingContextPackage.InvalidNameHelper.id()
+public static String org.omg.CosNaming.NamingContextPackage.NotEmptyHelper.id()
+public static String org.omg.CosNaming.NamingContextPackage.NotFoundHelper.id()
+public static String org.omg.CosNaming.NamingContextPackage.NotFoundReasonHelper.id()
+public static String org.omg.DynamicAny.DynAnyFactoryPackage.InconsistentTypeCodeHelper.id()
+public static String org.omg.DynamicAny.DynAnyPackage.InvalidValueHelper.id()
+public static String org.omg.DynamicAny.DynAnyPackage.TypeMismatchHelper.id()
+public static String org.omg.IOP.CodecFactoryPackage.UnknownEncodingHelper.id()
+public static String org.omg.IOP.CodecPackage.FormatMismatchHelper.id()
+public static String org.omg.IOP.CodecPackage.InvalidTypeForEncodingHelper.id()
+public static String org.omg.IOP.CodecPackage.TypeMismatchHelper.id()
+public static String org.omg.PortableInterceptor.ORBInitInfoPackage.ObjectIdHelper.extract(org.omg.CORBA.Any)
+public static String org.omg.PortableInterceptor.ORBInitInfoPackage.DuplicateNameHelper.id()
+public static String org.omg.PortableInterceptor.ORBInitInfoPackage.InvalidNameHelper.id()
+public static String org.omg.PortableInterceptor.ORBInitInfoPackage.ObjectIdHelper.id()
+public String org.omg.PortableInterceptor.ORBInitInfoPackage.DuplicateName.name
+public static String org.omg.PortableInterceptor.ORBInitInfoPackage.ObjectIdHelper.read(org.omg.CORBA.portable.InputStream)
+public static String org.omg.PortableServer.CurrentPackage.NoContextHelper.id()
+public static String org.omg.PortableServer.POAManagerPackage.AdapterInactiveHelper.id()
+public static String org.omg.PortableServer.POAPackage.AdapterAlreadyExistsHelper.id()
+public static String org.omg.PortableServer.POAPackage.AdapterNonExistentHelper.id()
+public static String org.omg.PortableServer.POAPackage.InvalidPolicyHelper.id()
+public static String org.omg.PortableServer.POAPackage.NoServantHelper.id()
+public static String org.omg.PortableServer.POAPackage.ObjectAlreadyActiveHelper.id()
+public static String org.omg.PortableServer.POAPackage.ObjectNotActiveHelper.id()
+public static String org.omg.PortableServer.POAPackage.ServantAlreadyActiveHelper.id()
+public static String org.omg.PortableServer.POAPackage.ServantNotActiveHelper.id()
+public static String org.omg.PortableServer.POAPackage.WrongAdapterHelper.id()
+public static String org.omg.PortableServer.POAPackage.WrongPolicyHelper.id()
+public static String sun.invoke.util.VerifyAccess.getPackageName(Class<T>)
+public static final String sun.reflect.misc.ReflectUtil.PROXY_PACKAGE
+public static final String sun.security.krb5.internal.PAForUserEnc.AUTH_PACKAGE
+public String sun.util.locale.provider.LocaleProviderAdapter.Type.getTextResourcesPackage()
+public String sun.util.locale.provider.LocaleProviderAdapter.Type.getUtilResourcesPackage()
 $
 ```
 Note how the member is considered to match if either of these two names match:
@@ -263,6 +453,12 @@ similar signatures:
 ```shell
 $ juggle 'java.io.InputStream (String)'
 public static java.io.InputStream ClassLoader.getSystemResourceAsStream(String)
+public static java.io.InputStream com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream(String)
+public static java.io.InputStream com.sun.org.apache.xalan.internal.utils.SecuritySupport.getResourceAsStream(String)
+public static java.io.InputStream com.sun.org.apache.xerces.internal.utils.SecuritySupport.getResourceAsStream(String)
+public static java.io.InputStream com.sun.xml.internal.ws.util.xml.XmlUtil.getUTF8Stream(String)
+public static java.io.InputStream sun.text.normalizer.ICUData.getRequiredStream(String)
+public static java.io.InputStream sun.text.normalizer.ICUData.getStream(String)
 public java.io.FileInputStream.<init>(String) throws java.io.FileNotFoundException
 public java.io.StringBufferInputStream.<init>(String)
 $
@@ -367,11 +563,33 @@ modifier will set an alternative minimum level of accessibility
 ```shell
 $ juggle 'protected java.io.OutputStream ()'
 public java.io.OutputStream.<init>()
-public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static final java.io.PrintStream System.err
 public static final java.io.PrintStream System.out
+public com.sun.corba.se.impl.encoding.CDROutputStream_1_0.<init>()
+public com.sun.corba.se.impl.encoding.CDROutputStream_1_1.<init>()
+public com.sun.corba.se.impl.encoding.CDROutputStream_1_2.<init>()
+public com.sun.corba.se.impl.io.IIOPOutputStream.<init>() throws java.io.IOException
+public com.sun.corba.se.impl.io.OutputStreamHook.<init>() throws java.io.IOException
+public static java.io.PrintStream com.sun.corba.se.impl.naming.cosnaming.NamingUtils.debugStream
+public static java.io.PrintStream com.sun.corba.se.impl.naming.cosnaming.NamingUtils.errStream
+public com.sun.org.apache.xml.internal.security.utils.UnsyncByteArrayOutputStream.<init>()
+public com.sun.xml.internal.bind.v2.util.ByteArrayOutputStreamEx.<init>()
+public com.sun.xml.internal.messaging.saaj.util.ByteOutputStream.<init>()
+public com.sun.xml.internal.org.jvnet.staxex.ByteArrayOutputStreamEx.<init>()
+public com.sun.xml.internal.ws.util.ByteArrayBuffer.<init>()
 public java.io.ByteArrayOutputStream.<init>()
 public java.io.PipedOutputStream.<init>()
+public static synchronized java.io.PrintStream java.rmi.server.LogStream.getDefaultStream()
+public static java.io.PrintStream java.rmi.server.RemoteServer.getLog()
+public static java.io.PrintStream java.sql.DriverManager.getLogStream()
+public static java.io.PrintStream javax.swing.DebugGraphics.logStream()
+public javax.swing.text.rtf.AbstractFilter.<init>()
+public javax.swing.text.rtf.RTFParser.<init>()
+public org.omg.CORBA.portable.OutputStream.<init>()
+public org.omg.CORBA_2_3.portable.OutputStream.<init>()
+public static java.io.PrintStream sun.java2d.loops.GraphicsPrimitive.traceout
+public sun.net.www.http.PosterOutputStream.<init>()
+public sun.security.util.DerOutputStream.<init>()
 protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
 $
 ```
@@ -432,6 +650,7 @@ For example, there are no methods that take a `double[]`, an `int`, a
 
 ```shell
 $ juggle "void (double[],int,double,int)"
+public static void com.sun.media.sound.EmergencySoundbank.complexGaussianDist(double[],double,double,double)
 $
 ```
 
@@ -440,6 +659,7 @@ However, allowing Juggle to permute parameters, locates a match:
 ```shell
 $ juggle -x "void (double[],int,double,int)"
 public static void java.util.Arrays.fill(double[],int,int,double)
+public static void com.sun.media.sound.EmergencySoundbank.complexGaussianDist(double[],double,double,double)
 $
 ```
 
@@ -479,17 +699,54 @@ A simple `?` wildcard can stand for any type.  So here are all the members
 that take a `String`, an `int` and two other parameters of unknown type:
 ```shell
 $ juggle '(String,int,?,?)'
+public com.sun.java.util.jar.pack.Attribute.FormatException.<init>(String,int,String,String)
+public static final String com.sun.org.apache.bcel.internal.classfile.Utility.fillup(String,int,boolean,char)
+public com.sun.org.apache.xerces.internal.impl.xs.traversers.OneAttr.<init>(String,int,int,Object)
+public com.sun.xml.internal.fastinfoset.util.StringIntMap.Entry.<init>(String,int,int,com.sun.xml.internal.fastinfoset.util.StringIntMap.Entry)
+public java.awt.TextArea.<init>(String,int,int,int) throws java.awt.HeadlessException
+public java.lang.management.MonitorInfo.<init>(String,int,int,StackTraceElement)
 public java.net.Socket.<init>(String,int,java.net.InetAddress,int) throws java.io.IOException
 public java.text.StringCharacterIterator.<init>(String,int,int,int)
+public java.util.logging.FileHandler.<init>(String,int,int,boolean) throws java.io.IOException,SecurityException
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,int,int)
 public javax.security.auth.callback.ConfirmationCallback.<init>(String,int,String[],int)
-public static int Integer.parseInt(CharSequence,int,int,int) throws NumberFormatException
-public static long Long.parseLong(CharSequence,int,int,int) throws NumberFormatException
-public static int Integer.parseUnsignedInt(CharSequence,int,int,int) throws NumberFormatException
-public static long Long.parseUnsignedLong(CharSequence,int,int,int) throws NumberFormatException
-public static <E> java.util.List<E> java.util.List<E>.of(E,E,E,E)
-public static <K,V> java.util.Map<K,V> java.util.Map<K,V>.of(K,V,K,V)
-public static <E> java.util.Set<E> java.util.Set<E>.of(E,E,E,E)
+public sun.awt.shell.ShellFolderColumnInfo.<init>(String,int,int,boolean)
+public static boolean sun.awt.windows.ThemeReader.getBoolean(String,int,int,int)
+public static java.awt.Color sun.awt.windows.ThemeReader.getColor(String,int,int,int)
+public static int sun.awt.windows.ThemeReader.getEnum(String,int,int,int)
+public static int sun.awt.windows.ThemeReader.getInt(String,int,int,int)
+public static java.awt.Point sun.awt.windows.ThemeReader.getPoint(String,int,int,int)
+public static java.awt.Dimension sun.awt.windows.ThemeReader.getPosition(String,int,int,int)
+public static java.awt.Insets sun.awt.windows.ThemeReader.getThemeMargins(String,int,int,int)
+public sun.java2d.cmm.ProfileDeferralInfo.<init>(String,int,int,int)
+public sun.rmi.transport.tcp.TCPEndpoint.<init>(String,int,java.rmi.server.RMIClientSocketFactory,java.rmi.server.RMIServerSocketFactory)
+public static java.util.Map<K,V> sun.util.locale.provider.CalendarDataUtility.retrieveFieldValueNames(String,int,int,java.util.Locale)
+public static java.util.Map<K,V> sun.util.locale.provider.CalendarDataUtility.retrieveJavaTimeFieldValueNames(String,int,int,java.util.Locale)
+public java.awt.event.ActionEvent.<init>(Object,int,String,int)
+public javax.swing.JOptionPane.<init>(Object,int,int,javax.swing.Icon)
+public javax.swing.event.ListDataEvent.<init>(Object,int,int,int)
+public javax.swing.event.ListSelectionEvent.<init>(Object,int,int,boolean)
+public javax.swing.plaf.nimbus.NimbusDefaults.DerivedFont.<init>(String,float,Boolean,Boolean)
+public com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg.<init>(String,Object,Object,com.sun.org.apache.xalan.internal.xsltc.compiler.SyntaxTreeNode)
+public static String com.sun.xml.internal.bind.marshaller.Messages.format(String,Object,Object,Object)
+public static String com.sun.xml.internal.bind.unmarshaller.Messages.format(String,Object,Object,Object)
+public com.sun.xml.internal.ws.message.JAXBAttachment.<init>(String,Object,com.sun.xml.internal.ws.spi.db.XMLBridge<T>,String)
+public javax.management.MBeanServerNotification.<init>(String,Object,long,javax.management.ObjectName)
+public javax.management.Notification.<init>(String,Object,long,String)
+public javax.management.Notification.<init>(String,Object,long,long)
+public javax.naming.directory.SearchResult.<init>(String,Object,javax.naming.directory.Attributes,boolean)
+public sun.font.TrueTypeFont.<init>(String,Object,int,boolean) throws java.awt.FontFormatException
+public sun.security.validator.ValidatorException.<init>(String,Object,java.security.cert.X509Certificate,Throwable)
+public static boolean com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary.compare(Object,Object,int,com.sun.org.apache.xalan.internal.xsltc.DOM)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(Object,Object,Object,Object)
+public static com.sun.istack.internal.localization.Localizable com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.localizableWSP_0030_SERVICE_PORT_OPERATION_FAULT_MSG_PARAM_MUST_NOT_BE_NULL(Object,Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.AddressingMessages.NON_UNIQUE_OPERATION_SIGNATURE(Object,Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.RUNTIME_WSDLPARSER_INVALID_WSDL(Object,Object,Object,Object)
+public static com.sun.istack.internal.localization.Localizable com.sun.xml.internal.ws.resources.AddressingMessages.localizableNON_UNIQUE_OPERATION_SIGNATURE(Object,Object,Object,Object)
+public static com.sun.istack.internal.localization.Localizable com.sun.xml.internal.ws.resources.ClientMessages.localizableRUNTIME_WSDLPARSER_INVALID_WSDL(Object,Object,Object,Object)
+public java.beans.Expression.<init>(Object,Object,String,Object[])
+public static transient void sun.util.logging.LoggingSupport.log(Object,Object,String,Object[])
+public static void sun.util.logging.LoggingSupport.log(Object,Object,String,Throwable)
 $
 ```
 
@@ -509,6 +766,24 @@ public volatile String StringBuilder.substring(int)
 public volatile String StringBuilder.substring(int,int)
 public synchronized String StringBuffer.substring(int)
 public synchronized String StringBuffer.substring(int,int)
+public abstract String com.sun.org.apache.regexp.internal.CharacterIterator.substring(int)
+public abstract String com.sun.org.apache.regexp.internal.CharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.CharacterArrayCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.CharacterArrayCharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.ReaderCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.ReaderCharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.StreamCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.StreamCharacterIterator.substring(int,int)
+public String com.sun.org.apache.regexp.internal.StringCharacterIterator.substring(int)
+public String com.sun.org.apache.regexp.internal.StringCharacterIterator.substring(int,int)
+public abstract com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xml.internal.utils.XMLString.substring(int)
+public abstract com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xml.internal.utils.XMLString.substring(int,int)
+public com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xml.internal.utils.XMLStringDefault.substring(int)
+public com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xml.internal.utils.XMLStringDefault.substring(int,int)
+public com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xpath.internal.objects.XString.substring(int)
+public com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xpath.internal.objects.XString.substring(int,int)
+public com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xpath.internal.objects.XStringForFSB.substring(int)
+public com.sun.org.apache.xml.internal.utils.XMLString com.sun.org.apache.xpath.internal.objects.XStringForFSB.substring(int,int)
 $
 ```
 
@@ -564,6 +839,36 @@ public CharSequence String.subSequence(int,int)
 public abstract CharSequence CharSequence.subSequence(int,int)
 public String String.substring(int,int)
 public static java.nio.CharBuffer java.nio.CharBuffer.wrap(CharSequence,int,int)
+public static String com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary.substringF(String,double,double)
+public static String com.sun.xml.internal.bind.marshaller.Messages.format(String,Object,Object)
+public static String com.sun.xml.internal.bind.unmarshaller.Messages.format(String,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0024_SPI_FAIL_SERVICE_URL_LINE_MSG(Object,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0029_SERVICE_PORT_OPERATION_PARAM_MUST_NOT_BE_NULL(Object,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0061_METHOD_INVOCATION_FAILED(Object,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0071_ERROR_MULTIPLE_ASSERTION_CREATORS_FOR_NAMESPACE(Object,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0074_CANNOT_CREATE_ASSERTION_BAD_TYPE(Object,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0089_EXPECTED_ELEMENT(Object,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0091_END_ELEMENT_NO_MATCH(Object,Object,Object)
+public static String com.sun.xml.internal.ws.policy.privateutil.LocalizationMessages.WSP_0092_CHARACTER_DATA_UNEXPECTED(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.FAILED_TO_INSTANTIATE_INSTANCE_RESOLVER(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.FAILED_TO_PARSE_WITH_MEX(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.StreamingMessages.INVALID_PROPERTY_VALUE_INTEGER(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.StreamingMessages.INVALID_PROPERTY_VALUE_LONG(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ProviderApiMessages.NOTFOUND_PORT_IN_WSDL(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.NOT_KNOW_HTTP_CONTEXT_TYPE(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIMEMODELER_INVALIDANNOTATION_ON_IMPL(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIMEMODELER_INVALID_SOAPBINDING_ON_METHOD(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_ONEWAY_OPERATION_NO_CHECKED_EXCEPTIONS(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ModelerMessages.RUNTIME_MODELER_SOAPBINDING_CONFLICT(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_INVALID_ATTRIBUTE_VALUE(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_MISSING_ATTRIBUTE(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_WRONG_ELEMENT(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_WSDL_INCORRECTSERVICEPORT(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ServerMessages.RUNTIME_PARSER_WSDL_MULTIPLEBINDING(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.ClientMessages.UNSUPPORTED_OPERATION(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.UtilMessages.UTIL_PARSER_WRONG_ELEMENT(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.WsdlmodelMessages.WSDL_PORTADDRESS_EPRADDRESS_NOT_MATCH(Object,Object,Object)
+public static String com.sun.xml.internal.ws.resources.StreamingMessages.XMLREADER_UNEXPECTED_STATE_MESSAGE(Object,Object,Object)
 $
 ```
 

@@ -17,6 +17,8 @@
  */
 package com.angellane.juggle.candidate;
 
+import com.angellane.backport.jdk11.java.lang.Runtime;
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.TypeFlavour;
 import org.junit.jupiter.api.Assumptions;
@@ -24,8 +26,9 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
 import com.angellane.backport.jdk17.java.lang.reflect.RecordComponent;
-import java.util.List;
-import java.util.Set;
+
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,15 +44,15 @@ public class TypeCandidateTest {
         assertEquals(TypeFlavour.CLASS,                 ct.flavour());
         assertEquals(Accessibility.PUBLIC,              ct.accessibility());
         assertEquals(0,                                 ct.otherModifiers());
-        assertEquals(Set.of(),                          ct.annotationTypes());
+        assertEquals(Collections.emptySet(),            ct.annotationTypes());
         assertEquals(java.util.AbstractList.class,      ct.superClass());
         assertEquals(
-                Set.of(java.io.Serializable.class,
+                SetExtras.of(java.io.Serializable.class,
                     java.lang.Cloneable.class,
                     java.util.List.class,
                     java.util.RandomAccess.class
                 ),                                      ct.superInterfaces());
-        assertEquals(List.of(),                         ct.recordComponents());
+        assertEquals(Collections.emptyList(),           ct.recordComponents());
     }
 
     @Test
@@ -61,10 +64,11 @@ public class TypeCandidateTest {
         assertEquals(TypeFlavour.INTERFACE,             ct.flavour());
         assertEquals(Accessibility.PUBLIC,              ct.accessibility());
         assertEquals(Modifier.ABSTRACT,                 ct.otherModifiers());
-        assertEquals(Set.of(),                          ct.annotationTypes());
+        assertEquals(Collections.emptySet(),            ct.annotationTypes());
         assertNull(                                     ct.superClass());
-        assertEquals(Set.of(java.util.Collection.class),ct.superInterfaces());
-        assertEquals(List.of(),                         ct.recordComponents());
+        assertEquals(Collections.singleton(java.util.Collection.class),
+                                                        ct.superInterfaces());
+        assertEquals(Collections.emptyList(),           ct.recordComponents());
     }
 
     @Test
@@ -76,10 +80,10 @@ public class TypeCandidateTest {
         assertEquals(TypeFlavour.ENUM,                  ct.flavour());
         assertEquals(Accessibility.PUBLIC,              ct.accessibility());
         assertEquals(Modifier.STATIC | Modifier.FINAL,  ct.otherModifiers());
-        assertEquals(Set.of(),                          ct.annotationTypes());
+        assertEquals(Collections.emptySet(),            ct.annotationTypes());
         assertEquals(java.lang.Enum.class,              ct.superClass());
-        assertEquals(Set.of(),                          ct.superInterfaces());
-        assertEquals(List.of(),                         ct.recordComponents());
+        assertEquals(Collections.emptySet(),            ct.superInterfaces());
+        assertEquals(Collections.emptyList(),           ct.recordComponents());
     }
 
     @Test
@@ -113,17 +117,17 @@ public class TypeCandidateTest {
         assertEquals(TypeFlavour.RECORD,                ct.flavour());
         assertEquals(Accessibility.PUBLIC,              ct.accessibility());
         assertEquals(Modifier.FINAL,                    ct.otherModifiers());
-        assertEquals(Set.of(),                          ct.annotationTypes());
+        assertEquals(Collections.emptySet(),            ct.annotationTypes());
         assertEquals(recordClass,                       ct.superClass());
-        assertEquals(Set.of(),                          ct.superInterfaces());
+        assertEquals(Collections.emptySet(),            ct.superInterfaces());
 
-        assertEquals(List.of("user", "group"),
+        assertEquals(Arrays.asList("user", "group"),
                 ct.recordComponents().stream()
                         .map(RecordComponent::getName)
                         .collect(Collectors.toList()),
                 "recordComponent names match");
 
-        assertEquals(List.of(userPrincipalClass, groupPrincipalClass),
+        assertEquals(Arrays.asList(userPrincipalClass, groupPrincipalClass),
                 ct.recordComponents().stream()
                         .map(RecordComponent::getType)
                         .collect(Collectors.toList()),
@@ -142,9 +146,9 @@ public class TypeCandidateTest {
         assertEquals(TypeFlavour.CLASS,                 ct.flavour());
         assertEquals(Accessibility.PUBLIC,              ct.accessibility());
         assertEquals(Modifier.FINAL | Modifier.ABSTRACT,ct.otherModifiers());
-        assertEquals(Set.of(),                          ct.annotationTypes());
+        assertEquals(Collections.emptySet(),            ct.annotationTypes());
         assertNull(                                     ct.superClass());
-        assertEquals(Set.of(),                          ct.superInterfaces());
-        assertEquals(List.of(),                         ct.recordComponents());
+        assertEquals(Collections.emptySet(),            ct.superInterfaces());
+        assertEquals(Collections.emptyList(),           ct.recordComponents());
     }
 }

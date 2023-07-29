@@ -17,5 +17,42 @@
  */
 package com.angellane.backport.jdk11.java.lang.module;
 
-public class ResolvedModule {
+import com.angellane.backport.jdk11.java.lang.Module;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public final class ResolvedModule {
+    private static Class<?> _resolvedModule     = null;
+    private static Method   _reference          = null;
+
+    static {
+        try {
+            _resolvedModule = Class.forName("java.lang.module.ResolvedModule");
+            _reference = _resolvedModule.getMethod("reference");
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {}
+
+        assert !Module._modulesSupported() || null != _resolvedModule;
+        assert !Module._modulesSupported() || null != _reference;
+    }
+
+    private final Object _wrapped;
+
+    public ResolvedModule(Object wrap) {
+        if (_resolvedModule.isAssignableFrom(wrap.getClass()))
+            _wrapped = wrap;
+        else
+            throw new ClassCastException();
+    }
+
+    public ModuleReference reference() {
+        try {
+            return new ModuleReference(
+                    _reference.invoke(_wrapped)
+            );
+        } catch (InvocationTargetException | IllegalAccessException
+                 | ClassCastException ignored) {}
+
+        return null;
+    }
 }

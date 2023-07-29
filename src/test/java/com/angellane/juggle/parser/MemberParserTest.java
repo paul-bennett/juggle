@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle.parser;
 
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.backport.jdk17.java.lang.ClassExtras;
 import com.angellane.juggle.Juggler;
 import com.angellane.juggle.match.Accessibility;
@@ -30,8 +31,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,7 +90,7 @@ public class MemberParserTest {
         );
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.setAnnotationTypes(Set.of(
+        expectedQuery.setAnnotationTypes(SetExtras.of(
                 SafeVarargs.class, Deprecated.class
         ));
         expectedQuery.setModifiersAndMask(Modifier.STATIC, Modifier.STATIC);
@@ -200,7 +201,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("(,?,...)");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.params = List.of(
+        expectedQuery.params = Arrays.asList(
                 ParamSpec.wildcard(),
                 ParamSpec.wildcard(),
                 ParamSpec.ellipsis());
@@ -216,7 +217,7 @@ public class MemberParserTest {
                         + "? super Integer)");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.params = List.of(
+        expectedQuery.params = Arrays.asList(
                 ParamSpec.param(
                         BoundedType.subtypeOf(java.net.InetAddress.class)),
                 ParamSpec.param(
@@ -236,7 +237,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("(Integer)");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.params = List.of(
+        expectedQuery.params = Collections.singletonList(
                 ParamSpec.param(BoundedType.exactType(Integer.class))
         );
 
@@ -248,7 +249,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("()");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.params = List.of();
+        expectedQuery.params = Collections.emptyList();
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -258,7 +259,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("()");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.params = List.of();
+        expectedQuery.params = Collections.emptyList();
         expectedQuery.exceptions = null;
 
         assertEquals(expectedQuery, actualQuery);
@@ -269,7 +270,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("throws");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.exceptions = Set.of();
+        expectedQuery.exceptions = Collections.emptySet();
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -280,7 +281,7 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
-                Set.of(BoundedType.exactType(ArithmeticException.class));
+                Collections.singleton(BoundedType.exactType(ArithmeticException.class));
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -290,7 +291,7 @@ public class MemberParserTest {
         MemberQuery actualQuery = memberQueryFor("throws ?");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.exceptions = Set.of(BoundedType.unboundedWildcardType());
+        expectedQuery.exceptions = SetExtras.of(BoundedType.unboundedWildcardType());
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -301,7 +302,7 @@ public class MemberParserTest {
                 "throws ? super java.io.FileNotFoundException");
 
         MemberQuery expectedQuery = new MemberQuery();
-        expectedQuery.exceptions = Set.of(
+        expectedQuery.exceptions = SetExtras.of(
                 BoundedType.supertypeOf(java.io.FileNotFoundException.class)
         );
 
@@ -315,7 +316,7 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
-                Set.of(BoundedType.subtypeOf(java.io.IOException.class));
+                Collections.singleton(BoundedType.subtypeOf(java.io.IOException.class));
 
         assertEquals(expectedQuery, actualQuery);
     }
@@ -327,7 +328,7 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
-                Set.of(BoundedType.subtypeOf(
+                Collections.singleton(BoundedType.subtypeOf(
                         Error.class, Exception.class, Throwable.class));
 
         assertEquals(expectedQuery, actualQuery);
@@ -340,7 +341,7 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.exceptions =
-                Set.of(BoundedType.exactType(ArithmeticException.class),
+                SetExtras.of(BoundedType.exactType(ArithmeticException.class),
                         BoundedType.exactType(java.io.IOException.class));
 
         assertEquals(expectedQuery, actualQuery);

@@ -72,7 +72,6 @@ $
 Another Christmas tree
 ```shell
 $ juggle "@Deprecated abstract public interface /Obs/"  
-public abstract interface java.util.Observer
 $
 ```
 
@@ -86,12 +85,62 @@ $ juggle '@java.lang.annotation.Documented @interface'
 public abstract @interface Deprecated
 public abstract @interface FunctionalInterface
 public abstract @interface SafeVarargs
+public abstract @interface com.sun.istack.internal.Interned
+public abstract @interface com.sun.istack.internal.NotNull
+public abstract @interface com.sun.istack.internal.Nullable
+public abstract @interface com.sun.org.glassfish.external.arc.Taxonomy
+public abstract @interface com.sun.org.glassfish.gmbal.AMXMetadata
+public abstract @interface com.sun.org.glassfish.gmbal.Description
+public abstract @interface com.sun.org.glassfish.gmbal.DescriptorFields
+public abstract @interface com.sun.org.glassfish.gmbal.DescriptorKey
+public abstract @interface com.sun.org.glassfish.gmbal.IncludeSubclass
+public abstract @interface com.sun.org.glassfish.gmbal.InheritedAttribute
+public abstract @interface com.sun.org.glassfish.gmbal.InheritedAttributes
+public abstract @interface com.sun.org.glassfish.gmbal.ManagedAttribute
+public abstract @interface com.sun.org.glassfish.gmbal.ManagedData
+public abstract @interface com.sun.org.glassfish.gmbal.ManagedObject
+public abstract @interface com.sun.org.glassfish.gmbal.ManagedOperation
+public abstract @interface com.sun.org.glassfish.gmbal.NameValue
+public abstract @interface com.sun.org.glassfish.gmbal.ParameterNames
+public abstract @interface com.sun.xml.internal.ws.api.server.InstanceResolverAnnotation
+public abstract @interface com.sun.xml.internal.ws.developer.MemberSubmissionAddressing
+public abstract @interface com.sun.xml.internal.ws.developer.SchemaValidation
+public abstract @interface com.sun.xml.internal.ws.developer.Serialization
+public abstract @interface com.sun.xml.internal.ws.developer.StreamingAttachment
+public abstract @interface com.sun.xml.internal.ws.developer.UsesJAXBContext
+public abstract @interface java.beans.ConstructorProperties
 public abstract @interface java.lang.annotation.Documented
 public abstract @interface java.lang.annotation.Inherited
 public abstract @interface java.lang.annotation.Native
 public abstract @interface java.lang.annotation.Repeatable
 public abstract @interface java.lang.annotation.Retention
 public abstract @interface java.lang.annotation.Target
+public abstract @interface javax.annotation.Generated
+public abstract @interface javax.annotation.PostConstruct
+public abstract @interface javax.annotation.PreDestroy
+public abstract @interface javax.annotation.Resources
+public abstract @interface javax.annotation.processing.SupportedAnnotationTypes
+public abstract @interface javax.annotation.processing.SupportedOptions
+public abstract @interface javax.annotation.processing.SupportedSourceVersion
+public abstract @interface javax.management.DescriptorKey
+public abstract @interface javax.management.MXBean
+public abstract @interface javax.xml.ws.Action
+public abstract @interface javax.xml.ws.BindingType
+public abstract @interface javax.xml.ws.FaultAction
+public abstract @interface javax.xml.ws.RequestWrapper
+public abstract @interface javax.xml.ws.RespectBinding
+public abstract @interface javax.xml.ws.ResponseWrapper
+public abstract @interface javax.xml.ws.ServiceMode
+public abstract @interface javax.xml.ws.WebEndpoint
+public abstract @interface javax.xml.ws.WebFault
+public abstract @interface javax.xml.ws.WebServiceClient
+public abstract @interface javax.xml.ws.WebServiceProvider
+public abstract @interface javax.xml.ws.WebServiceRef
+public abstract @interface javax.xml.ws.WebServiceRefs
+public abstract @interface javax.xml.ws.soap.Addressing
+public abstract @interface javax.xml.ws.soap.MTOM
+public abstract @interface javax.xml.ws.spi.WebServiceFeatureAnnotation
+public abstract @interface jdk.Exported
 $
 ```
 

@@ -17,7 +17,8 @@
  */
 package com.angellane.juggle;
 
-//import com.angellane.backport.jdk11.java.lang.module.FindException;
+import com.angellane.backport.jdk11.java.lang.Module;
+import com.angellane.backport.jdk11.java.lang.module.FindException;
 import com.angellane.backport.jdk11.java.lang.StringExtras;
 import com.angellane.backport.jdk11.java.util.OptionalExtras;
 import com.angellane.backport.jdk17.java.lang.ClassExtras;
@@ -30,11 +31,11 @@ import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
 import com.angellane.juggle.query.*;
 import com.angellane.juggle.sink.Sink;
-import com.angellane.juggle.source.Module;
+import com.angellane.juggle.source.FileSource;
+import com.angellane.juggle.source.ModuleSource;
 import com.angellane.juggle.util.ResolvingURLClassLoader;
 import com.angellane.juggle.source.Source;
 
-import java.lang.module.FindException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
@@ -46,10 +47,11 @@ public class Juggler {
     private final List<String> importedPackageNames = new ArrayList<>();
 
     public Juggler() {
-        addSource(new Module(getModulePaths(),
-                Object.class.getModule().getName()  // "java.base" is always inspected
-                )
-        );
+        if (Module._modulesSupported())
+            addSource(new ModuleSource());
+        else
+            addSource(new FileSource(System.getProperty("java.home") + "/lib/rt.jar"));
+
         importedPackageNames.add(Object.class.getPackage().getName());    // "java.lang" is always imported
     }
 

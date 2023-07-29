@@ -17,5 +17,71 @@
  */
 package com.angellane.backport.jdk11.java.lang.module;
 
-public class Configuration {
+import com.angellane.backport.jdk11.java.lang.Module;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Optional;
+
+public final class Configuration {
+    private static Class<?> _configuration  = null;
+    private static Class<?> _moduleFinder   = null;
+    private static Class<?> _findException  = null;
+    private static Method   _findModule     = null;
+    private static Method   _resolve        = null;
+
+    static {
+        try {
+            _configuration = Class.forName("java.lang.module.Configuration");
+            _moduleFinder  = Class.forName("java.lang.module.ModuleFinder");
+            _findException = Class.forName("java.lang.module.FindException");
+            _findModule = _configuration.getMethod("findModule", String.class);
+            _resolve    = _configuration.getMethod(
+                    "resolve", _moduleFinder, _moduleFinder, Collection.class
+            );
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {}
+
+        assert !Module._modulesSupported() || null != _configuration;
+        assert !Module._modulesSupported() || null != _moduleFinder;
+        assert !Module._modulesSupported() || null != _findException;
+        assert !Module._modulesSupported() || null != _findModule;
+        assert !Module._modulesSupported() || null != _resolve;
+    }
+
+    private final Object _wrapped;     // Actual type: java.lang.module.Configuration
+
+    public Configuration(Object wrap) {
+        if (_configuration.isAssignableFrom(wrap.getClass()))
+            _wrapped = wrap;
+        else
+            throw new ClassCastException();
+    }
+
+
+    public Optional<ResolvedModule> findModule(String name) {
+        try {
+            return ((Optional<Object>)_findModule.invoke(_wrapped, name))
+                    .flatMap(t -> Optional.of(new ResolvedModule(t)));
+        } catch (InvocationTargetException | IllegalAccessException
+                | ClassCastException ignored) {}
+
+        return Optional.empty();
+    }
+
+    public Configuration resolve(ModuleFinder before,
+                                 ModuleFinder after,
+                                 Collection<String> roots) {
+        try {
+            return new Configuration(
+                    _resolve.invoke(_wrapped, before._unwrap(), after._unwrap(), roots)
+            );
+        } catch (InvocationTargetException ex) {
+            Throwable thrown = ex.getTargetException();
+            if (_findException.isAssignableFrom(thrown.getClass()))
+                throw new FindException(thrown);
+        } catch (IllegalAccessException | ClassCastException ignored) {}
+
+        return null;
+    }
 }

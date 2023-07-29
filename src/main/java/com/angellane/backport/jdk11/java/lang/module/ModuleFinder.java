@@ -17,5 +17,54 @@
  */
 package com.angellane.backport.jdk11.java.lang.module;
 
+import com.angellane.backport.jdk11.java.lang.Module;
+import com.angellane.backport.jdk17.java.lang.ClassExtras;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+
 public class ModuleFinder {
+    private static Class<?> _moduleFinder   = null;
+    private static Method   _ofSystem       = null;
+    private static Method   _of             = null;
+
+    static {
+        try {
+            _moduleFinder   = Class.forName("java.lang.module.ModuleFinder");
+            _ofSystem       = _moduleFinder.getMethod("ofSystem");
+            _of             = _moduleFinder.getMethod("of", ClassExtras.arrayType(Path.class));
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {}
+
+        assert !Module._modulesSupported() || null != _moduleFinder;
+        assert !Module._modulesSupported() || null != _ofSystem;
+        assert !Module._modulesSupported() || null != _of;
+    }
+
+    private final Object _wrapped;
+
+    ModuleFinder(Object wrap) {
+        if (_moduleFinder.isAssignableFrom(wrap.getClass()))
+            _wrapped = wrap;
+        else
+            throw new ClassCastException();
+    }
+
+    Object _unwrap() { return _wrapped; }
+
+    public static ModuleFinder ofSystem() {
+        try {
+            return new ModuleFinder(_ofSystem.invoke(null));
+        } catch (InvocationTargetException | IllegalAccessException
+                 | ClassCastException ignored) {}
+        return null;
+    }
+
+    public static ModuleFinder of(Path... entries) {
+        try {
+            return new ModuleFinder(_of.invoke(null, (Object) entries));
+        } catch (InvocationTargetException | IllegalAccessException
+                 | ClassCastException ignored) {}
+        return null;
+    }
 }

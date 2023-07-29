@@ -17,12 +17,13 @@
  */
 package com.angellane.juggle.parser;
 
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.juggle.Juggler;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.query.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -98,7 +99,7 @@ public class TypeParserTest {
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.CLASS;
         expectedQuery.setAccessibility(Accessibility.PUBLIC);
-        expectedQuery.setSuperInterfaces(Set.of(
+        expectedQuery.setSuperInterfaces(SetExtras.of(
                 BoundedType.exactType(java.io.Serializable.class),
                 BoundedType.subtypeOf(java.lang.reflect.AnnotatedType.class)
                 )
@@ -115,7 +116,7 @@ public class TypeParserTest {
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.CLASS;
         expectedQuery.setAccessibility(Accessibility.PUBLIC);
-        expectedQuery.setPermittedSubtypes(Set.of(
+        expectedQuery.setPermittedSubtypes(SetExtras.of(
                 BoundedType.exactType(java.lang.Integer.class),
                 BoundedType.subtypeOf(java.lang.Long.class)
         ));
@@ -133,7 +134,7 @@ public class TypeParserTest {
 
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.INTERFACE;
-        expectedQuery.setSuperInterfaces(Set.of(
+        expectedQuery.setSuperInterfaces(SetExtras.of(
                 BoundedType.exactType(java.lang.reflect.AnnotatedType.class),
                 BoundedType.supertypeOf(java.lang.reflect.TypeVariable.class),
                 BoundedType.subtypeOf(java.lang.reflect.AnnotatedElement.class),
@@ -152,7 +153,7 @@ public class TypeParserTest {
 
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.INTERFACE;
-        expectedQuery.setPermittedSubtypes(Set.of(
+        expectedQuery.setPermittedSubtypes(Collections.singleton(
                 BoundedType.exactType(java.lang.reflect.AnnotatedType.class)
         ));
 
@@ -178,7 +179,7 @@ public class TypeParserTest {
 
         TypeQuery expectedQuery = new TypeQuery();
         expectedQuery.flavour = TypeFlavour.ANNOTATION;
-        expectedQuery.setAnnotationTypes(Set.of(Deprecated.class));
+        expectedQuery.setAnnotationTypes(Collections.singleton(Deprecated.class));
 
         assertEquals(expectedQuery, actualQuery);
     }

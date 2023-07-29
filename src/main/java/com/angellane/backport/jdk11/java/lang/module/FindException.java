@@ -17,5 +17,8 @@
  */
 package com.angellane.backport.jdk11.java.lang.module;
 
-public class FindException {
+public class FindException extends RuntimeException {
+    public FindException(Throwable ex) {
+        super(ex.getMessage(), ex.getCause());
+    }
 }

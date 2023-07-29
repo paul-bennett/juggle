@@ -17,5 +17,54 @@
  */
 package com.angellane.backport.jdk11.java.lang.module;
 
-public class ModuleReader {
+import com.angellane.backport.jdk11.java.lang.Module;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+public class ModuleReader implements Closeable {
+    private static Class<?> _moduleReader   = null;
+    private static Method   _list           = null;
+    private static Method   _close          = null;
+
+    static {
+        try {
+            _moduleReader = Class.forName("java.lang.module.ModuleReader");
+            _list = _moduleReader.getMethod("list");
+            _close = _moduleReader.getMethod("close");
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {}
+
+        assert !Module._modulesSupported() || null != _moduleReader;
+        assert !Module._modulesSupported() || null != _list;
+        assert !Module._modulesSupported() || null != _close;
+    }
+
+    private final Object _wrapped;
+
+    public ModuleReader(Object wrap) {
+        if (_moduleReader.isAssignableFrom(wrap.getClass()))
+            _wrapped = wrap;
+        else
+            throw new ClassCastException();
+    }
+
+    public Stream<String> list() {
+        try {
+            return (Stream<String>) _list.invoke(_wrapped);
+        } catch (InvocationTargetException | IllegalAccessException
+                 | ClassCastException ignored) {}
+
+        return null;
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            _close.invoke(_wrapped);
+        } catch (InvocationTargetException | IllegalAccessException
+                 | ClassCastException ignored) {}
+    }
 }

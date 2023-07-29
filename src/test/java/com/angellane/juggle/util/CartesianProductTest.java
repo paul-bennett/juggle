@@ -19,6 +19,8 @@ package com.angellane.juggle.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -34,13 +36,13 @@ public class CartesianProductTest {
     /**
      * A Collector that concatenates characters into a String.
      */
-    final Collector<Character, StringBuilder, String> concatenator = new Collector<>() {
+    final Collector<Character, StringBuilder, String> concatenator = new Collector<Character, StringBuilder, String>() {
         @Override public Supplier<StringBuilder>                supplier()          { return StringBuilder::new;      }
         @Override public BiConsumer<StringBuilder,Character>    accumulator()       { return StringBuilder::append;   }
         @Override public BinaryOperator<StringBuilder>          combiner()          { return StringBuilder::append;   }
         @Override public Function<StringBuilder,String>         finisher()          { return StringBuilder::toString; }
 
-        @Override public Set<Characteristics>                   characteristics()   { return Set.of();                }
+        @Override public Set<Characteristics>                   characteristics()   { return Collections.emptySet();  }
     };
 
     @Test
@@ -54,7 +56,7 @@ public class CartesianProductTest {
 
     @Test
     public void testOne() {
-        List<Character> l1 = List.of('a', 'b', 'c', 'd');
+        List<Character> l1 = Arrays.asList('a', 'b', 'c', 'd');
 
         List<String> product = CartesianProduct.of(l1)
                 .stream()
@@ -62,13 +64,13 @@ public class CartesianProductTest {
                 .collect(Collectors.toList());
 
         assertEquals(l1.size(), product.size());
-        assertEquals(List.of("a", "b", "c", "d"), product);
+        assertEquals(Arrays.asList("a", "b", "c", "d"), product);
     }
 
     @Test
     public void testTwo() {
-        List<Character> l1 = List.of('a', 'b', 'c');
-        List<Character> l2 = List.of('1', '2', '3');
+        List<Character> l1 = Arrays.asList('a', 'b', 'c');
+        List<Character> l2 = Arrays.asList('1', '2', '3');
 
         List<String> product = CartesianProduct.of(l1, l2)
                 .stream()
@@ -76,14 +78,14 @@ public class CartesianProductTest {
                 .collect(Collectors.toList());
 
         assertEquals(l1.size() * l2.size(), product.size());
-        assertEquals(List.of("a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"), product);
+        assertEquals(Arrays.asList("a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"), product);
     }
 
     @Test
     public void testThree() {
-        List<Character> l1 = List.of('a', 'b');
-        List<Character> l2 = List.of('1', '2');
-        List<Character> l3 = List.of('A', 'B');
+        List<Character> l1 = Arrays.asList('a', 'b');
+        List<Character> l2 = Arrays.asList('1', '2');
+        List<Character> l3 = Arrays.asList('A', 'B');
 
         List<String> product = CartesianProduct.of(l1, l2, l3)
                 .stream()
@@ -92,14 +94,14 @@ public class CartesianProductTest {
                 .collect(Collectors.toList());
 
         assertEquals(l1.size() * l2.size() * l3.size(), product.size());
-        assertEquals(List.of("a1A", "a1B", "a2A", "a2B", "b1A", "b1B", "b2A", "b2B"), product);
+        assertEquals(Arrays.asList("a1A", "a1B", "a2A", "a2B", "b1A", "b1B", "b2A", "b2B"), product);
     }
 
     @Test
     public void testThreeParallel() {
-        List<Character> l1 = List.of('a', 'b');
-        List<Character> l2 = List.of('1', '2');
-        List<Character> l3 = List.of('A', 'B');
+        List<Character> l1 = Arrays.asList('a', 'b');
+        List<Character> l2 = Arrays.asList('1', '2');
+        List<Character> l3 = Arrays.asList('A', 'B');
 
         List<String> product = CartesianProduct.of(l1, l2, l3)
                 .stream()
@@ -109,6 +111,6 @@ public class CartesianProductTest {
                 .collect(Collectors.toList());
 
         assertEquals(l1.size() * l2.size() * l3.size(), product.size());
-        assertEquals(List.of("a1A", "a1B", "a2A", "a2B", "b1A", "b1B", "b2A", "b2B"), product);
+        assertEquals(Arrays.asList("a1A", "a1B", "a2A", "a2B", "b1A", "b1B", "b2A", "b2B"), product);
     }
 }

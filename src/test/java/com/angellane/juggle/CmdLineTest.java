@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 import picocli.CommandLine.ParseResult;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +38,7 @@ public class CmdLineTest {
         Main app = new Main();
         ParseResult result = new CommandLine(app).parseArgs(args);
 
-        assertEquals(List.of(), result.unmatched());
+        assertEquals(Collections.emptyList(), result.unmatched());
 
         assertEquals(1, app.juggler.getImportedPackageNames().size());   // java.lang
         assertEquals(1, app.juggler.getSources().size());   // just the default source, java.base
@@ -59,7 +60,7 @@ public class CmdLineTest {
         ParseResult result = new CommandLine(app).parseArgs(args);
         app.parseDeclarationQuery(app.getQueryString());
 
-        assertEquals(List.of(), result.unmatched());
+        assertEquals(Collections.emptyList(), result.unmatched());
         assertNotNull(app.juggler.memberQuery.params);
         assertEquals(0, app.juggler.memberQuery.params.size());
     }
@@ -71,7 +72,7 @@ public class CmdLineTest {
         ParseResult result = new CommandLine(app).parseArgs(args);
         app.parseDeclarationQuery(app.getQueryString());
 
-        assertEquals(List.of(), result.unmatched());
+        assertEquals(Collections.emptyList(), result.unmatched());
         assertNotNull(app.juggler.memberQuery.params);
         assertEquals(1, app.juggler.memberQuery.params.size());
         assertEquals(ParamSpec.param(null, 0, 0, BoundedType.exactType(Object.class), null),
@@ -85,7 +86,7 @@ public class CmdLineTest {
         ParseResult result = new CommandLine(app).setOverwrittenOptionsAllowed(true).parseArgs(args);
         app.parseDeclarationQuery(app.getQueryString());
 
-        assertEquals(List.of(), result.unmatched());
+        assertEquals(Collections.emptyList(), result.unmatched());
         assertNotNull(app.juggler.memberQuery.params);
         assertEquals(2, app.juggler.memberQuery.params.size());
         assertEquals(ParamSpec.param(null, 0, 0, BoundedType.exactType(String.class), null),
@@ -106,12 +107,12 @@ public class CmdLineTest {
         MemberQuery q = new MemberQuery();
         q.setAccessibility(Accessibility.PUBLIC);
         q.returnType = BoundedType.exactType(Integer.TYPE);
-        q.params = List.of(
+        q.params = Arrays.asList(
                 ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null),
                 ParamSpec.param(null, 0, 0, BoundedType.exactType(Integer.TYPE), null)
         );
 
-        assertEquals(List.of(), result.unmatched());
+        assertEquals(Collections.emptyList(), result.unmatched());
         assertEquals(q, app.juggler.memberQuery);
     }
 }

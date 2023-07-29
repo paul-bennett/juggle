@@ -17,19 +17,21 @@
  */
 package com.angellane.juggle.query;
 
-import com.angellane.juggle.match.Accessibility;
+import com.angellane.backport.jdk11.java.lang.Runtime;
+import com.angellane.backport.jdk11.java.util.SetExtras;
 import com.angellane.juggle.candidate.TypeCandidate;
+import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.match.TypeMatcher;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Pattern;
 
 import static com.angellane.juggle.match.TypeMatcher.EXACT_MATCH;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TypeQueryTest {
     TypeMatcher tm = new TypeMatcher(false);
@@ -40,11 +42,11 @@ public class TypeQueryTest {
                 TypeCandidate.candidateForType(java.util.ArrayList.class);
 
         TypeQuery q = new TypeQuery();
-        q.annotationTypes   = Set.of();
+        q.annotationTypes   = Collections.emptySet();
         q.accessibility     = Accessibility.PUBLIC;
         q.modifiers         = 0;
         q.supertype         = BoundedType.exactType(java.util.AbstractList.class);
-        q.superInterfaces   = Set.of(
+        q.superInterfaces   = SetExtras.of(
                 BoundedType.exactType(java.io.Serializable.class),
                 BoundedType.exactType(java.lang.Cloneable.class),
                 BoundedType.exactType(java.util.List.class),
@@ -76,7 +78,7 @@ public class TypeQueryTest {
         q.accessibility     = Accessibility.PUBLIC;
         q.modifiers         = Modifier.ABSTRACT;
         q.declarationPattern = Pattern.compile("List", Pattern.LITERAL);
-        q.superInterfaces   = Set.of(
+        q.superInterfaces   = Collections.singleton(
                 BoundedType.exactType(java.util.Collection.class));
 
         assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
@@ -111,7 +113,6 @@ public class TypeQueryTest {
         } catch (ClassNotFoundException e) {
             // The classes we use in this test only exist since JDK 16
             // When running on earlier releases we should end up here
-
             Assumptions.assumeTrue(Runtime.version().feature() < 16);
             Assumptions.abort("Skipping test -- Record classes not available");
         }
@@ -122,7 +123,7 @@ public class TypeQueryTest {
         TypeQuery q = new TypeQuery();
         q.modifiers         = Modifier.FINAL;
         q.declarationPattern = Pattern.compile("Unix");
-        q.params            = List.of(
+        q.params            = Arrays.asList(
                 ParamSpec.param(userPrincipalClass, "user"),
                 ParamSpec.param(groupPrincipalClass, "group")
         );
@@ -139,7 +140,7 @@ public class TypeQueryTest {
                 TypeCandidate.candidateForType(java.lang.Integer.TYPE);
 
         TypeQuery q = new TypeQuery();
-        q.annotationTypes   = Set.of();
+        q.annotationTypes   = Collections.emptySet();
         q.accessibility     = Accessibility.PUBLIC;
         q.modifiers         = Modifier.FINAL | Modifier.ABSTRACT;
         q.declarationPattern = Pattern.compile("int", Pattern.LITERAL);

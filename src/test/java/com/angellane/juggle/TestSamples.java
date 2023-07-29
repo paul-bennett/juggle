@@ -17,6 +17,7 @@
  */
 package com.angellane.juggle;
 
+import com.angellane.backport.jdk11.java.lang.Runtime;
 import com.angellane.juggle.testsupport.ShellParser;
 import org.junit.jupiter.api.*;
 
@@ -24,6 +25,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -210,7 +212,7 @@ public class TestSamples {
 
 
     private String sortedLines(String text) {
-        return text.lines().map(s -> s + "\n").sorted()
+        return Arrays.stream(text.split("[\r\n]")).map(s -> s + "\n").sorted()
                 .collect(StringBuilder::new,
                         StringBuilder::append,
                         StringBuilder::append).toString();

@@ -17,10 +17,15 @@
  */
 package com.angellane.juggle.source;
 
-//import com.angellane.backport.jdk11.java.lang.module.*;
+import com.angellane.backport.jdk11.java.lang.ClassExtras;
+import com.angellane.backport.jdk11.java.lang.module.Configuration;
+import com.angellane.backport.jdk11.java.lang.module.ModuleDescriptor;
+import com.angellane.backport.jdk11.java.lang.module.ModuleFinder;
+import com.angellane.backport.jdk11.java.lang.ModuleLayer;
+import com.angellane.backport.jdk11.java.lang.module.ModuleReader;
+import com.angellane.backport.jdk11.java.lang.module.ResolvedModule;
+import com.angellane.backport.jdk11.java.nio.PathExtras;
 import com.angellane.backport.jdk11.java.util.OptionalExtras;
-
-import java.lang.module.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,14 +36,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Module extends Source {
+public class ModuleSource extends Source {
     private static final String CLASS_SUFFIX = ".class";
     private static final String MODULE_INFO  = "module-info";
 
     private final List<String> modulePaths;
     private final String moduleName;
 
-    public Module(List<String> modulePaths, String name) {
+    public ModuleSource() {
+        this.modulePaths = Collections.emptyList();
+        this.moduleName = ClassExtras.getModule(Object.class).getName();
+    }
+
+    public ModuleSource(List<String> modulePaths, String name) {
         this.modulePaths = modulePaths;
         this.moduleName = name;
     }
@@ -50,7 +60,7 @@ public class Module extends Source {
         List<String> modNames = Collections.singletonList(moduleName);
 
         Path[] paths = modulePaths.stream()
-                .map(Path::of)
+                .map(PathExtras::of)
                 .toArray(Path[]::new);
 
         Configuration modConf = ModuleLayer.boot().configuration().resolve(
@@ -106,7 +116,7 @@ public class Module extends Source {
                                 .map(n -> getJuggler().loadClassByName(n))
                                 .flatMap(OptionalExtras::stream)
                                 // Ignore classes in packages that aren't exported
-                                .filter(c -> c.getModule().isExported(c.getPackageName()))
+                                .filter(c -> ClassExtras.getModule(c).isExported(c.getPackage().getName()))
                         ;
                     }
                     catch (IOException ignored) {}
