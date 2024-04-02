@@ -629,7 +629,7 @@ Each command-line option has a long name equivalent. This table summarises all o
 | `-c`   | `--conversions` | `auto`, `none`, `all`                                     | `-c auto`                                                    | Whether to apply type conversions                   |
 | `-i`   | `--import`      | package name                                              |                                                              | Packages to import (`java.lang` is always searched) |
 | `-cp`  | `--classpath`   | paths, separated by `:` (Unix-like) or `;` (Windows)      |                                                              | JAR files or directories to search                  |
-| `-m`   | `--add-module`  | module name(s)                                            | `-m java.base`                                               | JMODs to search                                     |
+| `-m`   | `--add-modules` | module name(s)                                            | `-m java.base`                                               | JMODs to search                                     |
 | `-p`   | `--module-path` | paths, separated by `:` (Unix-like) or `;` (Windows)      | `-p .`                                                       | Directories to search for modules                   |
 | `-s`   | `--sort`        | `access`, `hierarchy`, `name`, `package`, `score`, `text` | `-s score -s hierarchy -s access -s package -s name -s text` | Sort criteria                                       |
 | `-x`   | `--permute`     | (none)                                                    | (don't permute)                                              | Match permutations of supplied parameters           |
