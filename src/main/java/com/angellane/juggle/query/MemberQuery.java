@@ -21,6 +21,7 @@ import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
@@ -36,8 +37,9 @@ import static com.angellane.juggle.match.TypeMatcher.NO_MATCH;
  * to match.
  */
 public final class MemberQuery extends Query<MemberCandidate> {
-    public BoundedType returnType = null;
-    public Set<BoundedType> exceptions = null;
+    public Boolean          isDefault   = null;
+    public BoundedType      returnType  = null;
+    public Set<BoundedType> exceptions  = null;
 
     @Override
     public boolean equals(Object other) {
@@ -47,6 +49,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
             return false;
         else
             return super.equals(q)
+                    && Objects.equals(isDefault,  q.isDefault)
                     && Objects.equals(returnType, q.returnType)
                     && Objects.equals(exceptions, q.exceptions)
                     ;
@@ -55,6 +58,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode()
+                , isDefault
                 , returnType
                 , exceptions
         );
@@ -67,6 +71,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
                 ", accessibility=" + accessibility +
                 ", modifierMask=" + modifierMask +
                 ", modifiers=" + modifiers +
+                ", isDefault=" + isDefault + 
                 ", returnType=" + returnType +
                 ", declarationPattern=" + declarationPattern +
                 ", params=" + params +
@@ -107,11 +112,22 @@ public final class MemberQuery extends Query<MemberCandidate> {
                 scoreAnnotations(cm.annotationTypes())
                 , scoreAccessibility(cm.accessibility())
                 , scoreModifiers(cm.otherModifiers())
+                , scoreIsDefault(cm)
                 , scoreReturn(tm, cm.returnType())
                 , scoreName(cm.simpleName(), cm.canonicalName())
                 , scoreParams(tm, cm.params())
                 , scoreExceptions(tm, cm.throwTypes())
         ));
+    }
+
+    private OptionalInt scoreIsDefault(MemberCandidate cm) {
+        if (this.isDefault == null)
+            return EXACT_MATCH;
+        else return (this.isDefault
+                && cm.member() instanceof Method meth
+                && meth.isDefault() == this.isDefault
+        )
+                ? EXACT_MATCH : NO_MATCH;
     }
 
     OptionalInt scoreReturn(TypeMatcher tm, Class<?> returnType) {
@@ -136,5 +152,9 @@ public final class MemberQuery extends Query<MemberCandidate> {
                         qx -> tm.scoreTypeMatch(qx, cx).isPresent())
                 )
                 ? EXACT_MATCH : NO_MATCH;
+    }
+
+    public void setIsDefault(Boolean isDefault) {
+        this.isDefault = isDefault;
     }
 }

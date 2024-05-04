@@ -247,7 +247,7 @@ public String Package.getSpecificationTitle()
 public String Package.getSpecificationVendor()
 public String Package.getSpecificationVersion()
 public String Package.toString()
-public String java.lang.constant.ClassDesc.packageName()
+public default String java.lang.constant.ClassDesc.packageName()
 $
 ```
 Note how the member is considered to match if either of these two names match:

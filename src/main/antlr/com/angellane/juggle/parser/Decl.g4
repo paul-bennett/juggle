@@ -162,6 +162,7 @@ memberModifier
     : annotation
     | 'private' | 'protected' | 'package' | 'public'
     | 'abstract' | 'static' | 'final' | 'native' | 'strictfp' | 'synchronized'
+    | 'default'
     | 'transient' | 'volatile'
     ;
 

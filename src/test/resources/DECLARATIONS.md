@@ -149,7 +149,6 @@ $
 And here are all the `final native` methods returning a `boolean`:
 ```shell
 $ juggle final native boolean
-public final native boolean Thread.isAlive()
 public final transient native boolean java.lang.invoke.VarHandle.compareAndSet(Object[])
 public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSet(Object[])
 public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetAcquire(Object[])
@@ -527,5 +526,16 @@ Lower bounds are possible too:
 $ juggle 'int (String,int) throws ? super NumberFormatException'
 public static int Integer.parseInt(String,int) throws NumberFormatException
 public static int Integer.parseUnsignedInt(String,int) throws NumberFormatException
+$
+```
+
+## Default methods
+
+What are the default intermediate operations on Streams?
+```shell
+$ juggle -i java.util.stream -i java.util -i java.util.function 'default Stream (Stream this,...)'
+public default Stream<T> Stream<T>.dropWhile(Predicate<T>)
+public default <R> Stream<T> Stream<T>.mapMulti(BiConsumer<T,U>)
+public default Stream<T> Stream<T>.takeWhile(Predicate<T>)
 $
 ```

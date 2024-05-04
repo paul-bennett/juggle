@@ -333,6 +333,9 @@ public class QueryFactory {
                 case "sealed"       -> tempTypeQuery.setIsSealed(true);
                 case "non-sealed"   -> tempTypeQuery.setIsSealed(false);
 
+                // And this is restricted to member queries
+                case "default"      -> tempMemberQuery.setIsDefault(true);
+
                 default ->
                         juggler.warn("Unknown modifier `%s'; ignoring"
                                 .formatted(text));
@@ -549,7 +552,7 @@ public class QueryFactory {
                 Class<?> lb = tempType.lowerBound();
                 Set<Class<?>> ub = tempType.upperBound();
 
-                if ((lb != null && lb == Void.TYPE) ||
+                if ((lb == Void.TYPE) ||
                         (ub != null && ub.stream().anyMatch(
                                 c -> c.equals(Void.TYPE)
                         ))

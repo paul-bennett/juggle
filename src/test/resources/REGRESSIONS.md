@@ -116,9 +116,9 @@ It's now possible to list just non-static members by specifying the name
 of the first parameter as `this`:
 ```shell
 $ juggle -c none '(java.util.function.Function this,...)'
-public <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.andThen(java.util.function.Function<T,R>)
+public default <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.andThen(java.util.function.Function<T,R>)
 public abstract R java.util.function.Function<T,R>.apply(T)
-public <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.compose(java.util.function.Function<T,R>)
+public default <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.compose(java.util.function.Function<T,R>)
 $
 ```
 

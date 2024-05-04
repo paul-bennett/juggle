@@ -57,7 +57,7 @@ public class TextOutput implements Sink {
         StringBuilder ret = new StringBuilder();
 
         StringBuilder mods = new StringBuilder();
-        mods.append(decodeModifiers(c.getModifiers()));
+        mods.append(decodeModifiers(c.getModifiers(), false));
         if (ClassUtils.classIsSealed(c))    mods.append("sealed ");
         if (ClassUtils.classIsNonSealed(c)) mods.append("non-sealed ");
 
@@ -106,7 +106,10 @@ public class TextOutput implements Sink {
     public String decode(Member m) {
         StringBuilder ret = new StringBuilder();
 
-        ret.append(f.formatKeyword(decodeModifiers(m.getModifiers())));
+        // Default methods aren't flagged explicitly in modifiers
+        boolean isDefault = m instanceof Method method && method.isDefault();
+
+        ret.append(f.formatKeyword(decodeModifiers(m.getModifiers(), isDefault)));
 
         Executable e = (m instanceof Executable) ? (Executable)m : null;
 
@@ -127,14 +130,19 @@ public class TextOutput implements Sink {
         return ret.toString();
     }
 
-    public String decodeModifiers(int mods) {
+    public String decodeModifiers(int mods, boolean isDefault) {
         // Modifier.toString() includes "interface" in its output, but we
         // don't want it -- that's handled by decodeTypeKind()
         int tweakedMods = mods & (~Modifier.INTERFACE);
 
         StringBuilder ret = new StringBuilder(Modifier.toString(tweakedMods));
 
-        if (ret.length() > 0)
+        if (isDefault) {
+            if (!ret.isEmpty()) ret.append(' ');
+            ret.append("default");
+        }
+
+        if (!ret.isEmpty())
             ret.append(' ');
 
         return ret.toString();

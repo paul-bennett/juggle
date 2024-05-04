@@ -246,7 +246,7 @@ $
 ```
 ```shell
 $ juggle --dry-run --show-query '()'
-QUERY: MemberQuery{annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, returnType=null, declarationPattern=null, params=[], exceptions=null}
+QUERY: MemberQuery{annotationTypes=null, accessibility=PUBLIC, modifierMask=0, modifiers=0, isDefault=null, returnType=null, declarationPattern=null, params=[], exceptions=null}
 $
 ```
 
