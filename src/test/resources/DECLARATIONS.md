@@ -39,16 +39,16 @@ public java.io.OutputStream java.net.Socket.getOutputStream() throws java.io.IOE
 public java.io.OutputStream java.net.URLConnection.getOutputStream() throws java.io.IOException
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.AsynchronousByteChannel)
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.WritableByteChannel)
-public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
-public transient java.io.OutputStream java.nio.file.spi.FileSystemProvider.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
+public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption...) throws java.io.IOException
+public transient java.io.OutputStream java.nio.file.spi.FileSystemProvider.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption...) throws java.io.IOException
 public java.io.OutputStream java.util.Base64.Encoder.wrap(java.io.OutputStream)
 public static final java.io.PrintStream System.err
 public static final java.io.PrintStream System.out
 public java.io.PrintStream java.io.PrintStream.append(char)
 public java.io.PrintStream java.io.PrintStream.append(CharSequence)
 public java.io.PrintStream java.io.PrintStream.append(CharSequence,int,int)
-public transient java.io.PrintStream java.io.PrintStream.format(String,Object[])
-public transient java.io.PrintStream java.io.PrintStream.format(java.util.Locale,String,Object[])
+public transient java.io.PrintStream java.io.PrintStream.format(String,Object...)
+public transient java.io.PrintStream java.io.PrintStream.format(java.util.Locale,String,Object...)
 public java.io.BufferedOutputStream.<init>(java.io.OutputStream)
 public java.io.BufferedOutputStream.<init>(java.io.OutputStream,int)
 public java.io.ByteArrayOutputStream.<init>()
@@ -73,8 +73,8 @@ public java.io.PrintStream.<init>(java.io.OutputStream,boolean,java.nio.charset.
 public java.io.PrintStream.<init>(String) throws java.io.FileNotFoundException
 public java.io.PrintStream.<init>(String,String) throws java.io.FileNotFoundException,java.io.UnsupportedEncodingException
 public java.io.PrintStream.<init>(String,java.nio.charset.Charset) throws java.io.IOException
-public transient java.io.PrintStream java.io.PrintStream.printf(String,Object[])
-public transient java.io.PrintStream java.io.PrintStream.printf(java.util.Locale,String,Object[])
+public transient java.io.PrintStream java.io.PrintStream.printf(String,Object...)
+public transient java.io.PrintStream java.io.PrintStream.printf(java.util.Locale,String,Object...)
 public java.security.DigestOutputStream.<init>(java.io.OutputStream,java.security.MessageDigest)
 public java.util.jar.JarOutputStream.<init>(java.io.OutputStream) throws java.io.IOException
 public java.util.jar.JarOutputStream.<init>(java.io.OutputStream,java.util.jar.Manifest) throws java.io.IOException
@@ -104,7 +104,7 @@ $ juggle static java.io.OutputStream
 public static java.io.OutputStream java.io.OutputStream.nullOutputStream()
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.AsynchronousByteChannel)
 public static java.io.OutputStream java.nio.channels.Channels.newOutputStream(java.nio.channels.WritableByteChannel)
-public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption[]) throws java.io.IOException
+public static transient java.io.OutputStream java.nio.file.Files.newOutputStream(java.nio.file.Path,java.nio.file.OpenOption...) throws java.io.IOException
 public static final java.io.PrintStream System.err
 public static final java.io.PrintStream System.out
 $
@@ -149,11 +149,11 @@ $
 And here are all the `final native` methods returning a `boolean`:
 ```shell
 $ juggle final native boolean
-public final transient native boolean java.lang.invoke.VarHandle.compareAndSet(Object[])
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSet(Object[])
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetAcquire(Object[])
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetPlain(Object[])
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetRelease(Object[])
+public final transient native boolean java.lang.invoke.VarHandle.compareAndSet(Object...)
+public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSet(Object...)
+public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetAcquire(Object...)
+public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetPlain(Object...)
+public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetRelease(Object...)
 $
 ```
 
@@ -226,7 +226,7 @@ public void SecurityManager.checkAccess(Thread)
 public void SecurityManager.checkAccess(ThreadGroup)
 public abstract boolean java.io.FileSystem.checkAccess(java.io.File,int)
 public native boolean java.io.UnixFileSystem.checkAccess(java.io.File,int)
-public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode...) throws java.io.IOException
 $
 ```
 
@@ -239,7 +239,7 @@ public void SecurityManager.checkAccess(Thread)
 public void SecurityManager.checkAccess(ThreadGroup)
 public abstract boolean java.io.FileSystem.checkAccess(java.io.File,int)
 public native boolean java.io.UnixFileSystem.checkAccess(java.io.File,int)
-public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode[]) throws java.io.IOException
+public abstract transient void java.nio.file.spi.FileSystemProvider.checkAccess(java.nio.file.Path,java.nio.file.AccessMode...) throws java.io.IOException
 $
 ```
 

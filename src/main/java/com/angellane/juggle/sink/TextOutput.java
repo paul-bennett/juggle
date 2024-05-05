@@ -123,7 +123,7 @@ public class TextOutput implements Sink {
         ret.append(f.formatMethodName(m instanceof Constructor ? "<init>" : m.getName()));
 
         if (e != null) {
-            ret.append(decodeParams(e.getGenericParameterTypes()));
+            ret.append(decodeParams(e.getParameters()));
             ret.append(decodeThrows(e.getGenericExceptionTypes()));
         }
 
@@ -186,7 +186,15 @@ public class TextOutput implements Sink {
         return decodeType(t, null);
     }
 
+    public String decodeType(Type t, boolean isVarArgs) {
+        return decodeType(t, null, isVarArgs);
+    }
+
     public String decodeType(Type t, Type[] actualTypeArgs) {
+        return decodeType(t, actualTypeArgs, false);
+    }
+
+    public String decodeType(Type t, Type[] actualTypeArgs, boolean isVarArgs) {
         /* In a JDK17 world...
         return switch (t) {
             case GenericArrayType   ga  -> decodeGenericArrayType(ga);
@@ -197,16 +205,16 @@ public class TextOutput implements Sink {
             default                     -> t.toString();
         };
         */
-             if (t instanceof GenericArrayType)     return decodeGenericArrayType((GenericArrayType)t);
+             if (t instanceof GenericArrayType)     return decodeGenericArrayType((GenericArrayType)t, isVarArgs);
         else if (t instanceof ParameterizedType)    return decodeParameterizedType((ParameterizedType)t);
         else if (t instanceof TypeVariable<?>)      return decodeTypeVariable((TypeVariable<?>)t);
         else if (t instanceof WildcardType)         return decodeWildcardType((WildcardType)t);
-        else if (t instanceof Class<?>)             return decodeClass((Class<?>)t, actualTypeArgs);
+        else if (t instanceof Class<?>)             return decodeClass((Class<?>)t, actualTypeArgs, isVarArgs);
         else                                        return t.toString();
     }
 
-    public String decodeGenericArrayType(GenericArrayType t) {
-        return decodeType(t.getGenericComponentType()) + "[]";
+    public String decodeGenericArrayType(GenericArrayType t, boolean isVarArgs) {
+        return decodeType(t.getGenericComponentType()) + (isVarArgs ? "..." : "[]");
     }
 
     public String decodeParameterizedType(ParameterizedType t) {
@@ -269,16 +277,16 @@ public class TextOutput implements Sink {
     }
 
     public String decodeClass(Class<?> c) {
-        return decodeClass(c, null);
+        return decodeClass(c, null, false);
     }
 
-    public String decodeClass(Class<?> c, Type[] actualTypeArguments) {
+    public String decodeClass(Class<?> c, Type[] actualTypeArguments, boolean isVarArgs) {
         // Emit the type name, taking into account generics and imports
 
         if (c.isPrimitive())
             return c.getName();
         else if (c.isArray())
-            return decodeType(c.getComponentType()) + "[]";
+            return decodeType(c.getComponentType()) + (isVarArgs ? "..." : "[]");
         else {
             StringBuilder ret = new StringBuilder(sanitisedClassName(c));
 
@@ -312,10 +320,10 @@ public class TextOutput implements Sink {
         }
     }
 
-    public String decodeParams(Type[] parameterTypes) {
+    public String decodeParams(Parameter[] parameters) {
         return "(" +
-                Arrays.stream(parameterTypes)
-                        .map(this::decodeType)
+                Arrays.stream(parameters)
+                        .map(p -> decodeType(p.getParameterizedType(), p.isVarArgs()))
                         .collect(Collectors.joining(",")) +
                 ")";
     }

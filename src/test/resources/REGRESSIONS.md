@@ -29,6 +29,24 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #119](https://github.com/paul-bennett/juggle/issues/119): Juggle should emit `...` rather than `[]` for varargs params
+
+```shell
+$ juggle -i java.nio.file -i java.util.stream -i java.nio.file.attribute -i java.util.function -i java.io \
+    '/java.nio.file.Files.find/'
+public static transient Stream<Path> Files.find(Path,int,BiPredicate<Path,BasicFileAttributes>,FileVisitOption...) throws IOException
+$
+```
+
+This example didn't work straight away, because the parameter is
+reflected as a `GenericArrayType` rather than a `Class<?>`
+```shell
+$ juggle -i java.util.stream Stream of      
+public static <T> Stream<T> Stream<T>.of(T)
+public static transient <T> Stream<T> Stream<T>.of(T...)
+$
+```
+
 ### [GitHub Issue #116](https://github.com/paul-bennett/juggle/issues/116): Output of generics is sometimes wrong
 
 Fixing this issue changed the output of many Juggle queries,
@@ -1256,10 +1274,10 @@ case-sensitive substring matches.)
 There are about 400 `transient` methods in the JDK. Here are a few.
 ```shell
 $ juggle -i java.util.stream -i java.nio.file transient Stream
-public static transient <T> Stream<T> Stream<T>.of(T[])
-public static transient Stream<Path> Files.find(Path,int,java.util.function.BiPredicate<Path,java.nio.file.attribute.BasicFileAttributes>,FileVisitOption[]) throws java.io.IOException
-public static transient Stream<Path> Files.walk(Path,int,FileVisitOption[]) throws java.io.IOException
-public static transient Stream<Path> Files.walk(Path,FileVisitOption[]) throws java.io.IOException
+public static transient <T> Stream<T> Stream<T>.of(T...)
+public static transient Stream<Path> Files.find(Path,int,java.util.function.BiPredicate<Path,java.nio.file.attribute.BasicFileAttributes>,FileVisitOption...) throws java.io.IOException
+public static transient Stream<Path> Files.walk(Path,int,FileVisitOption...) throws java.io.IOException
+public static transient Stream<Path> Files.walk(Path,FileVisitOption...) throws java.io.IOException
 $
 ```
 And here are some of the 2000 `volatile` methods:
