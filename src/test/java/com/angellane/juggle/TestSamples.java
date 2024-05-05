@@ -45,8 +45,8 @@ public class TestSamples {
     public void useThisTestForDebugging() {
         String query = "/search$/i (? extends java.util.Collection,...)";
         String expectedResults = """
-                public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
-                public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+                public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
+                public static <T> int java.util.Collections.binarySearch(java.util.List<? extends T>,T,java.util.Comparator<? super T>)
                 public synchronized int java.util.Stack<E>.search(Object)
                 """;
 

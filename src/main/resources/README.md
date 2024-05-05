@@ -98,7 +98,7 @@ $
 > _erased type_ of methods, so these look like methods that take four
 > `Object` parameters, and Juggle recognises that each of the types in
 > the query -- `double[]`, `int` and `double` -- can be passed as a parameter
-> of type `Object`.)
+> of type `Object`.
 
 In the same way that you can omit the return type from your query, you
 can also omit the parameter list, which will show methods that take _any
@@ -205,12 +205,12 @@ possible to include annotation data in the query.  If multiple annotations
 are supplied, they must all be present on the method.
 ```shell
 $ juggle @SafeVarargs
-public static transient <T> boolean java.util.Collections.addAll(java.util.Collection<E>,T[])
-public static transient <T> java.util.List<E> java.util.Arrays.asList(T[])
-public static transient <E> java.util.EnumSet<E> java.util.EnumSet<E>.of(E extends Enum<E>,E extends Enum<E>[])
+public static transient <T> boolean java.util.Collections.addAll(java.util.Collection<? super T>,T[])
+public static transient <T> java.util.List<T> java.util.Arrays.asList(T[])
+public static transient <E> java.util.EnumSet<E> java.util.EnumSet<E>.of(E,E[])
 public static transient <E> java.util.List<E> java.util.List<E>.of(E[])
 public static transient <E> java.util.Set<E> java.util.Set<E>.of(E[])
-public static transient <K,V> java.util.Map<K,V> java.util.Map<K,V>.ofEntries(java.util.Map.Entry<K,V>[])
+public static transient <K,V> java.util.Map<K,V> java.util.Map<K,V>.ofEntries(java.util.Map.Entry<? extends K,? extends V>[])
 public static transient <T> java.util.stream.Stream<T> java.util.stream.Stream<T>.of(T[])
 $
 ```
@@ -271,7 +271,7 @@ $
 
 > **Note: Reference widening conversion**
 > 
-> Here we see an example of a Reference Widening converion: `FileInputStream`
+> Here we see an example of a Reference Widening conversion: `FileInputStream`
 > and `StringBufferInputStream` are both descendant classes of `InputStream`,
 > so objects of those first two types can be assigned to a variable of the
 > latter type.
@@ -315,7 +315,7 @@ public abstract java.sql.CallableStatement java.sql.Connection.prepareCall(Strin
 $
 ```
 
-By default Juggle searches for modules in the current working directory.
+By default, Juggle searches for modules in the current working directory.
 To change this, use the `-p` / `--module-path` option.
 
 At present there's no support for scanning an unpacked JAR, or a directory of
@@ -466,7 +466,7 @@ public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<E>[])
 ```
 > **Note: Type arguments**
 > 
-> Juggle doesn't yet unify type arguments.  The `E` and `T` in the The last
+> Juggle doesn't yet unify type arguments.  The `E` and `T` in the last
 > match in the above example refer to the same thing, so Juggle should
 > ideally have output 
 > `public static <T> CartesianProduct<T> CartesianProduct<T>.of(List<T>[])`.

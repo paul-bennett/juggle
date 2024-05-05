@@ -143,7 +143,7 @@ returns a wildcard type:
 
 ```shell
 $ juggle /asSubclass/
-public <U> Class<T> Class<T>.asSubclass(Class<T>)
+public <U> Class<? extends U> Class<T>.asSubclass(Class<U>)
 $
 ```
 
@@ -186,7 +186,7 @@ $
 
 ```shell
 $ juggle -x '(String,ClassLoader,boolean)'
-public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
+public static Class<?> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
 public void ClassLoader.setPackageAssertionStatus(String,boolean)
 public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)
@@ -199,7 +199,7 @@ suddenly the long option name can be prefixed with `no-` on the command-line.
 
 ```shell
 $ juggle --permute '(String,ClassLoader,boolean)'
-public static Class<T> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
+public static Class<?> Class<T>.forName(String,boolean,ClassLoader) throws ClassNotFoundException
 public void ClassLoader.setClassAssertionStatus(String,boolean)
 public void ClassLoader.setPackageAssertionStatus(String,boolean)
 public static <E> java.util.List<E> java.util.List<E>.of(E,E,E)

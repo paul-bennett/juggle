@@ -29,6 +29,21 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #116](https://github.com/paul-bennett/juggle/issues/116): Output of generics is sometimes wrong
+
+Fixing this issue changed the output of many Juggle queries,
+so rather than list dozens of regressions, here's a corner
+that needed to be mopped up at the very end.
+
+First, Juggle was not correctly filtering classes used in wildcard
+types for imported packages
+```shell
+$ juggle -i java.util.stream -i java.util.function \
+    /java.util.stream.Stream.mapMulti\$/
+public default <R> Stream<R> Stream<T>.mapMulti(BiConsumer<? super T,? super Consumer<R>>)
+$
+```
+
 ### [GitHub Issue #42](https://github.com/paul-bennett/juggle/issues/42): Warn on impossible queries
 
 Juggle now warns on things which won't match anything.
@@ -116,9 +131,9 @@ It's now possible to list just non-static members by specifying the name
 of the first parameter as `this`:
 ```shell
 $ juggle -c none '(java.util.function.Function this,...)'
-public default <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.andThen(java.util.function.Function<T,R>)
+public default <V> java.util.function.Function<T,V> java.util.function.Function<T,R>.andThen(java.util.function.Function<? super R,? extends V>)
 public abstract R java.util.function.Function<T,R>.apply(T)
-public default <V> java.util.function.Function<T,R> java.util.function.Function<T,R>.compose(java.util.function.Function<T,R>)
+public default <V> java.util.function.Function<V,R> java.util.function.Function<T,R>.compose(java.util.function.Function<? super V,? extends T>)
 $
 ```
 
@@ -635,7 +650,7 @@ $
 ```shell
 $ juggle 'java.lang.reflect.Executable(?)'
 public java.lang.reflect.Executable java.lang.reflect.Parameter.getDeclaringExecutable()
-public java.lang.reflect.Constructor<T> Class<T>.getEnclosingConstructor() throws SecurityException
+public java.lang.reflect.Constructor<?> Class<T>.getEnclosingConstructor() throws SecurityException
 public java.lang.reflect.Method Class<T>.getEnclosingMethod() throws SecurityException
 public java.lang.reflect.Method java.lang.annotation.AnnotationTypeMismatchException.element()
 public java.lang.reflect.Method java.lang.reflect.RecordComponent.getAccessor()
@@ -1002,17 +1017,17 @@ public static int java.util.Arrays.binarySearch(float[],int,int,float)
 public static int java.util.Arrays.binarySearch(int[],int)
 public static int java.util.Arrays.binarySearch(int[],int,int,int)
 public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
-public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<T>)
+public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<? super T>)
 public static int java.util.Arrays.binarySearch(Object[],Object)
-public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<? super T>)
 public static int java.util.Arrays.binarySearch(long[],int,int,long)
 public static int java.util.Arrays.binarySearch(long[],long)
 public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends T>,T,java.util.Comparator<? super T>)
 public synchronized int java.util.Stack<E>.search(Object)
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<? super K,? super V,? extends U>)
 $
 ```
 
@@ -1043,25 +1058,25 @@ public static int java.util.Arrays.binarySearch(float[],int,int,float)
 public static int java.util.Arrays.binarySearch(int[],int)
 public static int java.util.Arrays.binarySearch(int[],int,int,int)
 public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
-public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<T>)
+public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<? super T>)
 public static int java.util.Arrays.binarySearch(Object[],Object)
-public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<? super T>)
 public static int java.util.Arrays.binarySearch(long[],int,int,long)
 public static int java.util.Arrays.binarySearch(long[],long)
 public static int java.util.Arrays.binarySearch(short[],int,int,short)
 public static int java.util.Arrays.binarySearch(short[],short)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends T>,T,java.util.Comparator<? super T>)
 public synchronized int java.util.Stack<E>.search(Object)
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<? super K,? super V,? extends U>)
 $
 ```
 
 Now let's just specify the first parameter. That drops us down to three candidates:
 ```shell
 $ juggle '/search$/i (? extends java.util.Collection,...)'                                              
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends T>,T,java.util.Comparator<? super T>)
 public synchronized int java.util.Stack<E>.search(Object)
 $
 ```
@@ -1081,7 +1096,7 @@ public static int java.util.Arrays.binarySearch(double[],double)
 public static int java.util.Arrays.binarySearch(double[],int,int,double)
 public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
 public static int java.util.Arrays.binarySearch(Object[],Object)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
 public synchronized int java.util.Stack<E>.search(Object)
 $
 ```
@@ -1089,7 +1104,7 @@ $
 $ juggle '/search$/i (..., String)'                                                
 public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
 public static int java.util.Arrays.binarySearch(Object[],Object)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
 public synchronized int java.util.Stack<E>.search(Object)
 $
 ```
@@ -1097,8 +1112,8 @@ $
 Let's put the ellipsis in the middle, missing out all but the first and last arg:
 ```shell
 $ juggle '/search$/i (java.util.List, ..., java.util.Comparator)'                                                
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends T>,T,java.util.Comparator<? super T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
 $
 ```
 
@@ -1116,13 +1131,13 @@ public static int java.util.Arrays.binarySearch(float[],float)
 public static int java.util.Arrays.binarySearch(float[],int,int,float)
 public static int java.util.Arrays.binarySearch(long[],int,int,long)
 public static int java.util.Arrays.binarySearch(long[],long)
-public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<T,U,R>)
+public <U> U java.util.concurrent.ConcurrentHashMap<K,V>.search(long,java.util.function.BiFunction<? super K,? super V,? extends U>)
 public static int java.util.Arrays.binarySearch(Object[],int,int,Object)
-public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<T>)
+public static <T> int java.util.Arrays.binarySearch(T[],int,int,T,java.util.Comparator<? super T>)
 public static int java.util.Arrays.binarySearch(Object[],Object)
-public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<? super T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends Comparable<? super T>>,T)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends T>,T,java.util.Comparator<? super T>)
 public synchronized int java.util.Stack<E>.search(Object)
 $
 ```
@@ -1242,9 +1257,9 @@ There are about 400 `transient` methods in the JDK. Here are a few.
 ```shell
 $ juggle -i java.util.stream -i java.nio.file transient Stream
 public static transient <T> Stream<T> Stream<T>.of(T[])
-public static transient Stream<T> Files.find(Path,int,java.util.function.BiPredicate<T,U>,FileVisitOption[]) throws java.io.IOException
-public static transient Stream<T> Files.walk(Path,int,FileVisitOption[]) throws java.io.IOException
-public static transient Stream<T> Files.walk(Path,FileVisitOption[]) throws java.io.IOException
+public static transient Stream<Path> Files.find(Path,int,java.util.function.BiPredicate<Path,java.nio.file.attribute.BasicFileAttributes>,FileVisitOption[]) throws java.io.IOException
+public static transient Stream<Path> Files.walk(Path,int,FileVisitOption[]) throws java.io.IOException
+public static transient Stream<Path> Files.walk(Path,FileVisitOption[]) throws java.io.IOException
 $
 ```
 And here are some of the 2000 `volatile` methods:
@@ -1284,7 +1299,7 @@ Results aren't deduplicated
 ```shell
 # juggle -n asSubclass -m java.base,java.base
 $ juggle /asSubclass/ -m java.base,java.base
-public <U> Class<T> Class<T>.asSubclass(Class<T>)
+public <U> Class<? extends U> Class<T>.asSubclass(Class<U>)
 $
 ```
 

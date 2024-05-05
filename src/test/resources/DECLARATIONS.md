@@ -207,7 +207,7 @@ How do I get hold of an instance of a class that implements both the `List` and 
 ```shell
 $ juggle -i java.util \? extends Queue \& List
 public LinkedList<E>.<init>()
-public LinkedList<E>.<init>(Collection<E>)
+public LinkedList<E>.<init>(Collection<? extends E>)
 $
 ```
 
@@ -363,10 +363,10 @@ public int java.util.Collections.ReverseComparator2<T>.compare(T,T)
 public volatile int java.util.Comparators.NaturalOrderComparator.compare(Object,Object)
 public int java.util.Comparators.NullComparator<T>.compare(T,T)
 public abstract int java.util.function.ToIntBiFunction<T,U>.applyAsInt(T,U)
-public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<T>)
-public static <T> int java.util.Collections.binarySearch(java.util.List<E>,T,java.util.Comparator<T>)
-public static <T> int java.util.Objects.compare(T,T,java.util.Comparator<T>)
-public int java.util.concurrent.SubmissionPublisher<T>.offer(T,java.util.function.BiPredicate<T,U>)
+public static <T> int java.util.Arrays.binarySearch(T[],T,java.util.Comparator<? super T>)
+public static <T> int java.util.Collections.binarySearch(java.util.List<? extends T>,T,java.util.Comparator<? super T>)
+public static <T> int java.util.Objects.compare(T,T,java.util.Comparator<? super T>)
+public int java.util.concurrent.SubmissionPublisher<T>.offer(T,java.util.function.BiPredicate<java.util.concurrent.Flow.Subscriber<? super T>,? super T>)
 public final int java.util.concurrent.atomic.AtomicIntegerFieldUpdater<T>.getAndUpdate(T,java.util.function.IntUnaryOperator)
 public final int java.util.concurrent.atomic.AtomicIntegerFieldUpdater<T>.updateAndGet(T,java.util.function.IntUnaryOperator)
 public int String.CaseInsensitiveComparator.compare(String,String)
@@ -378,12 +378,12 @@ public abstract int java.nio.file.attribute.UserDefinedFileAttributeView.read(St
 public abstract int java.nio.file.attribute.UserDefinedFileAttributeView.write(String,java.nio.ByteBuffer) throws java.io.IOException
 public abstract int java.text.Collator.compare(String,String)
 public synchronized int java.text.RuleBasedCollator.compare(String,String)
-public int java.util.Collections.ReverseComparator.compare(Comparable<T>,Comparable<T>)
-public int java.util.Comparators.NaturalOrderComparator.compare(Comparable<T>,Comparable<T>)
-public static <T> int java.util.Arrays.compare(T[],T[],java.util.Comparator<T>)
+public int java.util.Collections.ReverseComparator.compare(Comparable<Object>,Comparable<Object>)
+public int java.util.Comparators.NaturalOrderComparator.compare(Comparable<Object>,Comparable<Object>)
+public static <T> int java.util.Arrays.compare(T[],T[],java.util.Comparator<? super T>)
 public int java.util.Base64.Decoder.decode(byte[],byte[])
 public int java.util.Base64.Encoder.encode(byte[],byte[])
-public static <T> int java.util.Arrays.mismatch(T[],T[],java.util.Comparator<T>)
+public static <T> int java.util.Arrays.mismatch(T[],T[],java.util.Comparator<? super T>)
 public final int javax.crypto.Cipher.doFinal(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException,javax.crypto.IllegalBlockSizeException,javax.crypto.BadPaddingException
 public final int javax.crypto.Cipher.update(java.nio.ByteBuffer,java.nio.ByteBuffer) throws javax.crypto.ShortBufferException
 $
@@ -534,8 +534,8 @@ $
 What are the default intermediate operations on Streams?
 ```shell
 $ juggle -i java.util.stream -i java.util -i java.util.function 'default Stream (Stream this,...)'
-public default Stream<T> Stream<T>.dropWhile(Predicate<T>)
-public default <R> Stream<T> Stream<T>.mapMulti(BiConsumer<T,U>)
-public default Stream<T> Stream<T>.takeWhile(Predicate<T>)
+public default Stream<T> Stream<T>.dropWhile(Predicate<? super T>)
+public default <R> Stream<R> Stream<T>.mapMulti(BiConsumer<? super T,? super Consumer<R>>)
+public default Stream<T> Stream<T>.takeWhile(Predicate<? super T>)
 $
 ```

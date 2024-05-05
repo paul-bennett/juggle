@@ -183,13 +183,17 @@ public class TextOutput implements Sink {
     }
 
     public String decodeType(Type t) {
+        return decodeType(t, null);
+    }
+
+    public String decodeType(Type t, Type[] actualTypeArgs) {
         /* In a JDK17 world...
         return switch (t) {
             case GenericArrayType   ga  -> decodeGenericArrayType(ga);
             case ParameterizedType  pt  -> decodeParameterizedType(pt);
             case TypeVariable<?>    tv  -> decodeTypeVariable(tv);
             case WildcardType       wt  -> decodeWildcardType(wt);
-            case Class<?>           cl  -> decodeClass(cl);
+            case Class<?>           cl  -> decodeClass(cl, actualTypeArgs);
             default                     -> t.toString();
         };
         */
@@ -197,7 +201,7 @@ public class TextOutput implements Sink {
         else if (t instanceof ParameterizedType)    return decodeParameterizedType((ParameterizedType)t);
         else if (t instanceof TypeVariable<?>)      return decodeTypeVariable((TypeVariable<?>)t);
         else if (t instanceof WildcardType)         return decodeWildcardType((WildcardType)t);
-        else if (t instanceof Class<?>)             return decodeClass((Class<?>)t);
+        else if (t instanceof Class<?>)             return decodeClass((Class<?>)t, actualTypeArgs);
         else                                        return t.toString();
     }
 
@@ -206,15 +210,29 @@ public class TextOutput implements Sink {
     }
 
     public String decodeParameterizedType(ParameterizedType t) {
-        return decodeType(t.getRawType());
+        // We need to pass the actual type arguments down into the decoding
+        // layer since otherwise the only info available is the name of the
+        // type parameters
+
+        return decodeType(t.getRawType(), t.getActualTypeArguments());
     }
 
     public <T extends GenericDeclaration> String decodeTypeVariable(TypeVariable<T> t) {
-        var bs = t.getBounds();
-        if (bs.length == 1 && bs[0] == Object.class) bs = null;
+        // We don't need to emit bounds here; the TypeVariable is the
+        // case when a type parameter is declared in a signature
 
-        return t.getName() + (bs == null || bs.length == 0 ? ""
-                : " extends " + Stream.of(bs).map(this::decodeType).collect(Collectors.joining(", ")));
+        return t.getName();
+    }
+
+    private String decodeBounds(String keyword, Type[] bs) {
+        if (bs != null && bs.length > 0) {
+            return " " + keyword + " " +
+                    Stream.of(bs)
+                            .map(this::decodeType)
+                            .collect(Collectors.joining(" & "));
+        }
+        else
+            return "";
     }
 
     public String decodeWildcardType(WildcardType t) {
@@ -223,22 +241,38 @@ public class TextOutput implements Sink {
 
         if (ub.length == 1 && ub[0] == Object.class) ub = null;
 
-        StringBuilder sb = new StringBuilder(t.getTypeName());
+        return "?"
+                + decodeBounds("extends", ub)
+                + decodeBounds("super",   lb);
+    }
 
-        if (ub != null && ub.length > 0) {
-            sb.append(" extends ");
-            sb.append(Stream.of(ub).map(this::decodeType).collect(Collectors.joining(", ")));
-        }
+    private String sanitisedClassName(Class<?> c) {
+        StringBuilder ret = new StringBuilder();
 
-        if (lb != null && lb.length > 0) {
-            sb.append(" super ");
-            sb.append(Stream.of(lb).map(this::decodeType).collect(Collectors.joining(", ")));
-        }
+        String packageName = c.getPackageName();
 
-        return sb.toString();
+        if (!imports.contains(packageName))
+            ret.append(packageName).append('.');
+
+        String canonicalName = c.getCanonicalName();
+
+        // CanonicalName will be null for lambdas, etc.
+        if (canonicalName == null) canonicalName = c.getName();
+
+        // Knock off the "packageName." prefix
+        // This isn't the same as getSimpleName() since that doesn't include
+        // the names of enclosing outer classes
+
+        ret.append(canonicalName.substring(packageName.length()+1));
+
+        return ret.toString();
     }
 
     public String decodeClass(Class<?> c) {
+        return decodeClass(c, null);
+    }
+
+    public String decodeClass(Class<?> c, Type[] actualTypeArguments) {
         // Emit the type name, taking into account generics and imports
 
         if (c.isPrimitive())
@@ -246,27 +280,32 @@ public class TextOutput implements Sink {
         else if (c.isArray())
             return decodeType(c.getComponentType()) + "[]";
         else {
-            StringBuilder ret = new StringBuilder();
+            StringBuilder ret = new StringBuilder(sanitisedClassName(c));
 
-            String canonicalName = c.getCanonicalName();
-            String packageName = c.getPackageName();
+            if (actualTypeArguments != null && actualTypeArguments.length > 0) {
+                // This branch is hit when type arguments have been supplied
+                ret
+                        .append('<')
+                        .append(
+                            Stream.of(actualTypeArguments)
+                                    .map(this::decodeType)
+                                    .collect(Collectors.joining(","))
+                            )
+                        .append('>');
+            }
+            else {
+                // This is hit when there are no type arguments, but there
+                // may still be type parameters
+                TypeVariable<?>[] typeVars = c.getTypeParameters();
 
-            if (!imports.contains(packageName))
-                ret.append(packageName).append('.');
-
-            // Knock off the "packageName." prefix
-            ret.append((canonicalName != null ? canonicalName : c.getName())
-                    .substring(packageName.length()+1));
-
-            TypeVariable<?>[] typeVars = c.getTypeParameters();
-
-            if (typeVars.length > 0) {
-                ret.append('<');
-                StringJoiner j = new StringJoiner(",");
-                for (var tv : typeVars)
-                    j.add(tv.toString());
-                ret.append(j);
-                ret.append('>');
+                if (typeVars.length > 0) {
+                    ret.append('<');
+                    StringJoiner j = new StringJoiner(",");
+                    for (var tv : typeVars)
+                        j.add(tv.toString());
+                    ret.append(j);
+                    ret.append('>');
+                }
             }
 
             return ret.toString();
