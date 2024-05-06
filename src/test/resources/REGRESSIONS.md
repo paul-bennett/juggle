@@ -29,6 +29,36 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #121](https://github.com/paul-bennett/juggle/issues/121): Juggle should emit bounds on class queries
+
+```shell
+$ juggle class EnumDesc
+public static final class Enum.EnumDesc<E extends Enum<E>> extends java.lang.constant.DynamicConstantDesc<T>
+$
+```
+
+```shell
+$ juggle class Class -i java.lang.reflect -i java.io -i java.lang.invoke -i java.lang.constant
+public final class Class<T> implements Serializable, GenericDeclaration, Type, AnnotatedElement, TypeDescriptor.OfField<Class<?>>, Constable
+$
+```
+
+### [GitHub Issue #120](https://github.com/paul-bennett/juggle/issues/120): Test emitting multiple bounds
+
+Turns out Juggle wasn't emitting bounds on type variable declarations at all
+
+```shell
+$ juggle -cp build/classes/java/testLib -i com.angellane.juggle.testinput.lib /singleBound/
+public static <T extends Number> void Lib.singleBound(T)
+$
+```
+
+```shell
+$ juggle -cp build/classes/java/testLib -i com.angellane.juggle.testinput.lib /multipleBounds/
+public static <T extends Number & Comparable<T>> void Lib.multipleBounds(T)
+$
+```
+
 ### [GitHub Issue #119](https://github.com/paul-bennett/juggle/issues/119): Juggle should emit `...` rather than `[]` for varargs params
 
 ```shell
@@ -290,7 +320,7 @@ $
 What are the superclasses of `StringBuilder`?
 ```shell
 $ juggle class super StringBuilder
-public final class StringBuilder extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
+public final class StringBuilder extends AbstractStringBuilder implements java.io.Serializable, Comparable<StringBuilder>, CharSequence
 public class Object
 $
 ```
@@ -300,7 +330,7 @@ That doesn't look right! Where's the `AbstractStringBuilder` class?
 Turns out it's not `public`, so Juggle filtered it out.  Let's try again: 
 ```shell
 $ juggle private class super StringBuilder
-public final class StringBuilder extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
+public final class StringBuilder extends AbstractStringBuilder implements java.io.Serializable, Comparable<StringBuilder>, CharSequence
 public class Object
 abstract class AbstractStringBuilder implements Appendable, CharSequence
 $
@@ -457,10 +487,10 @@ There's a handful of `sealed` interfaces in JDK 17:
 ```shell
 $ juggle sealed interface
 public abstract sealed interface java.lang.constant.ConstantDesc permits java.lang.constant.ClassDesc, java.lang.constant.MethodHandleDesc, java.lang.constant.MethodTypeDesc, Double, java.lang.constant.DynamicConstantDesc<T>, Float, Integer, Long, String
-public abstract sealed interface java.lang.constant.ClassDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfField<F> permits java.lang.constant.PrimitiveClassDescImpl, java.lang.constant.ReferenceClassDescImpl
+public abstract sealed interface java.lang.constant.ClassDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfField<java.lang.constant.ClassDesc> permits java.lang.constant.PrimitiveClassDescImpl, java.lang.constant.ReferenceClassDescImpl
 public abstract sealed interface java.lang.constant.MethodHandleDesc implements java.lang.constant.ConstantDesc permits java.lang.constant.AsTypeMethodHandleDesc, java.lang.constant.DirectMethodHandleDesc
 public abstract sealed interface java.lang.constant.DirectMethodHandleDesc implements java.lang.constant.MethodHandleDesc permits java.lang.constant.DirectMethodHandleDescImpl
-public abstract sealed interface java.lang.constant.MethodTypeDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfMethod<F,M> permits java.lang.constant.MethodTypeDescImpl
+public abstract sealed interface java.lang.constant.MethodTypeDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfMethod<java.lang.constant.ClassDesc,java.lang.constant.MethodTypeDesc> permits java.lang.constant.MethodTypeDescImpl
 $
 ```
 
@@ -882,7 +912,7 @@ been moved to the end of that list rather than the start.
 $ juggle -i java.net class /Class/
 public class java.security.SecureClassLoader extends ClassLoader
 public class URLClassLoader extends java.security.SecureClassLoader implements java.io.Closeable
-public final class Class<T> implements java.io.Serializable, java.lang.reflect.GenericDeclaration, java.lang.reflect.Type, java.lang.reflect.AnnotatedElement, java.lang.invoke.TypeDescriptor.OfField<F>, java.lang.constant.Constable
+public final class Class<T> implements java.io.Serializable, java.lang.reflect.GenericDeclaration, java.lang.reflect.Type, java.lang.reflect.AnnotatedElement, java.lang.invoke.TypeDescriptor.OfField<Class<?>>, java.lang.constant.Constable
 public class ClassCastException extends RuntimeException
 public class ClassCircularityError extends LinkageError
 public class ClassFormatError extends LinkageError
@@ -1255,13 +1285,13 @@ $
 Similarly, there's only one class called `StringBuffer`:
 ```shell
 $ juggle 'class StringBuffer'
-public final class StringBuffer extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
+public final class StringBuffer extends AbstractStringBuilder implements java.io.Serializable, Comparable<StringBuffer>, CharSequence
 $
 ```
 But there are two that contain the letters `StringBuffer`:
 ```shell
 $ juggle 'class /StringBuffer/'
-public final class StringBuffer extends AbstractStringBuilder implements java.io.Serializable, Comparable<T>, CharSequence
+public final class StringBuffer extends AbstractStringBuilder implements java.io.Serializable, Comparable<StringBuffer>, CharSequence
 public class java.io.StringBufferInputStream extends java.io.InputStream
 $
 ```

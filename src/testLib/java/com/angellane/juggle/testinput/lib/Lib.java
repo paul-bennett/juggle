@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.CLASS)   @interface ClassAnnotation   {}
 @Retention(RetentionPolicy.RUNTIME) @interface RuntimeAnnotation {}
 
+@SuppressWarnings("unused")
 public class Lib {
   public static Lib libFactory() {
     return new Lib();
@@ -40,4 +41,8 @@ public class Lib {
   public static void someFunction(
           @SourceAnnotation @ClassAnnotation @RuntimeAnnotation int foo,
           final String bar) {}
+
+  // This method demonstrates a type parameter with multiple bounds.
+  public static <T extends Number> void singleBound(T t) {}
+  public static <T extends Number & Comparable<T>> void multipleBounds(T t) {}
 }

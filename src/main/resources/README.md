@@ -207,7 +207,7 @@ are supplied, they must all be present on the method.
 $ juggle @SafeVarargs
 public static transient <T> boolean java.util.Collections.addAll(java.util.Collection<? super T>,T...)
 public static transient <T> java.util.List<T> java.util.Arrays.asList(T...)
-public static transient <E> java.util.EnumSet<E> java.util.EnumSet<E>.of(E,E...)
+public static transient <E extends Enum<E>> java.util.EnumSet<E> java.util.EnumSet<E extends Enum<E>>.of(E,E...)
 public static transient <E> java.util.List<E> java.util.List<E>.of(E...)
 public static transient <E> java.util.Set<E> java.util.Set<E>.of(E...)
 public static transient <K,V> java.util.Map<K,V> java.util.Map<K,V>.ofEntries(java.util.Map.Entry<? extends K,? extends V>...)

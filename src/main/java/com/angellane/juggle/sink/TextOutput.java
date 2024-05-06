@@ -28,7 +28,6 @@ import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,8 +77,8 @@ public class TextOutput implements Sink {
         if (c.getInterfaces().length > 0 && !c.isAnnotation()) {
             ret.append(f.formatKeyword(" implements "));
             ret.append(
-                    Arrays.stream(c.getInterfaces())
-                            .map(this::decodeClass)
+                    Arrays.stream(c.getGenericInterfaces())
+                            .map(this::decodeType)
                             .map(f::formatType)
                             .collect(Collectors.joining(
                                     f.formatPunctuation(", "))
@@ -158,19 +157,15 @@ public class TextOutput implements Sink {
     }
 
     public String decodeTypeParameters(TypeVariable<?>[] typeVariables) {
-        if (typeVariables.length == 0)
-            return "";
-        else {
-            StringBuilder ret = new StringBuilder("<");
-            StringJoiner joiner = new StringJoiner(",");
-            for (TypeVariable<?> tv : typeVariables) {
-                joiner.add(tv.getName());
-                // This would be a good place to add bounds and handle wildcards
-            }
-            ret.append(joiner);
-            ret.append("> ");
-            return ret.toString();
-        }
+        return (typeVariables.length == 0)
+                ? ""
+                : ('<' +
+                Stream.of(typeVariables)
+                        .map(tv -> tv.getName()
+                                + decodeBounds("extends", tv.getBounds()))
+                        .collect(Collectors.joining(",")
+                        )
+                + "> ");
     }
 
     public String decodeDeclType(Member m) {
@@ -233,9 +228,13 @@ public class TextOutput implements Sink {
     }
 
     private String decodeBounds(String keyword, Type[] bs) {
-        if (bs != null && bs.length > 0) {
+        if (bs == null) return "";
+        var filteredBounds = Stream.of(bs)
+                .filter(b -> b != Object.class)   // Don't emit Object as bound
+                .toList();
+        if (!filteredBounds.isEmpty()) {
             return " " + keyword + " " +
-                    Stream.of(bs)
+                    filteredBounds.stream()
                             .map(this::decodeType)
                             .collect(Collectors.joining(" & "));
         }
@@ -307,12 +306,16 @@ public class TextOutput implements Sink {
                 TypeVariable<?>[] typeVars = c.getTypeParameters();
 
                 if (typeVars.length > 0) {
-                    ret.append('<');
-                    StringJoiner j = new StringJoiner(",");
-                    for (var tv : typeVars)
-                        j.add(tv.toString());
-                    ret.append(j);
-                    ret.append('>');
+                    ret
+                            .append('<')
+                            .append(
+                                    Stream.of(typeVars)
+                                            .map(tv -> tv.getName()
+                                                    + decodeBounds("extends", tv.getBounds())
+                                            )
+                                            .collect(Collectors.joining(","))
+                            )
+                            .append('>');
                 }
             }
 
