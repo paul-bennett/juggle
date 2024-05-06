@@ -29,6 +29,14 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #122](https://github.com/paul-bennett/juggle/issues/122): Juggle claims interfaces implement other interfaces rather than extend
+
+```shell
+$ juggle interface java.util.List
+public abstract interface java.util.List<E> extends java.util.Collection<E>
+$
+```
+
 ### [GitHub Issue #121](https://github.com/paul-bennett/juggle/issues/121): Juggle should emit bounds on class queries
 
 ```shell
@@ -438,24 +446,24 @@ Here's a similar sequence with interfaces.  First, the direct descendents
 of `Collection`:
 ```shell
 $ juggle -c none -i java.util interface extends Collection
-public abstract interface List<E> implements Collection<E>
-public abstract interface Queue<E> implements Collection<E>
-public abstract interface Set<E> implements Collection<E>
+public abstract interface List<E> extends Collection<E>
+public abstract interface Queue<E> extends Collection<E>
+public abstract interface Set<E> extends Collection<E>
 $
 ```
 
 Now all indirect descendents too:
 ```shell
 $ juggle -i java.util interface extends Collection
-public abstract interface Deque<E> implements Queue<E>
-public abstract interface List<E> implements Collection<E>
-public abstract interface NavigableSet<E> implements SortedSet<E>
-public abstract interface Queue<E> implements Collection<E>
-public abstract interface Set<E> implements Collection<E>
-public abstract interface SortedSet<E> implements Set<E>
-public abstract interface java.util.concurrent.BlockingQueue<E> implements Queue<E>
-public abstract interface java.util.concurrent.BlockingDeque<E> implements java.util.concurrent.BlockingQueue<E>, Deque<E>
-public abstract interface java.util.concurrent.TransferQueue<E> implements java.util.concurrent.BlockingQueue<E>
+public abstract interface Deque<E> extends Queue<E>
+public abstract interface List<E> extends Collection<E>
+public abstract interface NavigableSet<E> extends SortedSet<E>
+public abstract interface Queue<E> extends Collection<E>
+public abstract interface Set<E> extends Collection<E>
+public abstract interface SortedSet<E> extends Set<E>
+public abstract interface java.util.concurrent.BlockingQueue<E> extends Queue<E>
+public abstract interface java.util.concurrent.BlockingDeque<E> extends java.util.concurrent.BlockingQueue<E>, Deque<E>
+public abstract interface java.util.concurrent.TransferQueue<E> extends java.util.concurrent.BlockingQueue<E>
 $
 ```
 
@@ -487,10 +495,10 @@ There's a handful of `sealed` interfaces in JDK 17:
 ```shell
 $ juggle sealed interface
 public abstract sealed interface java.lang.constant.ConstantDesc permits java.lang.constant.ClassDesc, java.lang.constant.MethodHandleDesc, java.lang.constant.MethodTypeDesc, Double, java.lang.constant.DynamicConstantDesc<T>, Float, Integer, Long, String
-public abstract sealed interface java.lang.constant.ClassDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfField<java.lang.constant.ClassDesc> permits java.lang.constant.PrimitiveClassDescImpl, java.lang.constant.ReferenceClassDescImpl
-public abstract sealed interface java.lang.constant.MethodHandleDesc implements java.lang.constant.ConstantDesc permits java.lang.constant.AsTypeMethodHandleDesc, java.lang.constant.DirectMethodHandleDesc
-public abstract sealed interface java.lang.constant.DirectMethodHandleDesc implements java.lang.constant.MethodHandleDesc permits java.lang.constant.DirectMethodHandleDescImpl
-public abstract sealed interface java.lang.constant.MethodTypeDesc implements java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfMethod<java.lang.constant.ClassDesc,java.lang.constant.MethodTypeDesc> permits java.lang.constant.MethodTypeDescImpl
+public abstract sealed interface java.lang.constant.ClassDesc extends java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfField<java.lang.constant.ClassDesc> permits java.lang.constant.PrimitiveClassDescImpl, java.lang.constant.ReferenceClassDescImpl
+public abstract sealed interface java.lang.constant.MethodHandleDesc extends java.lang.constant.ConstantDesc permits java.lang.constant.AsTypeMethodHandleDesc, java.lang.constant.DirectMethodHandleDesc
+public abstract sealed interface java.lang.constant.DirectMethodHandleDesc extends java.lang.constant.MethodHandleDesc permits java.lang.constant.DirectMethodHandleDescImpl
+public abstract sealed interface java.lang.constant.MethodTypeDesc extends java.lang.constant.ConstantDesc, java.lang.invoke.TypeDescriptor.OfMethod<java.lang.constant.ClassDesc,java.lang.constant.MethodTypeDesc> permits java.lang.constant.MethodTypeDescImpl
 $
 ```
 

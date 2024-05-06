@@ -75,7 +75,7 @@ public class TextOutput implements Sink {
         }
 
         if (c.getInterfaces().length > 0 && !c.isAnnotation()) {
-            ret.append(f.formatKeyword(" implements "));
+            ret.append(f.formatKeyword(c.isInterface() ? " extends " : " implements "));
             ret.append(
                     Arrays.stream(c.getGenericInterfaces())
                             .map(this::decodeType)
