@@ -146,14 +146,10 @@ $ juggle strictfp
 $
 ```
 
-And here are all the `final native` methods returning a `boolean`:
+And here are all the `final native` methods returning a `byte`:
 ```shell
-$ juggle final native boolean
-public final transient native boolean java.lang.invoke.VarHandle.compareAndSet(Object...)
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSet(Object...)
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetAcquire(Object...)
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetPlain(Object...)
-public final transient native boolean java.lang.invoke.VarHandle.weakCompareAndSetRelease(Object...)
+$ juggle native byte
+public static native byte java.lang.reflect.Array.getByte(Object,int) throws IllegalArgumentException,ArrayIndexOutOfBoundsException
 $
 ```
 
