@@ -21,8 +21,7 @@ import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.comparator.*;
 import com.angellane.juggle.match.Match;
-import com.angellane.juggle.query.MemberQuery;
-import com.angellane.juggle.query.TypeQuery;
+import com.angellane.juggle.query.Query;
 
 import java.util.Comparator;
 import java.util.function.Function;
@@ -41,7 +40,7 @@ import java.util.function.Function;
  *       - constructor arg is a Function<Main, Comparator<Member>>
  */
 
-enum SortCriteria {
+public enum SortCriteria {
     SCORE   (j -> new ByScore<>(),              j -> new ByScore<>()),
     HIERARCHY (j -> new ByHierarchy(),          j -> (cm1,cm2) -> 0),
     ACCESS  (j -> new ByAccessibility<>(),      j -> new ByAccessibility<>()),
@@ -52,28 +51,28 @@ enum SortCriteria {
 
     private final Function<
             Juggler,
-            Comparator<Match<TypeCandidate, TypeQuery>>
+            Comparator<Match<TypeCandidate, Query<TypeCandidate>>>
             > typeComparatorGenerator;
     private final Function<
             Juggler,
-            Comparator<Match<MemberCandidate, MemberQuery>>
+            Comparator<Match<MemberCandidate, Query<MemberCandidate>>>
             > memberComparatorGenerator;
 
     SortCriteria(
-            Function<Juggler, Comparator<Match<TypeCandidate,   TypeQuery>>>
+            Function<Juggler, Comparator<Match<TypeCandidate, Query<TypeCandidate>>>>
                     typeComparatorGenerator,
-            Function<Juggler, Comparator<Match<MemberCandidate, MemberQuery>>>
+            Function<Juggler, Comparator<Match<MemberCandidate, Query<MemberCandidate>>>>
                     memberComparatorGenerator
     ) {
         this.typeComparatorGenerator   = typeComparatorGenerator;
         this.memberComparatorGenerator = memberComparatorGenerator;
     }
 
-    Comparator<Match<TypeCandidate,TypeQuery>>
+    Comparator<Match<TypeCandidate,Query<TypeCandidate>>>
     getTypeComparator(Juggler j) {
         return typeComparatorGenerator.apply(j);
     }
-    Comparator<Match<MemberCandidate,MemberQuery>>
+    Comparator<Match<MemberCandidate,Query<MemberCandidate>>>
     getMemberComparator(Juggler j) {
         return memberComparatorGenerator.apply(j);
     }

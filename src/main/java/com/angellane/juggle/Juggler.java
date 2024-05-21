@@ -59,7 +59,7 @@ public class Juggler {
     }
 
     public List<String> getModulePaths() {
-        return modulePaths.size() == 0 ? List.of(".") : modulePaths;
+        return modulePaths.isEmpty() ? List.of(".") : modulePaths;
     }
 
 
@@ -213,12 +213,12 @@ public class Juggler {
     Deque<Function<MemberCandidate, Stream<MemberCandidate>>>
             memberCandidateProcessors = new LinkedList<>();
     private final
-    List<Function<Match<TypeCandidate, TypeQuery>,
-            Stream<Match<TypeCandidate, TypeQuery>>>>
+    List<Function<Match<TypeCandidate, Query<TypeCandidate>>,
+            Stream<Match<TypeCandidate, Query<TypeCandidate>>>>>
             typeMatchProcessors = new ArrayList<>();
     private final
-    List<Function<Match<MemberCandidate, MemberQuery>,
-            Stream<Match<MemberCandidate, MemberQuery>>>>
+    List<Function<Match<MemberCandidate, Query<MemberCandidate>>,
+            Stream<Match<MemberCandidate, Query<MemberCandidate>>>>>
             memberMatchProcessors = new ArrayList<>();
 
     public void prependMemberCandidateProcessor(
@@ -229,15 +229,15 @@ public class Juggler {
 
     public void addTypeMatchProcessor(
             Function<
-                    Match<TypeCandidate, TypeQuery>,
-                    Stream<Match<TypeCandidate, TypeQuery>>
+                    Match<TypeCandidate, Query<TypeCandidate>>,
+                    Stream<Match<TypeCandidate, Query<TypeCandidate>>>
                     > processor) {
         typeMatchProcessors.add(processor);
     }
     public void addMemberMatchProcessor(
             Function<
-                    Match<MemberCandidate, MemberQuery>,
-                    Stream<Match<MemberCandidate, MemberQuery>>
+                    Match<MemberCandidate, Query<MemberCandidate>>,
+                    Stream<Match<MemberCandidate, Query<MemberCandidate>>>
                     > processor) {
         memberMatchProcessors.add(processor);
     }
@@ -263,7 +263,7 @@ public class Juggler {
     public void addSortCriteria(SortCriteria sort)          { sortCriteria.add(sort); }
     public List<SortCriteria> getSortCriteria() {
         // Return default criteria of none were set.
-        return sortCriteria.size() != 0
+        return !sortCriteria.isEmpty()
                 ? sortCriteria
                 : List.of(
                         SortCriteria.SCORE,   SortCriteria.HIERARCHY,
@@ -272,12 +272,12 @@ public class Juggler {
                 );
     }
 
-    Comparator<Match<TypeCandidate,TypeQuery>> getTypeComparator() {
+    Comparator<Match<TypeCandidate,Query<TypeCandidate>>> getTypeComparator() {
         return MultiComparator.of(getSortCriteria().stream()
                 .map(g -> g.getTypeComparator(this))
                 .toList());
     }
-    Comparator<Match<MemberCandidate,MemberQuery>> getMemberComparator() {
+    Comparator<Match<MemberCandidate,Query<MemberCandidate>>> getMemberComparator() {
         return MultiComparator.of(getSortCriteria().stream()
                 .map(g -> g.getMemberComparator(this))
                 .toList());
@@ -313,7 +313,7 @@ public class Juggler {
 
     // Conversions ====================================================================================================
 
-    enum Conversions { AUTO, NONE, ALL }
+    public enum Conversions { AUTO, NONE, ALL }
     private Conversions conversions = Conversions.AUTO;
     public void setConversions(Conversions conversions) {
         this.conversions = conversions;
@@ -360,19 +360,19 @@ public class Juggler {
     }
 
     protected
-    <C extends Candidate, Q extends Query<C>, M extends Match<C,Q>>
+    <C extends Candidate>
     void runPipeline(Stream<C> source,
-                     Q query,
+                     Query<C> query,
                      Collection<Function<C, Stream<C>>> candidateProcessors,
-                     Collection<Function<M, Stream<M>>> matchProcessors,
-                     Comparator<M> comparator
+                     Collection<Function<Match<C, Query<C>>, Stream<Match<C, Query<C>>>>> matchProcessors,
+                     Comparator<Match<C, Query<C>>> comparator
     ) {
         var candidateChain  = chainProcessors(candidateProcessors);
         var matchChain      = chainProcessors(matchProcessors);
 
         source
                 .flatMap(candidateChain)
-                .<M>flatMap(c -> query.match(getTypeMatcher(query), c))
+                .flatMap(c -> query.match(getTypeMatcher(query), c))
                 .flatMap(matchChain)
                 .distinct()
                 .sorted(comparator)

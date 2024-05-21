@@ -19,7 +19,6 @@ package com.angellane.juggle.query;
 
 import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.candidate.TypeCandidate;
-import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
 import com.angellane.juggle.util.ClassUtils;
 
@@ -113,20 +112,6 @@ public final class TypeQuery extends Query<TypeCandidate> {
     }
 
     @Override
-    public
-    <Q extends Query<TypeCandidate>, M extends Match<TypeCandidate, Q>>
-    Stream<M> match(TypeMatcher tm, TypeCandidate candidate) {
-        OptionalInt score = scoreCandidate(tm, candidate);
-
-        if (score.isPresent()) {
-            @SuppressWarnings("unchecked")
-            M m = (M)new Match<>(candidate, this, score.getAsInt());
-            return Stream.of(m);
-        }
-        else
-            return Stream.empty();
-    }
-
     public OptionalInt scoreCandidate(TypeMatcher tm, TypeCandidate ct) {
         return totalScore(List.of(
                 scoreAnnotations(ct.annotationTypes())

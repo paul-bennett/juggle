@@ -26,12 +26,10 @@ import java.util.Comparator;
 /**
  * Compares two Matches based on their Candidates' toString output.
  */
-public class ByString<
-        C extends Candidate, Q extends Query<C>, M extends Match<C,Q>
-        >
-        implements Comparator<M> {
+public class ByString<C extends Candidate>
+        implements Comparator<Match<C, Query<C>>> {
     @Override
-    public int compare(M m1, M m2) {
+    public int compare(Match<C, Query<C>> m1, Match<C, Query<C>> m2) {
         return m1.candidate().toString()
                 .compareTo(m2.candidate().toString());
     }

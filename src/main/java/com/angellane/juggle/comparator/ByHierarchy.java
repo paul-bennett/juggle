@@ -19,7 +19,7 @@ package com.angellane.juggle.comparator;
 
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.Match;
-import com.angellane.juggle.query.TypeQuery;
+import com.angellane.juggle.query.Query;
 
 import java.util.Comparator;
 
@@ -27,10 +27,10 @@ import java.util.Comparator;
  * Compares two Matches based on their Candidates' simple name.
  */
 public class ByHierarchy
-        implements Comparator<Match<TypeCandidate, TypeQuery>> {
+        implements Comparator<Match<TypeCandidate, Query<TypeCandidate>>> {
     @Override
-    public int compare(Match<TypeCandidate, TypeQuery> m1,
-                       Match<TypeCandidate, TypeQuery> m2) {
+    public int compare(Match<TypeCandidate, Query<TypeCandidate>> m1,
+                       Match<TypeCandidate, Query<TypeCandidate>> m2) {
 
         Class<?> c1 = m1.candidate().clazz();
         Class<?> c2 = m2.candidate().clazz();

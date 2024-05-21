@@ -18,7 +18,6 @@
 package com.angellane.juggle.query;
 
 import com.angellane.juggle.candidate.MemberCandidate;
-import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
 
 import java.lang.reflect.Method;
@@ -95,19 +94,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
     }
 
     @Override
-    public <Q extends Query<MemberCandidate>, M extends Match<MemberCandidate, Q>>
-    Stream<M> match(TypeMatcher tm, MemberCandidate candidate) {
-        OptionalInt score = scoreCandidate(tm, candidate);
-
-        if (score.isPresent()) {
-            @SuppressWarnings("unchecked")
-            M m = (M) new Match<>(candidate, this, score.getAsInt());
-            return Stream.of(m);
-        } else
-            return Stream.empty();
-    }
-
-    OptionalInt scoreCandidate(TypeMatcher tm, MemberCandidate cm) {
+    public OptionalInt scoreCandidate(TypeMatcher tm, MemberCandidate cm) {
         return totalScore(List.of(
                 scoreAnnotations(cm.annotationTypes())
                 , scoreAccessibility(cm.accessibility())
@@ -123,8 +110,7 @@ public final class MemberQuery extends Query<MemberCandidate> {
     private OptionalInt scoreIsDefault(MemberCandidate cm) {
         if (this.isDefault == null)
             return EXACT_MATCH;
-        else return (this.isDefault
-                && cm.member() instanceof Method meth
+        else return (cm.member() instanceof Method meth
                 && meth.isDefault() == this.isDefault
         )
                 ? EXACT_MATCH : NO_MATCH;

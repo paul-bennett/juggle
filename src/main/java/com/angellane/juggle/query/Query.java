@@ -60,14 +60,13 @@ public abstract sealed class Query<C extends Candidate>
     public abstract boolean hasBoundedWildcards();
 
     /**
-     * Tries to match the candidate against this query.
+     * Evaluate a score for the candidate against this query
      *
-     * @param candidate the candidate to try to match against this query
-     * @return Match (+score), or empty if #candidate doesn't match.
+     * @param tm a type matcher to use during scoring
+     * @param ct the candidate to score
+     * @return a score, or empty if not score available
      */
-    public abstract
-    <Q extends Query<C>, M extends Match<C,Q>>
-    Stream<M> match(TypeMatcher tm, C candidate);
+    public abstract OptionalInt scoreCandidate(TypeMatcher tm, C ct);
 
 
     // FRAMEWORK ==============================================================
@@ -146,6 +145,14 @@ public abstract sealed class Query<C extends Candidate>
 
 
     // MATCHERS ===============================================================
+
+    public Stream<Match<C, Query<C>>> match(TypeMatcher tm, C candidate) {
+        OptionalInt score = scoreCandidate(tm, candidate);
+
+        return score.isPresent()
+                ? Stream.of(new Match<>(candidate, this, score.getAsInt()))
+                : Stream.empty();
+    }
 
     protected boolean matchesAnnotations(Set<Class<?>> annotationTypes) {
         return this.annotationTypes == null
