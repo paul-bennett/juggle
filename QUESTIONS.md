@@ -1,20 +1,24 @@
+<!-- 
+    Juggle -- a declarative search tool for Java
+   
+    Copyright 2020,2024 Paul Bennett
+   
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
 # Open Questions
 
 This file contains a few user interface questions that I've not resolved yet.
-
-## Negative searches
-
-How should Juggle express negative searches in queries, e.g.
-names that _don't_ match a particular regular expression, or
-methods that _don't_ have a specific modifier set?
-
-> **Question**: Is `!` a suitable syntactic element for "not"?
-> E.G. `$ juggle !/foo/` and `$ juggle !static`?  Does this
-> cause problems due to its use in some shells?
-
-> **Question**: Should the grammar require there to be no
-> whitespace between the negation operator and the expression?
-
 
 ## Might throw other types
 

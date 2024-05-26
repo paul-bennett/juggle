@@ -1,7 +1,7 @@
 <!-- 
-    Juggle -- an API search tool for Java
+    Juggle -- a declarative search tool for Java
    
-    Copyright 2020,2023 Paul Bennett
+    Copyright 2020,2024 Paul Bennett
    
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
     limitations under the License.
 -->
 
-# Juggle: an API search tool for Java
+# Juggle: a declarative search tool for Java
 
 Juggle searches Java libraries for types and members that match a given declaration.
 
