@@ -411,6 +411,21 @@ All other member and type modifiers are supported too (`static`, `final`,
 `sealed` and `non-sealed`).  A candidate member or type must match _all_
 specified modifiers to be included in the results.
 
+As an extension to the Java syntax, you can _negate_ modifiers in Juggle
+queries by prefixing a modifier with an exclamation mark.  This causes
+Juggle to only show items that _don't_ have the specified modifier.
+
+For example, to list only instance members, put `!static` in your query:
+
+```shell
+$ juggle 'protected !static java.io.OutputStream ()'
+public java.io.OutputStream.<init>()
+public java.io.ByteArrayOutputStream.<init>()
+public java.io.PipedOutputStream.<init>()
+protected java.io.ObjectOutputStream.<init>() throws java.io.IOException,SecurityException
+$
+```
+
 
 ### Parameter Metadata
 

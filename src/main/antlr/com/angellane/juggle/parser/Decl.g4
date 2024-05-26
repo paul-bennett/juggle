@@ -123,22 +123,28 @@ recordDecl
 
 classModifiers: classModifier*;
 classModifier
-    :   annotation
-    |   'private' | 'protected' | 'package' | 'public'
-    |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
+    : annotation
+    | 'private' | 'protected' | 'package' | 'public'
+    | NEGATE?
+        ( 'abstract' | 'static' | 'final'
+        | 'sealed' | 'non-sealed' | 'strictfp'
+        )
     ;
 
 interfaceModifiers: interfaceModifier*;
 interfaceModifier
-    :   annotation
-    |   'private' | 'protected' | 'package' | 'public'
-    |   'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp'
+    : annotation
+    | 'private' | 'protected' | 'package' | 'public'
+    | NEGATE?
+        ( 'abstract' | 'static' | 'final'
+        | 'sealed' | 'non-sealed' | 'strictfp'
+        )
     ;
 
 annotationModifiers: annotationModifier*;
 annotationModifier
     :   annotation
-    |   'public' | 'abstract'
+    |   'public' | NEGATE? 'abstract'
     ;
 
 permitsClause
@@ -161,9 +167,11 @@ memberModifiers: memberModifier*;
 memberModifier
     : annotation
     | 'private' | 'protected' | 'package' | 'public'
-    | 'abstract' | 'static' | 'final' | 'native' | 'strictfp' | 'synchronized'
-    | 'default'
-    | 'transient' | 'volatile'
+    | NEGATE?
+        ( 'abstract' | 'static' | 'final' | 'native'
+        | 'strictfp' | 'synchronized' | 'default'
+        | 'transient' | 'volatile'
+        )
     ;
 
 returnType
@@ -219,7 +227,7 @@ params
 paramModifiers: paramModifier*;
 paramModifier
     :   annotation
-    |   'final'
+    |   NEGATE? 'final'
     ;
 
 param

@@ -29,6 +29,83 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+
+### [GitHub Issue #69](https://github.com/paul-bennett/juggle/issues/69): Allow inversion of modifiers
+
+Here's a set of methods to play with:
+```shell
+$ juggle -m java.se javax.lang.model.element.Modifier
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.ABSTRACT
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.DEFAULT
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.FINAL
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.NATIVE
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.NON_SEALED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.PRIVATE
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.PROTECTED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.PUBLIC
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.SEALED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.STATIC
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.STRICTFP
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.SYNCHRONIZED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.TRANSIENT
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.VOLATILE
+public static javax.lang.model.element.Modifier javax.lang.model.element.Modifier.valueOf(String)
+public abstract javax.lang.model.element.Modifier javax.tools.JavaFileObject.getAccessLevel()
+public javax.lang.model.element.Modifier javax.tools.ForwardingJavaFileObject<F extends javax.tools.JavaFileObject>.getAccessLevel()
+public javax.lang.model.element.Modifier javax.tools.SimpleJavaFileObject.getAccessLevel()
+$
+```
+
+Let's only look at the `static` members:
+```shell
+$ juggle -m java.se 'static javax.lang.model.element.Modifier'
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.ABSTRACT
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.DEFAULT
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.FINAL
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.NATIVE
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.NON_SEALED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.PRIVATE
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.PROTECTED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.PUBLIC
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.SEALED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.STATIC
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.STRICTFP
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.SYNCHRONIZED
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.TRANSIENT
+public static final javax.lang.model.element.Modifier javax.lang.model.element.Modifier.VOLATILE
+public static javax.lang.model.element.Modifier javax.lang.model.element.Modifier.valueOf(String)
+$
+```
+
+Now let's invert the modifier to find the non-static ones:
+
+```shell
+$ juggle -m java.se '!static javax.lang.model.element.Modifier'
+public abstract javax.lang.model.element.Modifier javax.tools.JavaFileObject.getAccessLevel()
+public javax.lang.model.element.Modifier javax.tools.ForwardingJavaFileObject<F extends javax.tools.JavaFileObject>.getAccessLevel()
+public javax.lang.model.element.Modifier javax.tools.SimpleJavaFileObject.getAccessLevel()
+$
+```
+
+How about the non-static, non-abstract methods?
+
+```shell
+$ juggle -m java.se '!static !abstract javax.lang.model.element.Modifier'
+public javax.lang.model.element.Modifier javax.tools.ForwardingJavaFileObject<F extends javax.tools.JavaFileObject>.getAccessLevel()
+public javax.lang.model.element.Modifier javax.tools.SimpleJavaFileObject.getAccessLevel()
+$
+```
+
+And of course we can mix positive and negative modifiers. Here are the abstract non-statics:
+Now let's invert the modifier to find the non-static ones:
+
+```shell
+$ juggle -m java.se '!static abstract javax.lang.model.element.Modifier'
+public abstract javax.lang.model.element.Modifier javax.tools.JavaFileObject.getAccessLevel()
+$
+```
+
+
 ### [GitHub Issue #89](https://github.com/paul-bennett/juggle/issues/89): Support negative pattern matches
 
 We'll play with this example from `README.md`:

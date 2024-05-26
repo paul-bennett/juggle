@@ -235,10 +235,6 @@ public class QueryFactory {
             this.tempModifiersMask |= modifier;
         }
 
-        private void addOtherModifier(int modifier) {
-            addOtherModifier(modifier, true);
-        }
-
         // Clears all modifiers (other modifiers & annotations)
         private void clearAllModifiers() {
             clearAnnotations();
@@ -316,26 +312,32 @@ public class QueryFactory {
         }
 
         private void handleModifier(String text) {
+            boolean setModifier = true;
+            if (text.startsWith("!")) {
+                setModifier = false;
+                text = text.substring(1);
+            }
+
             switch (text) {
                 case "private", "package", "protected", "public" ->
                         tempQuery.setAccessibility(Accessibility.fromString(text));
 
                 // This group of modifiers apply to members and parameters
-                case "static"       -> addOtherModifier(Modifier.STATIC);
-                case "final"        -> addOtherModifier(Modifier.FINAL);
-                case "synchronized" -> addOtherModifier(Modifier.SYNCHRONIZED);
-                case "volatile"     -> addOtherModifier(Modifier.VOLATILE);
-                case "transient"    -> addOtherModifier(Modifier.TRANSIENT);
-                case "native"       -> addOtherModifier(Modifier.NATIVE);
-                case "abstract"     -> addOtherModifier(Modifier.ABSTRACT);
-                case "strictfp"     -> addOtherModifier(Modifier.STRICT);
+                case "static"       -> addOtherModifier(Modifier.STATIC,        setModifier);
+                case "final"        -> addOtherModifier(Modifier.FINAL,         setModifier);
+                case "synchronized" -> addOtherModifier(Modifier.SYNCHRONIZED,  setModifier);
+                case "volatile"     -> addOtherModifier(Modifier.VOLATILE,      setModifier);
+                case "transient"    -> addOtherModifier(Modifier.TRANSIENT,     setModifier);
+                case "native"       -> addOtherModifier(Modifier.NATIVE,        setModifier);
+                case "abstract"     -> addOtherModifier(Modifier.ABSTRACT,      setModifier);
+                case "strictfp"     -> addOtherModifier(Modifier.STRICT,        setModifier);
 
                 // The grammar restricts these to type queries only
-                case "sealed"       -> tempTypeQuery.setIsSealed(true);
-                case "non-sealed"   -> tempTypeQuery.setIsSealed(false);
+                case "sealed"       -> tempTypeQuery.setIsSealed( setModifier);
+                case "non-sealed"   -> tempTypeQuery.setIsSealed(!setModifier);
 
                 // And this is restricted to member queries
-                case "default"      -> tempMemberQuery.setIsDefault(true);
+                case "default"      -> tempMemberQuery.setIsDefault(setModifier);
 
                 default ->
                         juggler.warn("Unknown modifier `%s'; ignoring"
