@@ -20,6 +20,7 @@ package com.angellane.juggle.query;
 import com.angellane.juggle.candidate.MemberCandidate;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.match.TypeMatcher;
+import com.angellane.juggle.util.NegatablePattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,6 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,7 +74,7 @@ public class TestMemberDecl {
         q.modifierMask = Modifier.STATIC;
         q.accessibility = Accessibility.PROTECTED;
         q.returnType = BoundedType.exactType(java.net.URL.class);
-        q.declarationPattern = Pattern.compile("^findResource$");
+        q.declarationPattern = NegatablePattern.compile("^findResource$");
         q.params = List.of(
                 ParamSpec.param(ClassLoader.class),
                 ParamSpec.param(String.class, "name"));
@@ -88,7 +88,7 @@ public class TestMemberDecl {
         MemberQuery q = new MemberQuery();
 
         q.accessibility = Accessibility.PROTECTED;
-        q.declarationPattern = Pattern.compile("^findResource$");
+        q.declarationPattern = NegatablePattern.compile("^findResource$");
         q.params = List.of(ParamSpec.ellipsis());
 
         matchQueryAndCandidate(q, cm);
@@ -98,7 +98,7 @@ public class TestMemberDecl {
     public void testTooManyArgs() {
         MemberQuery q = new MemberQuery();
 
-        q.declarationPattern = Pattern.compile("^findResource$");
+        q.declarationPattern = NegatablePattern.compile("^findResource$");
         q.params = List.of(
                 ParamSpec.param(ClassLoader.class),
                 ParamSpec.param(String.class, "name"),
@@ -113,7 +113,7 @@ public class TestMemberDecl {
     public void testTooFewArgs() {
         MemberQuery q = new MemberQuery();
 
-        q.declarationPattern = Pattern.compile("^findResource$");
+        q.declarationPattern = NegatablePattern.compile("^findResource$");
         q.params = List.of(ParamSpec.param(ClassLoader.class));
 
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
@@ -161,7 +161,7 @@ public class TestMemberDecl {
     @Test
     public void testCorrectDeclarationName() {
         MemberQuery q = new MemberQuery();
-        q.declarationPattern = Pattern.compile("^findResource$");
+        q.declarationPattern = NegatablePattern.compile("^findResource$");
         q.accessibility = Accessibility.PROTECTED;
         matchQueryAndCandidate(q, cm);
     }
@@ -228,7 +228,7 @@ public class TestMemberDecl {
     @Test
     public void testWrongDeclarationName() {
         MemberQuery q = new MemberQuery();
-        q.declarationPattern = Pattern.compile("^barf$");
+        q.declarationPattern = NegatablePattern.compile("^barf$");
         assertFalse(q.matchesName(cm.simpleName(), cm.canonicalName()), "Match name");
         assertFalse(q.scoreCandidate(tm, cm).isPresent(),
                 "Match entire declaration");

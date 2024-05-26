@@ -20,6 +20,7 @@ package com.angellane.juggle.query;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.candidate.TypeCandidate;
 import com.angellane.juggle.match.TypeMatcher;
+import com.angellane.juggle.util.NegatablePattern;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
@@ -75,7 +76,8 @@ public class TypeQueryTest {
         TypeQuery q = new TypeQuery();
         q.accessibility     = Accessibility.PUBLIC;
         q.modifiers         = Modifier.ABSTRACT;
-        q.declarationPattern = Pattern.compile("List", Pattern.LITERAL);
+        q.declarationPattern =
+                NegatablePattern.compile("List", Pattern.LITERAL);
         q.superInterfaces   = Set.of(
                 BoundedType.exactType(java.util.Collection.class));
 
@@ -90,7 +92,8 @@ public class TypeQueryTest {
         TypeQuery q = new TypeQuery();
         q.accessibility     = Accessibility.PUBLIC;
         q.modifiers         = Modifier.STATIC;  // also FINAL
-        q.declarationPattern = Pattern.compile("State", Pattern.LITERAL);
+        q.declarationPattern =
+                NegatablePattern.compile("State", Pattern.LITERAL);
 
         assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }
@@ -104,7 +107,7 @@ public class TypeQueryTest {
 
         TypeQuery q = new TypeQuery();
         q.modifiers         = Modifier.FINAL;
-        q.declarationPattern = Pattern.compile("Unix");
+        q.declarationPattern = NegatablePattern.compile("Unix");
         q.params            = List.of(
                 ParamSpec.param(java.nio.file.attribute.UserPrincipal.class, "user"),
                 ParamSpec.param(java.nio.file.attribute.GroupPrincipal.class, "group")
@@ -125,7 +128,7 @@ public class TypeQueryTest {
         q.annotationTypes   = Set.of();
         q.accessibility     = Accessibility.PUBLIC;
         q.modifiers         = Modifier.FINAL | Modifier.ABSTRACT;
-        q.declarationPattern = Pattern.compile("int", Pattern.LITERAL);
+        q.declarationPattern = NegatablePattern.compile("int", Pattern.LITERAL);
 
         assertEquals(EXACT_MATCH, q.scoreCandidate(tm, ct));
     }

@@ -22,6 +22,7 @@ import com.angellane.juggle.candidate.Param;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.match.Match;
 import com.angellane.juggle.match.TypeMatcher;
+import com.angellane.juggle.util.NegatablePattern;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -34,16 +35,16 @@ import static com.angellane.juggle.util.Decomposer.decomposeIntoParts;
 
 public abstract sealed class Query<C extends Candidate>
         permits TypeQuery, MemberQuery {
-    protected Set<Class<?>> annotationTypes     = null;
-    protected Accessibility accessibility       = null;
-    protected int           modifierMask        = 0;
-    protected int           modifiers           = 0;
-    protected Pattern       declarationPattern  = null;
+    protected Set<Class<?>>     annotationTypes     = null;
+    protected Accessibility     accessibility       = null;
+    protected int               modifierMask        = 0;
+    protected int               modifiers           = 0;
+    protected NegatablePattern  declarationPattern  = null;
 
     // For TypeQuery, this specifies the recordComponents
-    public List<ParamSpec>  params              = null;
+    public List<ParamSpec>  params                  = null;
 
-    private static final int OTHER_MODIFIERS_MASK =
+    private static final int OTHER_MODIFIERS_MASK   =
             Candidate.OTHER_MODIFIERS_MASK;
 
 
@@ -78,12 +79,12 @@ public abstract sealed class Query<C extends Candidate>
         else if (!(other instanceof Query<?> q))
             return false;
         else
-            return Objects.equals(annotationTypes,       q.annotationTypes)
-                    && accessibility                  == q.accessibility
-                    && modifierMask                   == q.modifierMask
-                    && modifiers                      == q.modifiers
-                    && patternsEqual(declarationPattern, q.declarationPattern)
-                    && Objects.equals(params,            q.params)
+            return Objects.equals(annotationTypes,        q.annotationTypes)
+                    && accessibility                   == q.accessibility
+                    && modifierMask                    == q.modifierMask
+                    && modifiers                       == q.modifiers
+                    && Objects.equals(declarationPattern, q.declarationPattern)
+                    && Objects.equals(params,             q.params)
                     ;
     }
 
@@ -96,20 +97,6 @@ public abstract sealed class Query<C extends Candidate>
                 , declarationPattern
                 , params
         );
-    }
-
-
-    // UTILITIES --------------------------------------------------------------
-
-    /*
-     * java.util.regex.Pattern doesn't provide a meaningful equality
-     * test, so we convert both sides to Strings and hope for the best
-     */
-    static boolean patternsEqual(Pattern a, Pattern b) {
-        return (a != null && b != null)
-                ? (Objects.equals(a.pattern(), b.pattern())
-                    && (a.flags() == b.flags()))
-                : (a == b);
     }
 
 
@@ -131,10 +118,12 @@ public abstract sealed class Query<C extends Candidate>
     }
 
     public void setNameExact(final String name) {
-        setNamePattern(Pattern.compile("^" + Pattern.quote(name) + "$"));
+        setNamePattern(NegatablePattern.compile(
+                "^%s$".formatted(Pattern.quote(name)))
+        );
     }
 
-    public void setNamePattern(Pattern pattern) {
+    public void setNamePattern(NegatablePattern pattern) {
         this.declarationPattern = pattern;
     }
 
@@ -171,8 +160,7 @@ public abstract sealed class Query<C extends Candidate>
 
     protected boolean matchesName(String simpleName, String canonicalName) {
         return this.declarationPattern == null
-                || simpleName != null && this.declarationPattern.matcher(simpleName).find()
-                || canonicalName != null && this.declarationPattern.matcher(canonicalName).find();
+                || this.declarationPattern.testAll(simpleName, canonicalName);
     }
 
 
@@ -249,7 +237,7 @@ public abstract sealed class Query<C extends Candidate>
             // More specified params than candidate params
             return NO_MATCH;
         else {
-            // Nasty: using a 1-element array so we can set inside lambda
+            // Nasty: using a 1-element array, so we can set inside lambda
             final OptionalInt [] ret = new OptionalInt[]{ NO_MATCH };
 
             decomposeIntoParts(spareParams, numEllipses, distribution -> {
@@ -308,7 +296,7 @@ public abstract sealed class Query<C extends Candidate>
 
                                 if (actualParam.name() != null) {
                                     if (!queryParam.paramName()
-                                            .matcher(actualParam.name()).find())
+                                            .test(actualParam.name()))
                                         return NO_MATCH;
                                 }
                                 else if (thisPattern.equals(

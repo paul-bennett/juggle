@@ -29,6 +29,37 @@ But in essence, add a test by copying one of the code blocks.
 
 (Most recently fixed first.)
 
+### [GitHub Issue #89](https://github.com/paul-bennett/juggle/issues/89): Support negative pattern matches
+
+We'll play with this example from `README.md`:
+```shell
+$ juggle -i java.time 'LocalTime (Clock)'
+public static LocalTime LocalTime.now(Clock)
+$
+```
+
+We should get the same result if we try to match on the method name:
+```shell
+$ juggle -i java.time 'LocalTime /now/(Clock)'
+public static LocalTime LocalTime.now(Clock)
+$
+```
+
+But we should get no results if we use a negative match for that method name:
+```shell
+$ juggle -i java.time 'LocalTime !/now/(Clock)'
+$
+```
+
+Although obviously if we try a negative match for the wrong name we'll get the original result:
+We should get the same result if we try to match on the method name:
+```shell
+$ juggle -i java.time 'LocalTime !/askdjhakj/(Clock)'
+public static LocalTime LocalTime.now(Clock)
+$
+```
+
+
 ### [GitHub Issue #122](https://github.com/paul-bennett/juggle/issues/122): Juggle claims interfaces implement other interfaces rather than extend
 
 ```shell

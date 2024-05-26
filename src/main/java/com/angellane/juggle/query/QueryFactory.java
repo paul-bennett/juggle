@@ -23,6 +23,7 @@ import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.parser.DeclBaseListener;
 import com.angellane.juggle.parser.DeclLexer;
 import com.angellane.juggle.parser.DeclParser;
+import com.angellane.juggle.util.NegatablePattern;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -116,8 +117,8 @@ public class QueryFactory {
         return juggler.classForTypename(className);
     }
 
-    public static Pattern patternFromLiteral(String s) {
-        return Pattern.compile("^" + Pattern.quote(s) + "$");
+    public static NegatablePattern patternFromLiteral(String s) {
+        return NegatablePattern.compile("^%s$".formatted(Pattern.quote(s)));
     }
 
     class Listener extends DeclBaseListener {
@@ -347,7 +348,7 @@ public class QueryFactory {
 
         // This is populated by other listeners – either as a parameter name
         // or a method name
-        private Pattern tempName = null;
+        private NegatablePattern tempName = null;
 
         private void clearName() {
             tempName = null;
@@ -357,13 +358,19 @@ public class QueryFactory {
         public void enterUname(DeclParser.UnameContext ctx) {
             tempName = ctx.IDENT() != null
                     ? patternFromLiteral(ctx.IDENT().getText())
-                    : patternFromRegex(ctx.REGEX().getText());
+                    : patternFromRegex(
+                            ctx.REGEX().getText(),
+                            ctx.NEGATE() == null);
         }
 
         @Override
         public void exitTypeDeclName(DeclParser.TypeDeclNameContext ctx) {
             if (ctx.REGEX() != null)
-                tempQuery.setNamePattern(patternFromRegex(ctx.REGEX().getText()));
+                tempQuery.setNamePattern(
+                        patternFromRegex(
+                                ctx.REGEX().getText(),
+                                ctx.NEGATE() == null)
+                );
             else {
                 String nameText = ctx.IDENT().stream()
                         .map(TerminalNode::getText)
@@ -377,7 +384,8 @@ public class QueryFactory {
             tempQuery.setNamePattern(tempName);
         }
 
-        private Pattern patternFromRegex(String re) {
+        private NegatablePattern patternFromRegex(String re,
+                                                  boolean positiveMatch) {
             boolean caseInsensitive = re.endsWith("i");
 
             if (caseInsensitive)
@@ -388,8 +396,9 @@ public class QueryFactory {
 
             re = re.substring(1, re.length() - 1);
 
-            return Pattern.compile(re,
-                    caseInsensitive ? Pattern.CASE_INSENSITIVE : 0);
+            return NegatablePattern.compile(re,
+                    caseInsensitive ? Pattern.CASE_INSENSITIVE : 0,
+                    positiveMatch);
         }
 
 

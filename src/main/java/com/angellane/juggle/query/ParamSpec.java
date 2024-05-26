@@ -17,8 +17,9 @@
  */
 package com.angellane.juggle.query;
 
+import com.angellane.juggle.util.NegatablePattern;
+
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
     static ZeroOrMoreParams ellipsis() {
@@ -37,19 +38,15 @@ public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
     static SingleParam param(Set<Class<?>> annotations,
                              int modifiers, int modifiersMask,
                              BoundedType bt,
-                             Pattern pat) {
+                             NegatablePattern pat) {
         if (bt  == null) bt  = BoundedType.unboundedWildcardType();
-        if (pat == null) pat = Pattern.compile("");
+        if (pat == null) pat = NegatablePattern.alwaysMatch();
 
         return new SingleParam(annotations, modifiers, modifiersMask, bt, pat);
     }
 
-    static SingleParam param(BoundedType bt, Pattern pat) {
+    static SingleParam param(BoundedType bt, NegatablePattern pat) {
         return param(null, 0, 0, bt, pat);
-    }
-
-    static SingleParam param(Pattern pat) {
-        return param(null, 0, 0, null, pat);
     }
 
     static SingleParam param(BoundedType bt) {
@@ -62,7 +59,7 @@ public sealed interface ParamSpec permits ZeroOrMoreParams, SingleParam {
 
     static SingleParam param(Class<?> type, String name) {
         return param(BoundedType.exactType(type),
-                Pattern.compile("^%s$".formatted(name)));
+                NegatablePattern.compile("^%s$".formatted(name)));
     }
 
 }

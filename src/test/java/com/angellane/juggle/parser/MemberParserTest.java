@@ -21,6 +21,7 @@ import com.angellane.juggle.Juggler;
 import com.angellane.juggle.match.Accessibility;
 import com.angellane.juggle.parser.DeclParser.MemberDeclContext;
 import com.angellane.juggle.query.*;
+import com.angellane.juggle.util.NegatablePattern;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -189,7 +190,9 @@ public class MemberParserTest {
 
         MemberQuery expectedQuery = new MemberQuery();
         expectedQuery.returnType = BoundedType.unboundedWildcardType();
-        expectedQuery.setNamePattern(Pattern.compile("pattern", Pattern.CASE_INSENSITIVE));
+        expectedQuery.setNamePattern(
+                NegatablePattern.compile("pattern", Pattern.CASE_INSENSITIVE)
+        );
 
         assertEquals(expectedQuery, actualQuery);
     }

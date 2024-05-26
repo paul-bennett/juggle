@@ -253,7 +253,23 @@ $
 Note how the member is considered to match if either of these two names match:
 1. The member's simple name (i.e. the declaration name)
 2. The member's canonical name (its declaration name prefixed with the
-   declaring package and class)  
+   declaring package and class)
+
+Wherever a regular expression is used, it can optionally be preceded with an
+exclamation mark to indicate "does not match".  For example, here's a list of
+all methods that take an `Optional` plus zero or mother other parameters, and
+returns an `Optional` but doesn't have `map` in their name (case-insensitive
+search):
+
+```shell
+$ juggle -i java.util 'Optional !/map/i (Optional,...)'
+public Optional<T> Optional<T>.filter(java.util.function.Predicate<? super T>)
+public Optional<T> Optional<T>.or(java.util.function.Supplier<? extends Optional<? extends T>>)
+public static <T> Optional<T> Optional<T>.of(T)
+public static <T> Optional<T> Optional<T>.ofNullable(T)
+$
+```
+
 
 ### Constructors
 
@@ -420,6 +436,81 @@ have been built in this way.
 When checking a candidate against a query, if the candidate wasn't compiled with
 parameter metadata, then those elements of the query are ignored (i.e. the
 parameter is matched by annotations and type only).
+
+The name of the pseudo-parameter `this` is always available, even for classes
+that haven't been compiled with the `-parameters` flag.  This allows you to
+list class members by specifying a parameter list of `(? this,...)`.
+
+For example, we can inspect all the methods of a class by using a regular
+expression on the member name:
+
+```shell
+$ juggle '/^java\.util\.Optional\.[^.]*$/'
+public static <T> java.util.Optional<T> java.util.Optional<T>.empty()
+public boolean java.util.Optional<T>.equals(Object)
+public java.util.Optional<T> java.util.Optional<T>.filter(java.util.function.Predicate<? super T>)
+public <U> java.util.Optional<U> java.util.Optional<T>.flatMap(java.util.function.Function<? super T,? extends java.util.Optional<? extends U>>)
+public T java.util.Optional<T>.get()
+public int java.util.Optional<T>.hashCode()
+public void java.util.Optional<T>.ifPresent(java.util.function.Consumer<? super T>)
+public void java.util.Optional<T>.ifPresentOrElse(java.util.function.Consumer<? super T>,Runnable)
+public boolean java.util.Optional<T>.isEmpty()
+public boolean java.util.Optional<T>.isPresent()
+public <U> java.util.Optional<U> java.util.Optional<T>.map(java.util.function.Function<? super T,? extends U>)
+public static <T> java.util.Optional<T> java.util.Optional<T>.of(T)
+public static <T> java.util.Optional<T> java.util.Optional<T>.ofNullable(T)
+public java.util.Optional<T> java.util.Optional<T>.or(java.util.function.Supplier<? extends java.util.Optional<? extends T>>)
+public T java.util.Optional<T>.orElse(T)
+public T java.util.Optional<T>.orElseGet(java.util.function.Supplier<? extends T>)
+public T java.util.Optional<T>.orElseThrow()
+public <X extends Throwable> T java.util.Optional<T>.orElseThrow(java.util.function.Supplier<? extends X>) throws X
+public java.util.stream.Stream<T> java.util.Optional<T>.stream()
+public String java.util.Optional<T>.toString()
+$
+```
+
+If we add the `static` modifier we'll just get the class members:
+
+```shell
+$ juggle 'static /^java\.util\.Optional\.[^.]*$/'            
+public static <T> java.util.Optional<T> java.util.Optional<T>.empty()
+public static <T> java.util.Optional<T> java.util.Optional<T>.of(T)
+public static <T> java.util.Optional<T> java.util.Optional<T>.ofNullable(T)
+$
+```
+
+To list the instance members instead we can look for the `this` parameter:
+
+```shell
+$ juggle '/^java\.util\.Optional\.[^.]*$/(? this,...)'
+public boolean java.util.Optional<T>.equals(Object)
+public java.util.Optional<T> java.util.Optional<T>.filter(java.util.function.Predicate<? super T>)
+public <U> java.util.Optional<U> java.util.Optional<T>.flatMap(java.util.function.Function<? super T,? extends java.util.Optional<? extends U>>)
+public T java.util.Optional<T>.get()
+public int java.util.Optional<T>.hashCode()
+public void java.util.Optional<T>.ifPresent(java.util.function.Consumer<? super T>)
+public void java.util.Optional<T>.ifPresentOrElse(java.util.function.Consumer<? super T>,Runnable)
+public boolean java.util.Optional<T>.isEmpty()
+public boolean java.util.Optional<T>.isPresent()
+public <U> java.util.Optional<U> java.util.Optional<T>.map(java.util.function.Function<? super T,? extends U>)
+public java.util.Optional<T> java.util.Optional<T>.or(java.util.function.Supplier<? extends java.util.Optional<? extends T>>)
+public T java.util.Optional<T>.orElse(T)
+public T java.util.Optional<T>.orElseGet(java.util.function.Supplier<? extends T>)
+public T java.util.Optional<T>.orElseThrow()
+public <X extends Throwable> T java.util.Optional<T>.orElseThrow(java.util.function.Supplier<? extends X>) throws X
+public java.util.stream.Stream<T> java.util.Optional<T>.stream()
+public String java.util.Optional<T>.toString()
+$
+```
+
+Of course if we use the `static` modifier along with a specification of the
+`this` parameter, we'll get no results since there is no overlap between class
+members and instance members:
+
+```shell
+$ juggle static '/^java\.util\.Optional\.[^.]*$/(? this,...)'
+$
+```
 
 
 ### Permutation of Parameters

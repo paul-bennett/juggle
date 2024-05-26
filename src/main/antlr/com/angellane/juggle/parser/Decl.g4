@@ -171,7 +171,7 @@ returnType
     ;
 
 typeDeclName
-    : REGEX
+    : NEGATE? REGEX
     | (IDENT DOT)* IDENT
     ;
 
@@ -180,7 +180,7 @@ memberDeclName
     ;
 
 uname
-    :   REGEX
+    :   NEGATE? REGEX
     |   IDENT
     ;
 
@@ -243,6 +243,7 @@ WS      : [\r\n\t ]+  -> skip;
 
 ELLIPSIS    : '...' ;
 DOT         : '.'   ;
+NEGATE      : '!'   ;
 
 REGEX   : '/' (ESC | ~[/\\])* '/' 'i'?;
 fragment ESC : '\\' . ;                 // Allow escape of any char, but only / is meaningful
