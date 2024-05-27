@@ -283,41 +283,57 @@ public class QueryFactory {
 
         @Override
         public void enterClassModifier(DeclParser.ClassModifierContext ctx) {
-            if (ctx.annotation() == null) handleModifier(ctx.getText());
+            handleModifierContext(ctx, ctx.annotation(), ctx.NEGATE());
         }
 
         @Override
         public void enterInterfaceModifier(DeclParser.InterfaceModifierContext ctx) {
-            if (ctx.annotation() == null) handleModifier(ctx.getText());
+            handleModifierContext(ctx, ctx.annotation(), ctx.NEGATE());
         }
 
         @Override
         public void enterAnnotationModifier(DeclParser.AnnotationModifierContext ctx) {
-            if (ctx.annotation() == null) handleModifier(ctx.getText());
+            handleModifierContext(ctx, ctx.annotation(), ctx.NEGATE());
         }
 
         @Override
         public void enterMemberModifier(DeclParser.MemberModifierContext ctx) {
-            if (ctx.annotation() == null) handleModifier(ctx.getText());
+            handleModifierContext(ctx, ctx.annotation(), ctx.NEGATE());
         }
 
         @Override
         public void enterParamModifier(DeclParser.ParamModifierContext ctx) {
-            if (ctx.annotation() == null) handleModifier(ctx.getText());
+            handleModifierContext(ctx, ctx.annotation(), ctx.NEGATE());
         }
 
         @Override
         public void enterRecordCompModifier(DeclParser.RecordCompModifierContext ctx) {
-            if (ctx.annotation() == null) handleModifier(ctx.getText());
+            handleModifierContext(ctx, ctx.annotation(), null);
         }
 
-        private void handleModifier(String text) {
-            boolean setModifier = true;
-            if (text.startsWith("!")) {
-                setModifier = false;
-                text = text.substring(1);
-            }
+        // This method is really tightly coupled with the parser structure,
+        // and the `enterXxxModifier` methods above.  It really just factors
+        // out some common code and acts as a bridge to the parser-independent
+        // `handleModifier` method below.
+        //
+        private void handleModifierContext(ParserRuleContext ctx,
+                                           DeclParser.AnnotationContext annotationContext,
+                                           TerminalNode negateNode) {
+            if (annotationContext == null) {     // Annotations are handled elsewhere
 
+                // Assumption: the NEGATE node immediately precedes the
+                // modifier, so we can use the length of its text for two
+                // purposes: 1) to determine whether we're negating, and
+                // 2) to know how many characters to strip from the front.
+
+                int negativePrefixLen = (negateNode == null) ? 0 : negateNode.getText().length();
+                String text = ctx.getText().substring(negativePrefixLen);
+
+                handleModifier(text, negativePrefixLen == 0);
+            }
+        }
+
+        private void handleModifier(String text, boolean setModifier) {
             switch (text) {
                 case "private", "package", "protected", "public" ->
                         tempQuery.setAccessibility(Accessibility.fromString(text));
